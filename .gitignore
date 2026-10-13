@@ -1,0 +1,14 @@
+# Dymola/OpenModelica simulation artifacts
+*.mat
+*.log
+*.bak
+*.tmp
+dsfinal.txt
+dsin.txt
+dslog.txt
+dymosim
+dymosim.exe
+
+# General OS/editor files
+.DS_Store
+Thumbs.db
