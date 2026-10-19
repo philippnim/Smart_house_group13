@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "smart-house-model"
+version = "0.1.0"
+description = "Smart house modelling using Modelica and Python"
+requires-python = ">=3.14"
+dependencies = [
+    "pandas>=3.0.0",
+    "matplotlib>=3.11.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
