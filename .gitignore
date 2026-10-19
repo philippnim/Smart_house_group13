@@ -1,7 +1,10 @@
-# Python
+# Python (ignore virtual environments, compiled files, and cache)
 __pycache__/
 *.py[cod]
 .venv/
+*.egg-info/
+.eggs/
+*.egg
 
 # Dymola / Modelica Build & Simulation Files
 *.mat
