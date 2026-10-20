@@ -8,7 +8,11 @@ partial model PartialWall
   parameter SI.Length heightWall "height of the wall" annotation(Dialog(group="Geometry"));
 
   // Gas type selection
-  parameter TILMedia.Gas.Types.BaseGas gasType=sim.gasType1 "Gas type" annotation (Dialog(tab="SIM", group="SIM"));
+  parameter TILMedia.Gas.Types.BaseGas gasType=sim.gasType1 "Gas type" annotation (Dialog(tab="SIM", group="SIM"),
+    choices(
+      choice=sim.gasType1 "Gas 1 as defined in SIM",
+      choice=sim.gasType2 "Gas 2 as defined in SIM",
+      choice=sim.gasType3 "Gas 3 as defined in SIM"));
 
   // Environment parameters for A (outside) and B (inside)
   parameter TILMedia.Internals.Units.RelativeHumidity phi_A = 50 "Relative humidity at port A" annotation(Dialog(group="Environment"));
@@ -36,7 +40,7 @@ public
     annotation (Placement(transformation(extent={{90,-10},{110,10}})));
 
 
-
+  // Convective Resistors
   TIL.OtherComponents.Thermal.ConvectiveResistor convectiveResistor_A(
     gasType=gasType,
     use_ambientPressureInput=false,
