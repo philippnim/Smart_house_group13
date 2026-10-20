@@ -17,4 +17,6 @@ dymosim.exe
 request.txt
 status.txt
 success.txt
+dsin.txt
 *.log
+*.bak-mo
