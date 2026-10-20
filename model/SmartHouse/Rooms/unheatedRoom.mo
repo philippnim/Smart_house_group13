@@ -1,4 +1,4 @@
 within SmartHouse.Rooms;
 model UnheatedRoom
-  extends BaseRoom;
+  extends PartialRoom;
 end UnheatedRoom;

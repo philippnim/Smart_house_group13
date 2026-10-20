@@ -1,5 +1,5 @@
 within SmartHouse.Rooms;
-partial model BaseRoom "tbd"
+partial model PartialRoom "tbd"
   import SI = Modelica.Units.SI;
 
   // Geometry parameters (need to be given)
@@ -28,6 +28,9 @@ partial model BaseRoom "tbd"
       choice=sim.gasType2 "Gas 2 as defined in SIM",
       choice=sim.gasType3 "Gas 3 as defined in SIM"));
 
+  outer TIL.SystemInformationManager sim
+    annotation (Placement(transformation(extent={{86,86},{100,100}})));
+
   // If gas exchange is available or not
   parameter Boolean useVentilation = true "Enable gas ports";
   parameter Boolean tempSensor = true "adds a temperature sensor";
@@ -42,7 +45,6 @@ partial model BaseRoom "tbd"
     annotation(Dialog(group="Internal Gains"));
   parameter Real fractionElectricToHeat = 1.0 "Fraction of electrical load converted to heat"
     annotation(Dialog(group="Internal Gains"));
-
 
   TIL.GasComponents.Volumes.Volume room_volume(
     gasType=gasType,
@@ -79,8 +81,7 @@ partial model BaseRoom "tbd"
   Modelica.Thermal.HeatTransfer.Components.HeatCapacitor heatCapacitor_room_internal(C=C_mass) if enableInternalMass
     annotation (Placement(transformation(extent={{-48,56},{-28,76}})));
 
-  outer TIL.SystemInformationManager sim
-    annotation (Placement(transformation(extent={{86,86},{100,100}})));
+
 
   Modelica.Blocks.Interfaces.RealOutput Temperature_sensor annotation (
       Placement(transformation(
@@ -170,5 +171,4 @@ equation
   annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
     coordinateSystem(preserveAspectRatio=false)));
 
-
-end BaseRoom;
+end PartialRoom;
