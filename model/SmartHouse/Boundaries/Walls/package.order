@@ -1,4 +1,5 @@
 PartialWall
-OpaqueWall
+InternalWall
+ExternalWall
 Window
 CompositWall

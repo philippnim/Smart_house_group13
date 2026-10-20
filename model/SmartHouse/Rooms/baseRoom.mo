@@ -153,7 +153,7 @@ equation
   // Connections if a temperature sensor output is needed
   if tempSensor then
     connect(sensor_T.port, room_volume.portArray[3]) annotation (Line(
-        points={{20,66},{20,12},{50,12},{50,0},{42.0667,0}},
+        points={{20,66},{20,12},{48,12},{48,0},{42.0667,0}},
         color={255,153,0},
         thickness=0.5));
     connect(sensor_T.sensorValue, Temperature_sensor) annotation (Line(points={{20,75},

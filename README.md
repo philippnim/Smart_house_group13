@@ -48,3 +48,14 @@ The building is simulated using weather data from Lillehammer - Sætherengen
 2. Set the Working Directory in Dymola to the `model/` folder within your cloned repository. This ensures that any output files are generated in the correct folder.
 3. Load the Models by navigating to File > Open and selecting the `.mo` files 
 4. Everything else is done within Dymola
+
+
+
+
+## Notes
+
+Here notes can be added about features that could later be implemented if of interest
+
+- humidity in the rooms through evaporation.
+- infiltration of each room in the final model
+- better tracking of energy consumption in each room
