@@ -47,21 +47,8 @@ model TestHousePhilipp
     rhoWall(displayUnit="kg/m3") = 1600,
     cpWall=1000)
     annotation (Placement(transformation(extent={{-58,2},{-38,22}})));
-  Boundaries.Walls.ExternalWall externalWall(
-    lengthWall=5,
-    heightWall=3,
-    gasType=sim.gasType1,
-    thickness_A=0.2,
-    lambda_A=0.035,
-    rho_A(displayUnit="kg/m3") = 20,
-    cp_A=1500,
-    thickness_B=0.175,
-    lambda_B=0.7,
-    rho_B(displayUnit="kg/m3") = 1600,
-    cp_B=1000)
-    annotation (Placement(transformation(extent={{-58,-26},{-38,-6}})));
   TIL.OtherComponents.Thermal.HeatBoundary heatBoundary_outside(TFixed=278.15)
-    annotation (Placement(transformation(extent={{-78,-22},{-70,-10}})));
+    annotation (Placement(transformation(extent={{-80,-22},{-72,-10}})));
   Boundaries.Horizontal.GroundFloor groundFloor(
     length=4,
     width=5,
@@ -69,6 +56,7 @@ model TestHousePhilipp
     lambda_upper=1.4,
     rho_upper(displayUnit="kg/m3") = 2000,
     cp_upper=1000,
+    enableSurfaceConnection=true,
     thickness_lower=0.1,
     lambda_lower=0.035,
     rho_lower(displayUnit="kg/m3") = 30,
@@ -93,6 +81,36 @@ model TestHousePhilipp
   TIL.LiquidComponents.Boundaries.BoundaryUnderdetermined
     boundaryUnderdetermined(liquidType=sim.liquidType1)
     annotation (Placement(transformation(extent={{8,-86},{16,-66}})));
+  Modelica.Blocks.Sources.TimeTable solarRadiation(
+    table=[0, 0;
+           21600, 0;
+           28800, 200;
+           36000, 450;
+           43200, 600;
+           50400, 450;
+           57600, 200;
+           64800, 0;
+           86400, 0])   annotation (Placement(transformation(extent={{-96,-78},{-76,-58}})));
+
+
+  Boundaries.Walls.CompositeWall compositeWall(
+    lengthTotal=5,
+    heightTotal=3,
+    lengthWindow=1,
+    heightWindow=3,
+    g_value=0.55,
+    thicknessWindow=0.04,
+    lambdaWindow=0.048,
+    thickness_A=0.2,
+    lambda_A=0.035,
+    rho_A(displayUnit="kg/m3") = 20,
+    cp_A=1500,
+    thickness_B=0.175,
+    lambda_B=0.7,
+    rho_B(displayUnit="kg/m3") = 1600,
+    cp_B=1000,
+    gasType=sim.gasType1)
+    annotation (Placement(transformation(extent={{-58,-26},{-38,-6}})));
 equation
   connect(heatBoundary_ceiling.heatPort, heatResistor_ceiling.heatPortA)
     annotation (Line(
@@ -121,16 +139,6 @@ equation
       points={{-38,12},{-12,12},{-12,-2},{-1.4,-2}},
       color={204,0,0},
       thickness=0.5));
-  connect(externalWall.heatPort_B_air, unheatedRoom1.heatPort_walls)
-    annotation (Line(
-      points={{-38,-16},{-12,-16},{-12,-2},{-1.4,-2}},
-      color={204,0,0},
-      thickness=0.5));
-  connect(heatBoundary_outside.heatPort, externalWall.heatPort_A_air)
-    annotation (Line(
-      points={{-74,-16},{-58,-16}},
-      color={204,0,0},
-      thickness=0.5));
   connect(heatBoundary_floor.heatPort, groundFloor.heatPort_down) annotation (
       Line(
       points={{-20,-92},{-20,-75.6}},
@@ -150,6 +158,23 @@ equation
       Line(
       points={{12,-76},{-6,-76},{-6,-70},{-10.4,-70}},
       color={0,170,238},
+      thickness=0.5));
+  connect(solarRadiation.y, compositeWall.RadiationInput)
+    annotation (Line(points={{-75,-68},{-52,-68},{-52,-28}}, color={0,0,127}));
+  connect(compositeWall.solarGains, groundFloor.heatPort_surfaceConnection)
+    annotation (Line(
+      points={{-44,-26},{-44,-59.6},{-29.6,-59.6}},
+      color={204,0,0},
+      thickness=0.5));
+  connect(compositeWall.heatPort_B, unheatedRoom1.heatPort_walls) annotation (
+      Line(
+      points={{-38,-16},{-12,-16},{-12,-2},{-1.4,-2}},
+      color={204,0,0},
+      thickness=0.5));
+  connect(compositeWall.heatPort_A, heatBoundary_outside.heatPort) annotation (
+      Line(
+      points={{-58,-16},{-76,-16}},
+      color={204,0,0},
       thickness=0.5));
   annotation (
     Icon(coordinateSystem(preserveAspectRatio=false)),

@@ -6,6 +6,7 @@ partial model PartialWall
   // Geometry parameter
   parameter SI.Length lengthWall "length of the wall" annotation(Dialog(group="Geometry"));
   parameter SI.Length heightWall "height of the wall" annotation(Dialog(group="Geometry"));
+  final parameter SI.Area area= heightWall * lengthWall "Area of the wall";
 
   // Gas type selection
   parameter TILMedia.Gas.Types.BaseGas gasType=sim.gasType1 "Gas type" annotation (Dialog(tab="SIM", group="SIM"),
@@ -13,6 +14,9 @@ partial model PartialWall
       choice=sim.gasType1 "Gas 1 as defined in SIM",
       choice=sim.gasType2 "Gas 2 as defined in SIM",
       choice=sim.gasType3 "Gas 3 as defined in SIM"));
+  // Required SIM for gasType reference
+  outer TIL.SystemInformationManager sim;
+
 
   // Environment parameters for A (outside) and B (inside)
   parameter TILMedia.Internals.Units.RelativeHumidity phi_A = 50 "Relative humidity at port A" annotation(Dialog(group="Environment"));
@@ -20,8 +24,7 @@ partial model PartialWall
   parameter SI.AbsolutePressure p_A = 101300 "Pressure at port A" annotation(Dialog(group="Environment"));
   parameter SI.AbsolutePressure p_B = 101300 "Pressure at port B" annotation(Dialog(group="Environment"));
 
-  // Required SIM for gasType reference
-  outer TIL.SystemInformationManager sim;
+
 
 
 
