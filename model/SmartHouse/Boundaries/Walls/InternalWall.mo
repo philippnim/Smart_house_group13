@@ -51,8 +51,6 @@ equation
       thickness=0.5));
   connect(heatCapacitor_wall.port, heatResistor_B.heatPortA)
     annotation (Line(points={{0,6},{0,0},{32,0}}, color={191,0,0}));
-  annotation (Icon(graphics={Text(
-          extent={{-90,90},{90,30}},
-          textColor={28,108,200},
-          textString="InternalWall")}));
+  annotation (Icon(graphics={Bitmap(extent={{-66,-78},{70,76}}, fileName=
+              "C:/Users/phili/Documents/Smart_house_group13/model/images/internal_wall.png")}));
 end InternalWall;

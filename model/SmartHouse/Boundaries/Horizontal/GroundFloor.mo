@@ -17,7 +17,7 @@ Optional Floor heating between the two layers."
   parameter SI.Length wallThickness "Pipe wall thickness" annotation(Dialog(enable=enableFloorHeating, group="Floor Heating"));
   parameter Integer nbTubes "Number of parallel tubes" annotation(Dialog(enable=enableFloorHeating, group="Floor Heating"));
   parameter Integer nbCells "Number of tube cells" annotation(Dialog(enable=enableFloorHeating, group="Floor Heating"));
-  parameter Real alpha "Constant heat transfer coefficient" annotation(Dialog(enable=enableFloorHeating, group="Floor Heating"));
+  parameter Real alpha_pipe "Constant heat transfer coefficient" annotation(Dialog(enable=enableFloorHeating, group="Floor Heating"));
   parameter SI.Temperature T_init "Initial Temperature of Wall and Liquid" annotation(Dialog(enable=enableFloorHeating, group="Floor Heating"));
 
   // Fluid Parameters
@@ -39,7 +39,7 @@ Optional Floor heating between the two layers."
     wallThickness=wallThickness,
     nbTubes=nbTubes,
     nbCells=nbCells,
-    alpha=alpha,
+    alpha=alpha_pipe,
     T_init=T_init,
     liquidType=liquidType)
                  if enableFloorHeating
@@ -91,5 +91,10 @@ equation
   connect(heatPort_up, heatResistor_up_convection.heatPortB) annotation (Line(
       points={{0,96},{0,88}},
       color={204,0,0},
-      thickness=0.5));
+    thickness=0.5));
+
+
+  // Select icon dynamically based on heating status
+  annotation (Icon(graphics={Bitmap(extent={{-74,-72},{74,82}}, fileName=DynamicSelect("C:/Users/phili/Documents/Smart_house_group13/model/images/unheatedFloor.png", if enableFloorHeating then "C:/Users/phili/Documents/Smart_house_group13/model/images/floorHeating.png" else "C:/Users/phili/Documents/Smart_house_group13/model/images/unheatedFloor.png"))}));
+
 end GroundFloor;
