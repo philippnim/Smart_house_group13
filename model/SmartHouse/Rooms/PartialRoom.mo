@@ -69,9 +69,11 @@ partial model PartialRoom "tbd"
   TIL.Connectors.HeatPort heatPort_floor
     annotation (Placement(transformation(extent={{-108,-108},{-80,-80}}),
         iconTransformation(extent={{-108,-108},{-80,-80}})));
-  TIL.Connectors.GasPort gasPortA if useVentilation
+  TIL.Connectors.GasPort gasPortA(gasType=gasType)
+                                  if useVentilation
     annotation (Placement(transformation(extent={{86,50},{106,70}})));
-  TIL.Connectors.GasPort gasPortB if useVentilation
+  TIL.Connectors.GasPort gasPortB(gasType=gasType)
+                                  if useVentilation
     annotation (Placement(transformation(extent={{86,-70},{106,-50}})));
   Modelica.Thermal.HeatTransfer.Components.ThermalConductor airToMass(G=
     G_airMass) if enableInternalMass
