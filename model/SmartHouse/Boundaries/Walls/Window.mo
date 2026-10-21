@@ -67,4 +67,8 @@ equation
       points={{-40,-40},{-40,-32},{40,-32},{40,-100}},
       color={204,0,0},
       thickness=0.5));
+  annotation (Icon(graphics={Text(
+          extent={{-90,90},{90,30}},
+          textColor={28,108,200},
+          textString="Window")}));
 end Window;

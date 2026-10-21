@@ -36,18 +36,23 @@ model InternalWall
     crossSection=heightWall*lengthWall)
     annotation (Placement(transformation(extent={{32,-2},{48,2}})));
 equation
-  connect(heatPort_A_surface, heatResistor_A.heatPortA) annotation (Line(
-      points={{-60,0},{-48,0}},
-      color={204,0,0},
-      thickness=0.5));
-  connect(heatResistor_B.heatPortB, heatPort_B_surface) annotation (Line(
-      points={{48,0},{60,0}},
+
+  connect(heatResistor_A.heatPortA, heatPort_A_surface) annotation (Line(
+      points={{-48,0},{-60,0}},
       color={204,0,0},
       thickness=0.5));
   connect(heatResistor_A.heatPortB, heatResistor_B.heatPortA) annotation (Line(
       points={{-32,0},{32,0}},
       color={204,0,0},
       thickness=0.5));
+  connect(heatResistor_B.heatPortB, heatPort_B_surface) annotation (Line(
+      points={{48,0},{60,0}},
+      color={204,0,0},
+      thickness=0.5));
   connect(heatCapacitor_wall.port, heatResistor_B.heatPortA)
     annotation (Line(points={{0,6},{0,0},{32,0}}, color={191,0,0}));
+  annotation (Icon(graphics={Text(
+          extent={{-90,90},{90,30}},
+          textColor={28,108,200},
+          textString="InternalWall")}));
 end InternalWall;

@@ -104,4 +104,8 @@ equation
     annotation (Line(points={{-30,8},{-30,0},{-22,0}}, color={191,0,0}));
   connect(heatCapacitor_material_B.port, heatResistor_B_outer.heatPortA)
     annotation (Line(points={{30,8},{30,0},{36,0}}, color={191,0,0}));
+  annotation (Icon(graphics={Text(
+          extent={{-90,90},{90,30}},
+          textColor={28,108,200},
+          textString="ExternalWall")}));
 end ExternalWall;

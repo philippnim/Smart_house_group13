@@ -5,21 +5,10 @@ Optional Floor heating between the two layers."
   extends PartialHorizontal4R2C;
   import SI = Modelica.Units.SI;
 
-  // Gas type selection
-  parameter TILMedia.Gas.Types.BaseGas gasType=sim.gasType1 "Gas type" annotation (Dialog(tab="SIM", group="SIM"),
-    choices(
-      choice=sim.gasType1 "Gas 1 as defined in SIM",
-      choice=sim.gasType2 "Gas 2 as defined in SIM",
-      choice=sim.gasType3 "Gas 3 as defined in SIM"));
-
-
-  // Environment parameters for the surface
-  parameter TILMedia.Internals.Units.RelativeHumidity phi_up = 50 "Relative humidity at top surface" annotation(Dialog(group="Environment"));
-  parameter SI.AbsolutePressure p_up = 101300 "Pressure at top surface" annotation(Dialog(group="Environment"));
-
+  //alpha values
+  parameter SI.CoefficientOfHeatTransfer alpha_up "Heat transfer coefficient for floor-air";
 
   // Heating parameters (Floor Heating)
-
   parameter Boolean enableFloorHeating = true "Is a floor heating connection available" annotation(Dialog(group="Floor Heating"));
 
   // Parameters (Standard Parameter should be added!!
@@ -43,19 +32,6 @@ Optional Floor heating between the two layers."
   // Components
 
   // Convective Resistance
-  TIL.OtherComponents.Thermal.ConvectiveResistor convectiveResistor_up(
-    gasType=gasType,
-    use_ambientPressureInput=false,
-    ambientPressureFixed=p_up,
-    ambientTemperatureReference=TIL.Internals.AmbientTemperatureReference.heatPortB,
-    use_gasCompositionInput=false,
-    phiFixed=phi_up,
-    redeclare model HeatTransferModel =
-        TIL.OtherComponents.Thermal.HeatTransfer.PlateHorizontalFreeConvection)
-    annotation (Placement(transformation(
-        extent={{-8,-2},{8,2}},
-        rotation=90,
-        origin={0,80})));
 
   FloorHeating integratedFloorHeating(
     pipeLength=pipeLength,
@@ -76,17 +52,18 @@ Optional Floor heating between the two layers."
   TIL.Connectors.LiquidPort liquidPort_B(liquidType=liquidType)
                                          if enableFloorHeating
     annotation (Placement(transformation(extent={{86,-50},{106,-30}})));
+  TIL.OtherComponents.Thermal.HeatResistor heatResistor_up_convection(
+    thermalResistanceType=TIL.OtherComponents.Thermal.Internals.ThermalResistanceType.ThermalConvection,
+    alpha=alpha_up,
+    geometryType=TIL.OtherComponents.Thermal.Internals.GeometryType.Plate,
+    crossSection=A_floor) annotation (Placement(transformation(
+        extent={{-8,-2},{8,2}},
+        rotation=90,
+      origin={0,80})));
+
 equation
   connect(heatPort_down_inner, heatPort_down) annotation (Line(
       points={{0,-64},{0,-96}},
-      color={204,0,0},
-      thickness=0.5));
-  connect(heatPort_up_inner, convectiveResistor_up.heatPortA) annotation (Line(
-      points={{0,64},{0,72}},
-      color={204,0,0},
-      thickness=0.5));
-  connect(heatPort_up, convectiveResistor_up.heatPortB) annotation (Line(
-      points={{0,96},{0,88}},
       color={204,0,0},
       thickness=0.5));
 
@@ -106,4 +83,13 @@ equation
       thickness=0.5));
 
   end if;
+  connect(heatPort_up_inner, heatResistor_up_convection.heatPortA) annotation (
+      Line(
+      points={{0,64},{0,72}},
+      color={204,0,0},
+      thickness=0.5));
+  connect(heatPort_up, heatResistor_up_convection.heatPortB) annotation (Line(
+      points={{0,96},{0,88}},
+      color={204,0,0},
+      thickness=0.5));
 end GroundFloor;
