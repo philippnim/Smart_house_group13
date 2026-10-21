@@ -6,7 +6,7 @@ model TestHousePhilipp
     initialPressure(displayUnit="bar"),
     initialTemperature=296.15,
     gasType=sim.gasType1,
-    useVentilation=false,
+    useVentilation=true,
     redeclare TIL.Utilities.Units.Conversions.Units.degC unitTemp)
     annotation (Placement(transformation(extent={{-2,-12},{18,8}})));
   TIL.OtherComponents.Thermal.HeatResistor heatResistor_ceiling(
@@ -34,10 +34,10 @@ model TestHousePhilipp
     annotation (Placement(transformation(extent={{20,10},{40,30}})));
   Modelica.Blocks.Sources.TimeTable Pel(table=[0.0,0; 28799,0; 28800,50; 61200,
         300; 86400,50])
-    annotation (Placement(transformation(extent={{84,-36},{64,-16}})));
+    annotation (Placement(transformation(extent={{84,-54},{64,-34}})));
   Modelica.Blocks.Sources.TimeTable Occupancy(table=[0,0; 7200,0; 7201,2; 14400,
         2; 14401,0; 86400,0])
-    annotation (Placement(transformation(extent={{84,-8},{64,12}})));
+    annotation (Placement(transformation(extent={{84,-28},{64,-8}})));
   Boundaries.Walls.InternalWall internalWall(
     lengthWall=13,
     heightWall=3,
@@ -111,6 +111,18 @@ model TestHousePhilipp
     cp_B=1000,
     gasType=sim.gasType1)
     annotation (Placement(transformation(extent={{-58,-26},{-38,-6}})));
+  TIL.GasComponents.Boundaries.BoundaryOverdetermined
+    boundaryOverdetermined_circulation(
+    gasType=sim.gasType1,
+    streamVariablesInputType="T",
+    TFixed=278.15,
+    boundaryType="p, V_flow",
+    pFixed=101300,
+    V_flowFixed(displayUnit="m3/h") = -0.0041666666666667)
+    annotation (Placement(transformation(extent={{74,28},{82,48}})));
+  TIL.GasComponents.Boundaries.BoundaryUnderdetermined
+    boundaryUnderdetermined_circulation(gasType=sim.gasType1)
+    annotation (Placement(transformation(extent={{74,2},{82,22}})));
 equation
   connect(heatBoundary_ceiling.heatPort, heatResistor_ceiling.heatPortA)
     annotation (Line(
@@ -125,10 +137,10 @@ equation
   connect(unheatedRoom1.Temperature_sensor, realValue.numberPort)
     annotation (Line(points={{11,9},{11,20},{18.5,20}}, color={0,0,127}));
   connect(Occupancy.y, unheatedRoom1.occupancy)
-    annotation (Line(points={{63,2},{24,2},{24,-20},{15,-20},{15,-13}},
-                                                          color={0,0,127}));
+    annotation (Line(points={{63,-18},{15,-18},{15,-13}}, color={0,0,127}));
   connect(Pel.y, unheatedRoom1.P_el)
-    annotation (Line(points={{63,-26},{9,-26},{9,-13}}, color={0,0,127}));
+    annotation (Line(points={{63,-44},{20,-44},{20,-22},{9,-22},{9,-13}},
+                                                        color={0,0,127}));
   connect(heatBoundary_wall.heatPort, internalWall.heatPort_A_air) annotation (
       Line(
       points={{-74,12},{-58,12}},
@@ -175,6 +187,16 @@ equation
       Line(
       points={{-58,-16},{-76,-16}},
       color={204,0,0},
+      thickness=0.5));
+  connect(boundaryOverdetermined_circulation.port, unheatedRoom1.gasPortA)
+    annotation (Line(
+      points={{78,38},{46,38},{46,4},{17.6,4}},
+      color={255,153,0},
+      thickness=0.5));
+  connect(boundaryUnderdetermined_circulation.port, unheatedRoom1.gasPortB)
+    annotation (Line(
+      points={{78,12},{50,12},{50,-8},{17.6,-8}},
+      color={255,153,0},
       thickness=0.5));
   annotation (
     Icon(coordinateSystem(preserveAspectRatio=false)),
