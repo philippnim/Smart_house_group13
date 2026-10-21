@@ -8,24 +8,10 @@ partial model PartialWall
   parameter SI.Length heightWall "height of the wall" annotation(Dialog(group="Geometry"));
   final parameter SI.Area area= heightWall * lengthWall "Area of the wall";
 
-  // Gas type selection
-  parameter TILMedia.Gas.Types.BaseGas gasType=sim.gasType1 "Gas type" annotation (Dialog(tab="SIM", group="SIM"),
-    choices(
-      choice=sim.gasType1 "Gas 1 as defined in SIM",
-      choice=sim.gasType2 "Gas 2 as defined in SIM",
-      choice=sim.gasType3 "Gas 3 as defined in SIM"));
-  // Required SIM for gasType reference
-  outer TIL.SystemInformationManager sim;
 
-
-  // Environment parameters for A (outside) and B (inside)
-  parameter TILMedia.Internals.Units.RelativeHumidity phi_A = 50 "Relative humidity at port A" annotation(Dialog(group="Environment"));
-  parameter TILMedia.Internals.Units.RelativeHumidity phi_B = 50 "Relative humidity at port B" annotation(Dialog(group="Environment"));
-  parameter SI.AbsolutePressure p_A = 101300 "Pressure at port A" annotation(Dialog(group="Environment"));
-  parameter SI.AbsolutePressure p_B = 101300 "Pressure at port B" annotation(Dialog(group="Environment"));
-
-
-
+  // alpha values
+  parameter SI.CoefficientOfHeatTransfer alpha_A "Heat transfer coefficient on A side";
+  parameter SI.CoefficientOfHeatTransfer alpha_B "Heat transfer coefficient on B side";
 
 
   // Internal surface ports for extending models
@@ -44,48 +30,50 @@ public
 
 
   // Convective Resistors
-  TIL.OtherComponents.Thermal.ConvectiveResistor convectiveResistor_A(
-    gasType=gasType,
-    use_ambientPressureInput=false,
-    ambientPressureFixed=p_A,
-    ambientTemperatureReference=TIL.Internals.AmbientTemperatureReference.heatPortA,
-    use_gasCompositionInput=false,
-    phiFixed=phi_A,
-    redeclare model HeatTransferModel =
-        TIL.OtherComponents.Thermal.HeatTransfer.PlateVerticalFreeConvection (
-          length=heightWall, width=lengthWall))
-    annotation (Placement(transformation(extent={{-88,-2},{-72,2}})));
 
-  TIL.OtherComponents.Thermal.ConvectiveResistor convectiveResistor_B(
-    gasType=gasType,
-    use_ambientPressureInput=false,
-    ambientPressureFixed=p_B,
-    ambientTemperatureReference=TIL.Internals.AmbientTemperatureReference.heatPortB,
-    use_gasCompositionInput=false,
-    phiFixed=phi_B,
-    redeclare model HeatTransferModel =
-        TIL.OtherComponents.Thermal.HeatTransfer.PlateVerticalFreeConvection (
-          length=heightWall, width=lengthWall))
+
+  TIL.OtherComponents.Thermal.HeatResistor heatResistor_A_convection(
+    thermalResistanceType=TIL.OtherComponents.Thermal.Internals.ThermalResistanceType.ThermalConvection,
+    alpha=alpha_A,
+    geometryType=TIL.OtherComponents.Thermal.Internals.GeometryType.Plate,
+    crossSection=area)
+    annotation (Placement(transformation(extent={{-88,-2},{-72,2}})));
+  TIL.OtherComponents.Thermal.HeatResistor heatResistor_B_convection(
+    thermalResistanceType=TIL.OtherComponents.Thermal.Internals.ThermalResistanceType.ThermalConvection,
+    alpha=alpha_B,
+    geometryType=TIL.OtherComponents.Thermal.Internals.GeometryType.Plate,
+    crossSection=area)
     annotation (Placement(transformation(extent={{72,-2},{88,2}})));
 
-
 equation
-  connect(convectiveResistor_A.heatPortB, heatPort_A_surface) annotation (Line(
-      points={{-72,0},{-60,0}},
+  connect(heatPort_A_surface, heatResistor_A_convection.heatPortB) annotation (
+      Line(
+      points={{-60,0},{-72,0}},
       color={204,0,0},
       thickness=0.5));
-  connect(convectiveResistor_A.heatPortA, heatPort_A_air) annotation (Line(
-      points={{-88,0},{-100,0}},
+  connect(heatPort_A_air, heatResistor_A_convection.heatPortA) annotation (Line(
+      points={{-100,0},{-88,0}},
       color={204,0,0},
       thickness=0.5));
-  connect(heatPort_B_air, convectiveResistor_B.heatPortB) annotation (Line(
+  connect(heatPort_B_surface, heatResistor_B_convection.heatPortA) annotation (
+      Line(
+      points={{60,0},{72,0}},
+      color={204,0,0},
+      thickness=0.5));
+  connect(heatPort_B_air, heatResistor_B_convection.heatPortB) annotation (Line(
       points={{100,0},{88,0}},
       color={204,0,0},
       thickness=0.5));
-  connect(convectiveResistor_B.heatPortA, heatPort_B_surface) annotation (Line(
-      points={{72,0},{60,0}},
-      color={204,0,0},
-      thickness=0.5));
-  annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+  annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={
+        Text(
+          extent={{-84,16},{-54,-16}},
+          textColor={0,0,0},
+          textString="A"),
+        Text(
+          extent={{54,16},{84,-16}},
+          textColor={0,0,0},
+          textString="B"),
+        Rectangle(extent={{-100,100},{100,-100}}, lineColor={28,108,200})}),
+                                                                 Diagram(
       coordinateSystem(preserveAspectRatio=false)));
 end PartialWall;

@@ -9,19 +9,14 @@ model TestHousePhilipp
     useVentilation=true,
     redeclare TIL.Utilities.Units.Conversions.Units.degC unitTemp)
     annotation (Placement(transformation(extent={{-2,-12},{18,8}})));
-  TIL.OtherComponents.Thermal.HeatResistor heatResistor_ceiling(
-      thermalResistance=0.38) annotation (Placement(transformation(
-        extent={{-15,-4},{15,4}},
-        rotation=270,
-        origin={-7,36})));
   TIL.OtherComponents.Thermal.HeatBoundary heatBoundary_wall(TFixed=293.15)
     annotation (Placement(transformation(extent={{-78,6},{-70,18}})));
-  TIL.OtherComponents.Thermal.HeatBoundary heatBoundary_ceiling(TFixed=293.15)
+  TIL.OtherComponents.Thermal.HeatBoundary heatBoundary_ceiling(TFixed=278.15)
     annotation (Placement(transformation(
         extent={{-4,-6},{4,6}},
         rotation=270,
-        origin={-8,68})));
-  TIL.OtherComponents.Thermal.HeatBoundary heatBoundary_floor(TFixed=283.15)
+        origin={0,100})));
+  TIL.OtherComponents.Thermal.HeatBoundary heatBoundary_floor(TFixed=279.15)
     annotation (Placement(transformation(
         extent={{-4,-6},{4,6}},
         rotation=90,
@@ -41,12 +36,13 @@ model TestHousePhilipp
   Boundaries.Walls.InternalWall internalWall(
     lengthWall=13,
     heightWall=3,
-    gasType=sim.gasType1,
+    alpha_A=8,
+    alpha_B=8,
     thicknessWall=0.15,
     lambdaWall=0.7,
     rhoWall(displayUnit="kg/m3") = 1600,
     cpWall=1000)
-    annotation (Placement(transformation(extent={{-58,2},{-38,22}})));
+    annotation (Placement(transformation(extent={{-60,2},{-40,22}})));
   TIL.OtherComponents.Thermal.HeatBoundary heatBoundary_outside(TFixed=278.15)
     annotation (Placement(transformation(extent={{-80,-22},{-72,-10}})));
   Boundaries.Horizontal.GroundFloor groundFloor(
@@ -61,14 +57,14 @@ model TestHousePhilipp
     lambda_lower=0.035,
     rho_lower(displayUnit="kg/m3") = 30,
     cp_lower=1450,
-    gasType=sim.gasType1,
+    alpha_up=6,
     enableFloorHeating=true,
     pipeLength=133,
     innerDiameter=0.012,
     wallThickness=0.002,
     nbTubes=1,
     nbCells=10,
-    alpha=1000,
+    alpha_pipe=1000,
     T_init=293.15,
     liquidType=sim.liquidType1)
     annotation (Placement(transformation(extent={{-30,-76},{-10,-56}})));
@@ -98,6 +94,10 @@ model TestHousePhilipp
     heightTotal=3,
     lengthWindow=1,
     heightWindow=3,
+    alpha_A_window=25,
+    alpha_B_window=8,
+    alpha_A_wall=25,
+    alpha_B_wall=8,
     g_value=0.55,
     thicknessWindow=0.04,
     lambdaWindow=0.048,
@@ -108,9 +108,8 @@ model TestHousePhilipp
     thickness_B=0.175,
     lambda_B=0.7,
     rho_B(displayUnit="kg/m3") = 1600,
-    cp_B=1000,
-    gasType=sim.gasType1)
-    annotation (Placement(transformation(extent={{-58,-26},{-38,-6}})));
+    cp_B=1000)
+    annotation (Placement(transformation(extent={{-60,-26},{-40,-6}})));
   TIL.GasComponents.Boundaries.BoundaryOverdetermined
     boundaryOverdetermined_circulation(
     gasType=sim.gasType1,
@@ -123,17 +122,22 @@ model TestHousePhilipp
   TIL.GasComponents.Boundaries.BoundaryUnderdetermined
     boundaryUnderdetermined_circulation(gasType=sim.gasType1)
     annotation (Placement(transformation(extent={{74,2},{82,22}})));
+  Boundaries.Horizontal.Roof roof(
+    length=4,
+    width=5,
+    thickness_upper=0.1,
+    lambda_upper=0.039,
+    rho_upper(displayUnit="kg/m3") = 50,
+    cp_upper=1030,
+    enableSurfaceConnection=false,
+    thickness_lower=0.02,
+    lambda_lower=0.13,
+    rho_lower(displayUnit="kg/m3") = 500,
+    cp_lower=1600,
+    alpha_up=25,
+    alpha_down=10)
+    annotation (Placement(transformation(extent={{-20,58},{0,78}})));
 equation
-  connect(heatBoundary_ceiling.heatPort, heatResistor_ceiling.heatPortA)
-    annotation (Line(
-      points={{-8,68},{-8,56},{-7,56},{-7,51}},
-      color={204,0,0},
-      thickness=0.5));
-  connect(heatResistor_ceiling.heatPortB, unheatedRoom1.heatPort_ceiling)
-    annotation (Line(
-      points={{-7,21},{-7,7.4},{-1.4,7.4}},
-      color={204,0,0},
-      thickness=0.5));
   connect(unheatedRoom1.Temperature_sensor, realValue.numberPort)
     annotation (Line(points={{11,9},{11,20},{18.5,20}}, color={0,0,127}));
   connect(Occupancy.y, unheatedRoom1.occupancy)
@@ -143,12 +147,12 @@ equation
                                                         color={0,0,127}));
   connect(heatBoundary_wall.heatPort, internalWall.heatPort_A_air) annotation (
       Line(
-      points={{-74,12},{-58,12}},
+      points={{-74,12},{-60,12}},
       color={204,0,0},
       thickness=0.5));
   connect(internalWall.heatPort_B_air, unheatedRoom1.heatPort_walls)
     annotation (Line(
-      points={{-38,12},{-12,12},{-12,-2},{-1.4,-2}},
+      points={{-40,12},{-12,12},{-12,-2},{-1.4,-2}},
       color={204,0,0},
       thickness=0.5));
   connect(heatBoundary_floor.heatPort, groundFloor.heatPort_down) annotation (
@@ -172,20 +176,20 @@ equation
       color={0,170,238},
       thickness=0.5));
   connect(solarRadiation.y, compositeWall.RadiationInput)
-    annotation (Line(points={{-75,-68},{-52,-68},{-52,-28}}, color={0,0,127}));
+    annotation (Line(points={{-75,-68},{-54,-68},{-54,-28}}, color={0,0,127}));
   connect(compositeWall.solarGains, groundFloor.heatPort_surfaceConnection)
     annotation (Line(
-      points={{-44,-26},{-44,-59.6},{-29.6,-59.6}},
+      points={{-46,-26},{-46,-59.6},{-29.6,-59.6}},
       color={204,0,0},
       thickness=0.5));
   connect(compositeWall.heatPort_B, unheatedRoom1.heatPort_walls) annotation (
       Line(
-      points={{-38,-16},{-12,-16},{-12,-2},{-1.4,-2}},
+      points={{-40,-16},{-12,-16},{-12,-2},{-1.4,-2}},
       color={204,0,0},
       thickness=0.5));
   connect(compositeWall.heatPort_A, heatBoundary_outside.heatPort) annotation (
       Line(
-      points={{-58,-16},{-76,-16}},
+      points={{-60,-16},{-76,-16}},
       color={204,0,0},
       thickness=0.5));
   connect(boundaryOverdetermined_circulation.port, unheatedRoom1.gasPortA)
@@ -197,6 +201,14 @@ equation
     annotation (Line(
       points={{78,12},{50,12},{50,-8},{17.6,-8}},
       color={255,153,0},
+      thickness=0.5));
+  connect(roof.heatPort_up, heatBoundary_ceiling.heatPort) annotation (Line(
+      points={{-10,77.6},{-10,92},{0,92},{0,100}},
+      color={204,0,0},
+      thickness=0.5));
+  connect(roof.heatPort_down, unheatedRoom1.heatPort_ceiling) annotation (Line(
+      points={{-10,58.4},{-10,7.4},{-1.4,7.4}},
+      color={204,0,0},
       thickness=0.5));
   annotation (
     Icon(coordinateSystem(preserveAspectRatio=false)),
