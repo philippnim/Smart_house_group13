@@ -1,6 +1,7 @@
 within SmartHouse.Boundaries.Horizontal;
 model GroundFloor
-  "tbd"
+  "Groundfloor based on the 4R2C Model. Convection heating at the top layer, conduction to earth at bottom layer. 
+Optional Floor heating between the two layers."
   extends PartialHorizontal4R2C;
   import SI = Modelica.Units.SI;
 

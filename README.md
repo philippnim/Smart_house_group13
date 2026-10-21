@@ -56,6 +56,7 @@ The building is simulated using weather data from Lillehammer - Sætherengen
 
 Here notes can be added about features that could later be implemented if of interest
 
-- humidity in the rooms through evaporation.
+- humidity in the rooms through evaporation. Especially through showers or kitchen.
+- Especially also regarding the internal gains through hot water pipes and showers etc. Maybe implement a DHW pipe which will also be connected to the wall heat ports. They are responsible for hot water circulation and model the heat losses lost to the rooms. Additionally a DHW consumer class could be implemented to simulate the bathroom.
 - infiltration of each room in the final model
 - better tracking of energy consumption in each room

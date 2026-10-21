@@ -13,6 +13,7 @@ model PartialHorizontal4R2C
   parameter SI.ThermalConductivity lambda_upper "Upper layer conductivity" annotation(Dialog(group="Upper layer"));
   parameter SI.Density rho_upper "Upper layer density" annotation(Dialog(group="Upper layer"));
   parameter SI.SpecificHeatCapacity cp_upper "Upper layer heat capacity" annotation(Dialog(group="Upper layer"));
+  parameter Boolean enableSurfaceConnection = false "Enable a direct connection to the surface area to integrate solar gains " annotation(Dialog(group="Upper layer"));
 
   // Lower layer
   parameter SI.Length thickness_lower "Lower layer thickness" annotation(Dialog(group="Lower layer"));
@@ -83,7 +84,8 @@ public //
         C_down_val)
     annotation (Placement(transformation(extent={{-44,-28},{-24,-8}})));
 
-
+  TIL.Connectors.HeatPort heatPort_surfaceConnection if enableSurfaceConnection
+    annotation (Placement(transformation(extent={{-106,54},{-86,74}})));
 
 
 equation
@@ -121,6 +123,13 @@ equation
       points={{24,0},{0,0},{0,-12}},
       color={204,0,0},
       thickness=0.5));
+
+  if enableSurfaceConnection then
+    connect(heatPort_surfaceConnection, heatPort_up_inner) annotation (Line(
+        points={{-96,64},{0,64}},
+        color={204,0,0},
+        thickness=0.5));
+  end if;
 
 
 end PartialHorizontal4R2C;
