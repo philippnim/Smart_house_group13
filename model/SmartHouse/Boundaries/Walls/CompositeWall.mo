@@ -98,6 +98,17 @@ equation
       points={{40,-100},{40,-60},{4,-60},{4,-40}},
       color={204,0,0},
       thickness=0.5));
-  annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+  annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={
+        Rectangle(extent={{-100,100},{100,-100}}, lineColor={28,108,200}),
+        Bitmap(extent={{-68,-86},{68,72}}, fileName=
+              "C:/Users/phili/Documents/Smart_house_group13/model/images/composite_wall.png"),
+        Text(
+          extent={{-86,18},{-56,-14}},
+          textColor={0,0,0},
+          textString="A"),
+        Text(
+          extent={{54,16},{84,-16}},
+          textColor={0,0,0},
+          textString="B")}),                                     Diagram(
         coordinateSystem(preserveAspectRatio=false)));
 end CompositeWall;
