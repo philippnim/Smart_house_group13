@@ -101,7 +101,7 @@ equation
   annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={
         Rectangle(extent={{-100,100},{100,-100}}, lineColor={28,108,200}),
         Bitmap(extent={{-68,-86},{68,72}}, fileName=
-              "C:/Users/phili/Documents/Smart_house_group13/model/images/composite_wall.png"),
+              "modelica://SmartHouse/Images/composite_wall.png"),
         Text(
           extent={{-86,18},{-56,-14}},
           textColor={0,0,0},

@@ -76,6 +76,6 @@ equation
       thickness=0.5));
 
 
-  annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+  annotation (Icon(graphics={Bitmap(extent={{-56,-72},{64,64}}, fileName="modelica://SmartHouse/Images/floorHeating.png")}), Diagram(
         coordinateSystem(preserveAspectRatio=false)));
 end FloorHeating;

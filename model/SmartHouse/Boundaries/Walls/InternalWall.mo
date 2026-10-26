@@ -52,5 +52,5 @@ equation
   connect(heatCapacitor_wall.port, heatResistor_B.heatPortA)
     annotation (Line(points={{0,6},{0,0},{32,0}}, color={191,0,0}));
   annotation (Icon(graphics={Bitmap(extent={{-66,-78},{70,76}}, fileName=
-              "C:/Users/phili/Documents/Smart_house_group13/model/images/internal_wall.png")}));
+              "modelica://SmartHouse/Images/internal_wall.png")}));
 end InternalWall;
