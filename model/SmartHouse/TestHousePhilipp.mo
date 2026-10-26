@@ -5,9 +5,11 @@ model TestHousePhilipp
     h=3,
     initialPressure(displayUnit="bar"),
     initialTemperature=296.15,
+    enableInternalMass=false,
     gasType=sim.gasType1,
     useVentilation=true,
-    redeclare TIL.Utilities.Units.Conversions.Units.degC unitTemp)
+    redeclare TIL.Utilities.Units.Conversions.Units.degC unitTemp,
+    heatPerPerson=70)
     annotation (Placement(transformation(extent={{-2,-12},{18,8}})));
   TIL.OtherComponents.Thermal.HeatBoundary heatBoundary_wall(TFixed=293.15)
     annotation (Placement(transformation(extent={{-78,6},{-70,18}})));
