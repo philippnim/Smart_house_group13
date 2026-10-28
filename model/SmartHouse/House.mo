@@ -23,7 +23,7 @@ model House
     h=2.2,
     useVentilation=false)
     annotation (Placement(transformation(extent={{-140,-40},{-120,-20}})));
-  Rooms.UnheatedRoom Livingroom(
+  Rooms.UnheatedRoom LivingRoom(
     A_floor=48,
     h=2.2,
     useVentilation=false)
@@ -413,8 +413,8 @@ model House
     alpha_pipe=1000,
     T_init=293.15,
     liquidType=sim.liquidType1)
-    annotation (Placement(transformation(extent={{-44,-162},{-24,-142}})));
-  Boundaries.Horizontal.GroundFloor LivingroomFloor(
+    annotation (Placement(transformation(extent={{-46,-162},{-26,-142}})));
+  Boundaries.Horizontal.GroundFloor LivingRoomFloor(
     length=6,
     width=8,
     thickness_upper=0.05,
@@ -483,19 +483,57 @@ model House
     T_init=293.15,
     liquidType=sim.liquidType1)
     annotation (Placement(transformation(extent={{140,-162},{160,-142}})));
-  TIL.OtherComponents.Thermal.HeatBoundary OutdoorTemp(use_temperatureInput=
-        true)
+  TIL.OtherComponents.Thermal.HeatBoundary OutdoorTemp(use_temperatureInput=true)
     annotation (Placement(transformation(extent={{-190,186},{-182,198}})));
-  Modelica.Blocks.Interfaces.RealInput OutdoorTempInput
-    annotation (Placement(transformation(extent={{-272,168},{-232,208}})));
-  Modelica.Blocks.Interfaces.BooleanInput SaunaOnOff
-    annotation (Placement(transformation(extent={{-272,92},{-232,132}})));
-  Modelica.Blocks.Interfaces.RealInput GroundTemperaturInput
-    annotation (Placement(transformation(extent={{-244,-212},{-204,-172}})));
-  TIL.OtherComponents.Thermal.HeatBoundary GroundTemperature(
-      use_temperatureInput=true)
+  TIL.OtherComponents.Thermal.HeatBoundary GroundTemp(use_temperatureInput=true)
     annotation (Placement(transformation(extent={{-190,-198},{-182,-186}})));
+  Connectors.HouseInputs houseInputs
+    annotation (Placement(transformation(extent={{-232,-6},{-212,14}})));
+  Connectors.HouseHeatingInput houseHeatingInput
+    annotation (Placement(transformation(extent={{198,-118},{218,-98}})));
 equation
+  // Occupancy: all six rooms.
+  connect(houseInputs.occupancy[1], Sauna.occupancy);
+  connect(houseInputs.occupancy[2], BathroomPlaceholder.occupancy);
+  connect(houseInputs.occupancy[3], Bedroom.occupancy);
+  connect(houseInputs.occupancy[4], Kitchen.occupancy);
+  connect(houseInputs.occupancy[5],LivingRoom. occupancy);
+  connect(houseInputs.occupancy[6], Garage.occupancy);
+
+  // Electrical loads: sauna heater is controlled internally.
+  connect(houseInputs.P_el[1], BathroomPlaceholder.P_el);
+  connect(houseInputs.P_el[2], Bedroom.P_el);
+  connect(houseInputs.P_el[3], Kitchen.P_el);
+  connect(houseInputs.P_el[4],LivingRoom. P_el);
+  connect(houseInputs.P_el[5], Garage.P_el);
+
+  //TemperaturesSorrounding
+  connect(houseInputs.TOutdoor, OutdoorTemp.T_in);
+  connect(houseInputs.TGround, GroundTemp.T_in);
+
+  //Sauna connection
+  connect(houseInputs.saunaOn, Sauna.SaunaSwitch);
+
+  //heatingInput connections
+  connect(houseHeatingInput.supplyP[1], BathroomFloor.Input);
+  connect(houseHeatingInput.supplyP[2], BedroomFloor.Input);
+  connect(houseHeatingInput.supplyP[3], KitchenFloor.Input);
+  connect(houseHeatingInput.supplyP[4], LivingRoomFloor.Input);
+
+  //heatingOutput connections
+  connect(houseHeatingInput.returnP[1], BathroomFloor.Output);
+  connect(houseHeatingInput.returnP[2], BedroomFloor.Output);
+  connect(houseHeatingInput.returnP[3], KitchenFloor.Output);
+  connect(houseHeatingInput.returnP[4], LivingRoomFloor.Output);
+
+  //heatingTemp connections
+  connect(houseHeatingInput.roomTemp[1], BathroomPlaceholder.Temperature_sensor);
+  connect(houseHeatingInput.roomTemp[2], Bedroom.Temperature_sensor);
+  connect(houseHeatingInput.roomTemp[3], Kitchen.Temperature_sensor);
+  connect(houseHeatingInput.roomTemp[4], LivingRoom.Temperature_sensor);
+
+
+
   connect(compositeWall.heatPort_B, Sauna.heatPort_walls) annotation (Line(
       points={{-160,70},{-139.4,70}},
       color={204,0,0},
@@ -563,19 +601,19 @@ equation
       points={{-80,10},{-80,-30},{-139.4,-30}},
       color={204,0,0},
       thickness=0.5));
-  connect(internalWall6.heatPort_B_air, Livingroom.heatPort_walls) annotation (
+  connect(internalWall6.heatPort_B_air,LivingRoom. heatPort_walls) annotation (
       Line(
       points={{-18,10},{-18,-30},{12.6,-30}},
       color={204,0,0},
       thickness=0.5));
-  connect(internalWall3.heatPort_B_air, Livingroom.heatPort_walls) annotation (
+  connect(internalWall3.heatPort_B_air,LivingRoom. heatPort_walls) annotation (
       Line(
       points={{-50,-30},{12.6,-30}},
       color={204,0,0},
       thickness=0.5));
   connect(BathroomPlaceholder.heatPort_floor, BathroomFloor.heatPort_up)
     annotation (Line(
-      points={{-39.4,60.6},{-39.4,-142.4},{-34,-142.4}},
+      points={{-39.4,60.6},{-39.4,-142.4},{-36,-142.4}},
       color={204,0,0},
       thickness=0.5));
   connect(BathroomPlaceholder.heatPort_ceiling, BathroomRoof.heatPort_down)
@@ -588,24 +626,23 @@ equation
       points={{-39.4,70},{10,70}},
       color={204,0,0},
       thickness=0.5));
-  connect(Livingroom.heatPort_walls, compositeWall2.heatPort_B) annotation (
+  connect(LivingRoom.heatPort_walls, compositeWall2.heatPort_B) annotation (
       Line(
       points={{12.6,-30},{6,-30},{6,-50},{22,-50},{22,-56}},
       color={204,0,0},
       thickness=0.5));
-  connect(Livingroom.heatPort_ceiling, KitchenRoof1.heatPort_down) annotation (
+  connect(LivingRoom.heatPort_ceiling, KitchenRoof1.heatPort_down) annotation (
       Line(
-      points={{12.6,-20.6},{12,-20.6},{12,54},{36,54},{36,126},{20,126},{20,
-          132.4}},
+      points={{12.6,-20.6},{12,-20.6},{12,54},{36,54},{36,126},{20,126},{20,132.4}},
       color={204,0,0},
       thickness=0.5));
-  connect(Livingroom.heatPort_floor, LivingroomFloor.heatPort_up) annotation (
+  connect(LivingRoom.heatPort_floor,LivingRoomFloor. heatPort_up) annotation (
       Line(
       points={{12.6,-39.4},{12,-39.4},{12,-48},{42,-48},{42,-116},{20,-116},{20,
           -122.4}},
       color={204,0,0},
       thickness=0.5));
-  connect(Livingroom.heatPort_walls, internalWall2.heatPort_A_air) annotation (
+  connect(LivingRoom.heatPort_walls, internalWall2.heatPort_A_air) annotation (
       Line(
       points={{12.6,-30},{74,-30}},
       color={204,0,0},
@@ -624,7 +661,7 @@ equation
       points={{60.6,70},{46,70},{46,30}},
       color={204,0,0},
       thickness=0.5));
-  connect(internalWall7.heatPort_B_air, Livingroom.heatPort_walls) annotation (
+  connect(internalWall7.heatPort_B_air,LivingRoom. heatPort_walls) annotation (
       Line(
       points={{46,10},{46,-30},{12.6,-30}},
       color={204,0,0},
@@ -634,8 +671,7 @@ equation
       color={204,0,0},
       thickness=0.5));
   connect(Bedroom.heatPort_floor, BedroomFloor.heatPort_up) annotation (Line(
-      points={{60.6,60.6},{60,60.6},{60,36},{64,36},{64,-136},{72,-136},{72,
-          -142.4}},
+      points={{60.6,60.6},{60,60.6},{60,36},{64,36},{64,-136},{72,-136},{72,-142.4}},
       color={204,0,0},
       thickness=0.5));
   connect(Bedroom.heatPort_walls, compositeWall4.heatPort_B) annotation (Line(
@@ -702,44 +738,33 @@ equation
       points={{22,-76},{202,-76},{202,190},{-186,190},{-186,192}},
       color={204,0,0},
       thickness=0.5));
-  connect(OutdoorTempInput, OutdoorTemp.T_in) annotation (Line(points={{-252,
-          188},{-208,188},{-208,196},{-190,196}}, color={0,0,127}));
-  connect(SaunaOnOff, Sauna.SaunaSwitch) annotation (Line(points={{-252,112},{
-          -119.6,112},{-119.6,79}}, color={255,0,255}));
-  connect(GroundTemperaturInput, GroundTemperature.T_in) annotation (Line(
-        points={{-224,-192},{-224,-166},{-196,-166},{-196,-188},{-190,-188}},
-        color={0,0,127}));
-  connect(KitchenFloor.heatPort_down, GroundTemperature.heatPort) annotation (
-      Line(
+  connect(KitchenFloor.heatPort_down, GroundTemp.heatPort) annotation (Line(
       points={{-190,-139.6},{-186,-139.6},{-186,-192}},
       color={204,0,0},
       thickness=0.5));
-  connect(SaunaFloor.heatPort_down, GroundTemperature.heatPort) annotation (
-      Line(
+  connect(SaunaFloor.heatPort_down, GroundTemp.heatPort) annotation (Line(
       points={{-130,-161.6},{-130,-192},{-186,-192}},
       color={204,0,0},
       thickness=0.5));
-  connect(BathroomFloor.heatPort_down, GroundTemperature.heatPort) annotation (
-      Line(
-      points={{-34,-161.6},{-34,-192},{-186,-192}},
+  connect(BathroomFloor.heatPort_down, GroundTemp.heatPort) annotation (Line(
+      points={{-36,-161.6},{-36,-192},{-186,-192}},
       color={204,0,0},
       thickness=0.5));
-  connect(BedroomFloor.heatPort_down, GroundTemperature.heatPort) annotation (
-      Line(
+  connect(BedroomFloor.heatPort_down, GroundTemp.heatPort) annotation (Line(
       points={{72,-161.6},{72,-192},{-186,-192}},
       color={204,0,0},
       thickness=0.5));
-  connect(LivingroomFloor.heatPort_down, GroundTemperature.heatPort)
-    annotation (Line(
+  connect(LivingRoomFloor.heatPort_down, GroundTemp.heatPort) annotation (Line(
       points={{20,-141.6},{20,-192},{-186,-192}},
       color={204,0,0},
       thickness=0.5));
-  connect(GarageFloor.heatPort_down, GroundTemperature.heatPort) annotation (
-      Line(
+  connect(GarageFloor.heatPort_down, GroundTemp.heatPort) annotation (Line(
       points={{150,-161.6},{150,-192},{-186,-192}},
       color={204,0,0},
       thickness=0.5));
-  annotation (Icon(coordinateSystem(preserveAspectRatio=false, extent={{-200,
-            -200},{200,200}})), Diagram(coordinateSystem(preserveAspectRatio=
-            false, extent={{-200,-200},{200,200}})));
+  annotation (Icon(graphics={Bitmap(
+          extent={{-200,-200},{200,200}},
+    fileName="modelica://SmartHouse/Images/house.png"),
+    Rectangle(extent={{-200,200},{200,-200}}, lineColor={28,108,200})}), Diagram(
+        coordinateSystem(preserveAspectRatio=false)));
 end House;

@@ -167,13 +167,11 @@ equation
       points={{-20,-56.4},{-20,-18},{-1.4,-18},{-1.4,-11.4}},
       color={204,0,0},
       thickness=0.5));
-  connect(boundaryOverdetermined.port, groundFloor.liquidPort_A) annotation (
-      Line(
+  connect(boundaryOverdetermined.port, groundFloor.Input) annotation (Line(
       points={{12,-56},{-6,-56},{-6,-62},{-10.4,-62}},
       color={0,170,238},
       thickness=0.5));
-  connect(boundaryUnderdetermined.port, groundFloor.liquidPort_B) annotation (
-      Line(
+  connect(boundaryUnderdetermined.port, groundFloor.Output) annotation (Line(
       points={{12,-76},{-6,-76},{-6,-70},{-10.4,-70}},
       color={0,170,238},
       thickness=0.5));

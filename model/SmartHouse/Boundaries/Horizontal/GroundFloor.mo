@@ -46,11 +46,9 @@ Optional Floor heating between the two layers."
     annotation (Placement(transformation(extent={{40,-10},{60,10}})));
 
 
-  TIL.Connectors.LiquidPort liquidPort_A(liquidType=liquidType)
-                                         if enableFloorHeating
+  TIL.Connectors.LiquidPort Input(liquidType=liquidType) if enableFloorHeating
     annotation (Placement(transformation(extent={{86,30},{106,50}})));
-  TIL.Connectors.LiquidPort liquidPort_B(liquidType=liquidType)
-                                         if enableFloorHeating
+  TIL.Connectors.LiquidPort Output(liquidType=liquidType) if enableFloorHeating
     annotation (Placement(transformation(extent={{86,-50},{106,-30}})));
   TIL.OtherComponents.Thermal.HeatResistor heatResistor_up_convection(
     thermalResistanceType=TIL.OtherComponents.Thermal.Internals.ThermalResistanceType.ThermalConvection,
@@ -73,14 +71,14 @@ equation
         points={{40.4,0},{24,0}},
         color={204,0,0},
         thickness=0.5));
-    connect(integratedFloorHeating.liquidPort_B, liquidPort_B) annotation (Line(
+    connect(integratedFloorHeating.liquidPort_B, Output) annotation (Line(
         points={{59.6,-8},{80,-8},{80,-40},{96,-40}},
         color={0,170,238},
         thickness=0.5));
-    connect(integratedFloorHeating.liquidPort_A, liquidPort_A) annotation (Line(
+    connect(integratedFloorHeating.liquidPort_A, Input) annotation (Line(
         points={{59.6,8},{82,8},{82,40},{96,40}},
         color={0,170,238},
-      thickness=0.5));
+        thickness=0.5));
 
   end if;
   connect(heatPort_up_inner, heatResistor_up_convection.heatPortA) annotation (
