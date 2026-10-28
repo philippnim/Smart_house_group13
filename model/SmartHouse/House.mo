@@ -1,5 +1,20 @@
 within SmartHouse;
 model House
+  // Gas that is utilized
+  parameter TILMedia.Gas.Types.BaseGas gasType=sim.gasType1 "Gas type Sauna" annotation (Dialog(tab="SIM", group="SIM"),
+    choices(
+      choice=sim.gasType1 "Gas 1 as defined in SIM",
+      choice=sim.gasType2 "Gas 2 as defined in SIM",
+      choice=sim.gasType3 "Gas 3 as defined in SIM"));
+// Fluid Parameters
+  parameter TILMedia.Liquid.Types.BaseLiquid liquidType=sim.liquidType1 "Liquid type" annotation (Dialog(tab="SIM",
+        group="SIM"), choices(
+      choice=sim.liquidType1 "Liquid 1 as defined in SIM",
+      choice=sim.liquidType2 "Liquid 2 as defined in SIM",
+      choice=sim.liquidType3 "Liquid 3 as defined in SIM"));
+
+  outer TIL.SystemInformationManager sim
+    annotation (Placement(transformation(extent={{86,86},{100,100}})));
   Rooms.Sauna Sauna(
     A_floor=10,
     h=2.2,
@@ -279,8 +294,8 @@ model House
   Boundaries.Walls.CompositeWall compositeWall3(
     lengthTotal=11,
     heightTotal=2.2,
-    lengthWindow=0,
-    heightWindow=3,
+    lengthWindow=0.2,
+    heightWindow=0.2,
     alpha_A_window=25,
     alpha_B_window=8,
     alpha_A_wall=25,
@@ -490,7 +505,11 @@ model House
   Connectors.HouseInputs houseInputs
     annotation (Placement(transformation(extent={{-232,-6},{-212,14}})));
   Connectors.HouseHeatingInput houseHeatingInput
-    annotation (Placement(transformation(extent={{198,-118},{218,-98}})));
+    annotation (Placement(transformation(extent={{204,-10},{224,10}})));
+  Modelica.Blocks.Sources.RealExpression realExpression
+    annotation (Placement(transformation(extent={{-568,-236},{-548,-216}})));
+  Modelica.Blocks.Sources.RealExpression realExpression1(y=0)
+    annotation (Placement(transformation(extent={{-216,-68},{-196,-48}})));
 equation
   // Occupancy: all six rooms.
   connect(houseInputs.occupancy[1], Sauna.occupancy);
@@ -762,9 +781,60 @@ equation
       points={{150,-161.6},{150,-192},{-186,-192}},
       color={204,0,0},
       thickness=0.5));
-  annotation (Icon(graphics={Bitmap(
+  connect(compositeWall5.RadiationInput, realExpression1.y) annotation (Line(
+        points={{-18,110},{-12,110},{-12,212},{-240,212},{-240,-36},{-188,-36},
+          {-188,-58},{-195,-58}}, color={0,0,127}));
+  connect(compositeWall.RadiationInput, realExpression1.y) annotation (Line(
+        points={{-174,58},{-174,44},{-240,44},{-240,-36},{-188,-36},{-188,-58},
+          {-195,-58}}, color={0,0,127}));
+  connect(compositeWall1.RadiationInput, realExpression1.y) annotation (Line(
+        points={{-174,-42},{-176,-42},{-176,-58},{-195,-58}}, color={0,0,127}));
+  connect(compositeWall4.RadiationInput, realExpression1.y) annotation (Line(
+        points={{116,58},{116,48},{-4,48},{-4,108},{-12,108},{-12,212},{-240,
+          212},{-240,-36},{-188,-36},{-188,-58},{-195,-58}}, color={0,0,127}));
+  connect(compositeWall3.RadiationInput, realExpression1.y) annotation (Line(
+        points={{192,-44},{-4,-44},{-4,-60},{-206,-60},{-206,-58},{-195,-58}},
+        color={0,0,127}));
+  connect(compositeWall2.RadiationInput, realExpression1.y) annotation (Line(
+        points={{34,-70},{48,-70},{48,-44},{-4,-44},{-4,-58},{-195,-58}}, color
+        ={0,0,127}));
+  connect(compositeWall1.solarGains, KitchenFloor.heatPort_surfaceConnection)
+    annotation (Line(
+      points={{-166,-40},{-166,-112},{-208,-112},{-208,-123.6},{-199.6,-123.6}},
+      color={204,0,0},
+      thickness=0.5));
+  connect(compositeWall.solarGains, SaunaFloor.heatPort_surfaceConnection)
+    annotation (Line(
+      points={{-166,60},{-166,-12},{-196,-12},{-196,-40},{-224,-40},{-224,-76},
+          {-172,-76},{-172,-80},{-160,-80},{-160,-148},{-148,-148},{-148,-145.6},
+          {-139.6,-145.6}},
+      color={204,0,0},
+      thickness=0.5));
+  connect(compositeWall2.solarGains, LivingRoomFloor.heatPort_surfaceConnection)
+    annotation (Line(
+      points={{32,-62},{52,-62},{52,-80},{40,-80},{40,-112},{4,-112},{4,-125.6},
+          {10.4,-125.6}},
+      color={204,0,0},
+      thickness=0.5));
+  connect(compositeWall5.solarGains, BathroomFloor.heatPort_surfaceConnection)
+    annotation (Line(
+      points={{-20,102},{-12,102},{-12,52},{-45.6,52},{-45.6,-145.6}},
+      color={204,0,0},
+      thickness=0.5));
+  connect(compositeWall4.solarGains, BedroomFloor.heatPort_surfaceConnection)
+    annotation (Line(
+      points={{108,60},{86,60},{86,-145.6},{62.4,-145.6}},
+      color={204,0,0},
+      thickness=0.5));
+  connect(compositeWall3.solarGains, GarageFloor.heatPort_surfaceConnection)
+    annotation (Line(
+      points={{184,-42},{162,-42},{162,-145.6},{140.4,-145.6}},
+      color={204,0,0},
+      thickness=0.5));
+  annotation (Icon(coordinateSystem(extent={{-220,-200},{220,200}}),
+                   graphics={Bitmap(
           extent={{-200,-200},{200,200}},
     fileName="modelica://SmartHouse/Images/house.png"),
     Rectangle(extent={{-200,200},{200,-200}}, lineColor={28,108,200})}), Diagram(
-        coordinateSystem(preserveAspectRatio=false)));
+        coordinateSystem(preserveAspectRatio=false, extent={{-220,-200},{220,200}})));
 end House;

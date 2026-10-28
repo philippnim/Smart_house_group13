@@ -37,9 +37,16 @@ package Connectors
 
   connector HouseHeatingInput
     "Heating Connections to the house"
-    parameter TILMedia.Liquid.Types.BaseLiquid liquidType;
+    // Fluid Parameters
+    parameter TILMedia.Liquid.Types.BaseLiquid liquidType=sim.liquidType1 "Liquid type" annotation (Dialog(tab="SIM",
+          group="SIM"), choices(
+        choice=sim.liquidType1 "Liquid 1 as defined in SIM",
+        choice=sim.liquidType2 "Liquid 2 as defined in SIM",
+        choice=sim.liquidType3 "Liquid 3 as defined in SIM"));
 
-    Modelica.Blocks.Interfaces.RealInput roomTemp[4](
+    outer TIL.SystemInformationManager sim "System information manager";
+
+    Modelica.Blocks.Interfaces.RealOutput roomTemp[4](
       each unit="degK")
       "Order: bathroom, bedroom, kitchen, living room";
     TIL.Connectors.LiquidPort supplyP[4](
