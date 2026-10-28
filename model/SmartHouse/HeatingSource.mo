@@ -99,11 +99,11 @@ package HeatingSource
       "Defrost-off trigger must remain active before defrost stops"
       annotation(Dialog(tab="Defrost", group="Timing"));
 
-    parameter Modelica.Units.SI.Time minOffTimeAfterDefrost = 1200
+    parameter Modelica.Units.SI.Time minOffTimeAfterDefrost = 2400
       "Minimum time between two defrost cycles"
       annotation(Dialog(tab="Defrost", group="Timing"));
 
-    parameter Real defrostTriggerOnThreshold = -400
+    parameter Real defrostTriggerOnThreshold = -570
       "Threshold used by the evaporator defrost-on criterion"
       annotation(Dialog(tab="Defrost", group="Trigger"));
 
@@ -859,21 +859,17 @@ package HeatingSource
         Line(points={{61.3,-77},{71.9785,-77},{71.9785,-78.5},{82.6571,-78.5}},
           color={255,0,255}));
     connect(fourWayValve.crossedConnection_in, heatPumpController.fourWayValve)
-      annotation (Line(points={{14,29},{14,-122},{134,-122},{134,-85.5},{
-            126.686,-85.5}},
+      annotation (Line(points={{14,29},{14,-122},{134,-122},{134,-85.5},{126.686,-85.5}},
           color={255,0,255}));
     connect(heatPumpController.controllerSwitch, compressorController.activeInput)
-      annotation (Line(points={{126.686,-78.5},{138,-78.5},{138,-78},{148,-78},
-            {148,13.8},{137.6,13.8}},
-                                 color={255,0,255}));
+      annotation (Line(points={{126.686,-78.5},{138,-78.5},{138,-78},{148,-78},{148,
+            13.8},{137.6,13.8}}, color={255,0,255}));
     connect(heatPumpController.controllerSwitch, expansionValveController.activeInput)
-      annotation (Line(points={{126.686,-78.5},{138,-78.5},{138,-78},{148,-78},
-            {148,20},{-142,20},{-142,9.8},{-137.6,9.8}},
-                                                    color={255,0,255}));
+      annotation (Line(points={{126.686,-78.5},{138,-78.5},{138,-78},{148,-78},{148,
+            20},{-142,20},{-142,9.8},{-137.6,9.8}}, color={255,0,255}));
     connect(heatPumpController.controllerSwitch, switch1.u2) annotation (Line(
-          points={{126.686,-78.5},{148,-78.5},{148,20},{-142,20},{-142,-22},{
-            -129.2,-22}},
-                   color={255,0,255}));
+          points={{126.686,-78.5},{148,-78.5},{148,20},{-142,20},{-142,-22},{-129.2,
+            -22}}, color={255,0,255}));
     connect(heatPumpController.TemperatureSetpoint, compressorController.u_s)
       annotation (Line(points={{126.686,-92.5},{142,-92.5},{142,10},{137.6,10}},
           color={0,0,127}));
@@ -928,8 +924,8 @@ package HeatingSource
             -32},{-110,-32},{-110,-24},{-60,-24},{-60,-20},{-38,-20},{-38,-8},{-34,
             -8},{-34,-2}},                              color={0,0,127}));
     connect(heatPumpController.fanSpeed, rotatoryBoundary.n_in) annotation (Line(
-          points={{126.686,-99.5},{152,-99.5},{152,-132},{2,-132},{2,-94},{-20,
-            -94}}, color={0,0,127}));
+          points={{126.686,-99.5},{152,-99.5},{152,-132},{2,-132},{2,-94},{-20,-94}},
+                   color={0,0,127}));
     connect(heatPumpController.enableHeatPump, EnableHeatSource) annotation (Line(
           points={{82.6571,-89},{74,-89},{74,-174},{0,-174},{0,-200}},
                                                                      color={255,0,
@@ -940,9 +936,8 @@ package HeatingSource
       annotation (Line(points={{102,6},{112,6},{112,-11.4}},
                                                           color={0,0,127}));
     connect(heatPumpController.controllerSwitchCompressor, switch2.u2)
-      annotation (Line(points={{126.686,-71.5},{134,-71.5},{134,-42},{112,-42},
-            {112,-25.2}},
-                     color={255,0,255}));
+      annotation (Line(points={{126.686,-71.5},{134,-71.5},{134,-42},{112,-42},{112,
+            -25.2}}, color={255,0,255}));
     connect(CompressorDisable.y, switch2.u3) annotation (Line(points={{106,-30.4},
             {106,-25.2},{107.2,-25.2}},
                                      color={0,0,127}));
@@ -1207,9 +1202,9 @@ package HeatingSource
       annotation (Placement(transformation(extent={{-104,-10},{-96,10}})));
     TIL.LiquidComponents.Boundaries.Boundary boundary1(boundaryType="p")
       annotation (Placement(transformation(extent={{96,-10},{104,10}})));
-    HeatPumpCycle heatPumpCycle(useDefrost=true)
+    HeatPumpCycle heatPumpCycle(TSupplySet=60, useDefrost=true)
       annotation (Placement(transformation(extent={{-32,-28},{30,28}})));
-    Modelica.Blocks.Sources.RealExpression T_ambient(y=263.15)
+    Modelica.Blocks.Sources.RealExpression T_ambient(y=293.15)
       "Disable compressor when heat source is turned of" annotation (Placement(
           transformation(
           extent={{-16,-8},{16,8}},
@@ -1220,9 +1215,11 @@ package HeatingSource
           extent={{-10,-10},{10,10}},
           rotation=90,
           origin={4,-72})));
-    TIL.LiquidComponents.Sensors.Sensor_T sensor_T
+    TIL.LiquidComponents.Sensors.Sensor_T sensor_T(redeclare
+        TIL.Utilities.Units.Conversions.Units.degC unit)
       annotation (Placement(transformation(extent={{-84,40},{-76,48}})));
-    TIL.LiquidComponents.Sensors.Sensor_T sensor_T1
+    TIL.LiquidComponents.Sensors.Sensor_T sensor_T1(redeclare
+        TIL.Utilities.Units.Conversions.Units.degC unit)
       annotation (Placement(transformation(extent={{62,34},{70,42}})));
    inner TIL.SystemInformationManager sim(
     redeclare TILMedia.VLEFluid.Types.TILMedia_Propane vleFluidType1,
@@ -1254,4 +1251,375 @@ package HeatingSource
                 Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
           coordinateSystem(preserveAspectRatio=false)));
   end TestHeatPump;
+
+  model TestHotWaterStorage
+    inner TIL.SystemInformationManager sim(
+    redeclare TILMedia.VLEFluid.Types.TILMedia_Propane vleFluidType1,
+    redeclare TILMedia.Gas.Types.VDI4670_MoistAir gasType1,
+    redeclare TILMedia.Liquid.Types.TILMedia_Water liquidType1);
+    HeatPumpCycle heatPumpCycle1(TSupplySet=60, useDefrost=true)
+      annotation (Placement(transformation(extent={{-32,-8},{30,48}})));
+    Modelica.Blocks.Sources.RealExpression T_ambient(y=293.15)
+      "Disable compressor when heat source is turned of" annotation (Placement(
+          transformation(
+          extent={{-16,-8},{16,8}},
+          rotation=90,
+          origin={-14,-62})));
+    Modelica.Blocks.Sources.BooleanExpression Enable(y=true) annotation (
+        Placement(transformation(
+          extent={{-10,-10},{10,10}},
+          rotation=90,
+          origin={2,-62})));
+    TIL.LiquidComponents.Sensors.Sensor_T sensor_T(redeclare
+        TIL.Utilities.Units.Conversions.Units.degC unit)
+      annotation (Placement(transformation(extent={{-84,60},{-76,68}})));
+    TIL.LiquidComponents.Sensors.Sensor_T sensor_T1(redeclare
+        TIL.Utilities.Units.Conversions.Units.degC unit)
+      annotation (Placement(transformation(extent={{62,54},{70,62}})));
+    TIL3_AddOn_HeatStorage.ThermalStorages.HotWaterTank
+                                 hotWaterTank1(
+      geometry(
+        innerVolume=0.19,
+        innerDiameter=0.4,
+        innerTotalHeight=1.5,
+        wallThickness=0.003,
+        heightTemperatureSensors={
+    0.15,
+    0.45,
+    0.75,
+    1.05,
+    1.35},
+        heightInletPorts={0.1},
+        heightOutletPorts={1.4}),
+      useTemperaturSensorsOutput=true,
+      redeclare model BuoyancyModel =
+          TIL3_AddOn_HeatStorage.ThermalStorages.Components.TransportPhenomena.TankHeatTransfer.Buoyancy.TemperatureDifference
+          (tauMixing=1),
+      redeclare model ThermalConductionModel =
+          TIL3_AddOn_HeatStorage.ThermalStorages.Components.TransportPhenomena.TankHeatTransfer.ThermalConduction.TemperatureDependingConductivity,
+      ambientHeatTransfer=TIL3_AddOn_HeatStorage.ThermalStorages.Internals.AmbientHeatTransfer.OverallHeatTransferNoThermalCapacity,
+      ambientTemperature=283.15,
+      redeclare model AmbientHeatTransferModel =
+          TIL3_AddOn_HeatStorage.ThermalStorages.Components.TransportPhenomena.TankHeatTransfer.Ambient.ConstantOveralHeatTransferCoefficients
+          (
+          UA_tankTopLid=3,
+          UA_tankCylinder=3,
+          UA_tankBottomLid=3),
+      redeclare model LiquidToTankWallHeatTransferModel =
+          TIL3_AddOn_HeatStorage.ThermalStorages.Components.TransportPhenomena.TankHeatTransfer.Ambient.CylinderVerticalFreeConvection,
+      useMantleHX=false,
+      useInternalHX_a=true,
+      nInternalHXCellsPerTankCell_a=4,
+      redeclare model TubeSideHeatTransferModelInternalHX_a =
+          TIL.LiquidComponents.Tubes.TransportPhenomena.HeatTransfer.ConstantAlpha
+          (constantAlpha=4000),
+      redeclare model PressureDropModelInternalHX_a =
+          TIL.LiquidComponents.Tubes.TransportPhenomena.PressureDrop.ZeroPressureDrop,
+      redeclare model WallHeatConductionModelInternalHX_a =
+          TIL.LiquidComponents.Tubes.TransportPhenomena.WallHeatTransfer.GeometryBasedConduction,
+      redeclare model WallMaterialInternalHX_a =
+          TILMedia.Solid.Types.TILMedia_Steel,
+      redeclare model TankToInternalHXHeatTransferModel_a =
+          TIL3_AddOn_HeatStorage.ThermalStorages.Components.TransportPhenomena.InternalHXHeatTransfer.LiquidTankSide.ConstantAlpha
+          (constantAlpha=2000),
+      useInternalHX_b=false,
+      redeclare model TubeSideHeatTransferModelInternalHX_b =
+          TIL.LiquidComponents.Tubes.TransportPhenomena.HeatTransfer.ConstantAlpha,
+      initMethod="constantTemperature",
+      TInitial=303.15,
+      TInitialTop=343.15,
+      TInitialBottom=303.15,
+          TInitialLiquidInternalHX_a=303.15,
+      TInitialWallInternalHX_a=303.15,
+      TInitialTankWall=303.15,
+      TInitialInsulation=303.15)
+      annotation (Placement(transformation(
+        extent={{46,-76},{66,-36}})));
+    TIL.LiquidComponents.Pumps.SimplePump pump(
+      presetVariableType="V_flow",
+      m_flowFixed=0.03,
+      use_volumeFlowRateInput=false,
+      V_flowFixed=0.25e-3)
+                          annotation (Placement(transformation(
+          origin={-36,-56},
+          extent={{8,-8},{-8,8}},
+          rotation=0)));
+    TIL.LiquidComponents.Boundaries.Boundary boundaryWater(boundaryType="p")
+      annotation (Placement(transformation(
+          extent={{-4,-10},{4,10}},
+          rotation=270,
+          origin={-70,-56})));
+    TIL.LiquidComponents.Boundaries.Boundary boundary1(boundaryType="p")
+      annotation (Placement(transformation(extent={{88,-54},{96,-34}})));
+    TIL.LiquidComponents.Boundaries.Boundary boundary(m_flowFixed=0, TFixed=303.15)
+      annotation (Placement(transformation(extent={{90,-78},{98,-58}})));
+  equation
+    connect(T_ambient.y, heatPumpCycle1.T_ambient) annotation (Line(points={{-14,-44.4},
+            {-14,-25.422},{-13.4,-25.422},{-13.4,-6.44444}}, color={0,0,127}));
+    connect(Enable.y, heatPumpCycle1.EnableHeatSource) annotation (Line(points={{2,
+            -51},{2,-12},{-1,-12},{-1,-4.88889}}, color={255,0,255}));
+    connect(sensor_T.port, heatPumpCycle1.WaterInput) annotation (Line(
+        points={{-80,60},{-80,20},{-32,20}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(sensor_T1.port, heatPumpCycle1.WaterOutput) annotation (Line(
+        points={{66,54},{52,54},{52,-6},{36,-6},{36,20},{30,20}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(heatPumpCycle1.WaterOutput, hotWaterTank1.liquidFluidPortA)
+      annotation (Line(
+        points={{30,20},{28,20},{28,-74},{46,-74}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(boundaryWater.port, hotWaterTank1.liquidFluidPortB) annotation (Line(
+        points={{-70,-56},{-54,-56},{-54,-80},{-36,-80},{-36,-84},{32,-84},{32,-68},
+            {46,-68}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(pump.portB, heatPumpCycle1.WaterInput) annotation (Line(
+        points={{-36,-48},{-36,20},{-32,20}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(pump.portA, hotWaterTank1.liquidFluidPortB) annotation (Line(
+        points={{-36,-64},{-36,-84},{32,-84},{32,-68},{46,-68}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(boundary1.port, hotWaterTank1.outletPorts[1]) annotation (Line(
+        points={{92,-44},{66,-44}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(hotWaterTank1.inletPorts[1], boundary.port) annotation (Line(
+        points={{66,-68},{94,-68}},
+        color={0,170,238},
+        thickness=0.5));
+    annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+          coordinateSystem(preserveAspectRatio=false)));
+  end TestHotWaterStorage;
+
+  model HeatPump_ThermalStorage
+    HeatPumpCycle heatPumpCycle1(TSupplySet=60, useDefrost=true)
+      annotation (Placement(transformation(extent={{-46,-10},{16,46}})));
+    Modelica.Blocks.Interfaces.RealInput T_ambient
+      "Temperature of the ambient in K" annotation (Placement(transformation(
+          extent={{-20,-20},{20,20}},
+          rotation=90,
+          origin={-50,-100}),  iconTransformation(
+          extent={{-10,-10},{10,10}},
+          rotation=90,
+          origin={-80,-170})));
+    Modelica.Blocks.Interfaces.BooleanInput EnableHeatSource
+      "Enable heat source operation" annotation (Placement(transformation(
+          extent={{-20,-20},{20,20}},
+          rotation=90,
+          origin={-10,-100}),
+                            iconTransformation(
+          extent={{-20,-20},{20,20}},
+          rotation=90,
+          origin={0,-160})));
+    ThermalstorageController thermalstorageController
+      annotation (Placement(transformation(extent={{0,-60},{20,-40}})));
+    TIL3_AddOn_HeatStorage.ThermalStorages.HotWaterTank
+                                 hotWaterTank(
+      geometry(
+        innerVolume=0.19,
+        innerDiameter=0.4,
+        innerTotalHeight=1.5,
+        wallThickness=0.003,
+        heightTemperatureSensors={1.45},
+        heightInletPorts={0.1},
+        heightOutletPorts={1.4}),
+      useTemperaturSensorsOutput=true,
+      redeclare model BuoyancyModel =
+          TIL3_AddOn_HeatStorage.ThermalStorages.Components.TransportPhenomena.TankHeatTransfer.Buoyancy.TemperatureDifference
+          (tauMixing=1),
+      redeclare model ThermalConductionModel =
+          TIL3_AddOn_HeatStorage.ThermalStorages.Components.TransportPhenomena.TankHeatTransfer.ThermalConduction.TemperatureDependingConductivity,
+      ambientHeatTransfer=TIL3_AddOn_HeatStorage.ThermalStorages.Internals.AmbientHeatTransfer.OverallHeatTransferNoThermalCapacity,
+      ambientTemperature=283.15,
+      redeclare model AmbientHeatTransferModel =
+          TIL3_AddOn_HeatStorage.ThermalStorages.Components.TransportPhenomena.TankHeatTransfer.Ambient.ConstantOveralHeatTransferCoefficients
+          (
+          UA_tankTopLid=3,
+          UA_tankCylinder=3,
+          UA_tankBottomLid=3),
+      redeclare model LiquidToTankWallHeatTransferModel =
+          TIL3_AddOn_HeatStorage.ThermalStorages.Components.TransportPhenomena.TankHeatTransfer.Ambient.CylinderVerticalFreeConvection,
+      useMantleHX=false,
+      useInternalHX_a=true,
+      nInternalHXCellsPerTankCell_a=4,
+      redeclare model TubeSideHeatTransferModelInternalHX_a =
+          TIL.LiquidComponents.Tubes.TransportPhenomena.HeatTransfer.ConstantAlpha
+          (constantAlpha=4000),
+      redeclare model PressureDropModelInternalHX_a =
+          TIL.LiquidComponents.Tubes.TransportPhenomena.PressureDrop.ZeroPressureDrop,
+      redeclare model WallHeatConductionModelInternalHX_a =
+          TIL.LiquidComponents.Tubes.TransportPhenomena.WallHeatTransfer.GeometryBasedConduction,
+      redeclare model WallMaterialInternalHX_a =
+          TILMedia.Solid.Types.TILMedia_Steel,
+      redeclare model TankToInternalHXHeatTransferModel_a =
+          TIL3_AddOn_HeatStorage.ThermalStorages.Components.TransportPhenomena.InternalHXHeatTransfer.LiquidTankSide.ConstantAlpha
+          (constantAlpha=2000),
+      useInternalHX_b=false,
+      redeclare model TubeSideHeatTransferModelInternalHX_b =
+          TIL.LiquidComponents.Tubes.TransportPhenomena.HeatTransfer.ConstantAlpha,
+      initMethod="constantTemperature",
+      TInitial=284.15,
+      TInitialTop=343.15,
+      TInitialBottom=303.15,
+      TInitialLiquidInternalHX_a=283.15,
+      TInitialWallInternalHX_a=283.15,
+      TInitialTankWall=328.15,
+      TInitialInsulation=318.15) annotation (Placement(transformation(extent={{70,38},
+              {90,78}})));
+    TIL.LiquidComponents.Pumps.SimplePump pump(
+      presetVariableType="V_flow",
+      m_flowFixed=0.03,
+      use_volumeFlowRateInput=false,
+      V_flowFixed=0.25e-3)
+                          annotation (Placement(transformation(
+          origin={26,38},
+          extent={{8,-8},{-8,8}},
+          rotation=0)));
+    TIL.LiquidComponents.Valves.LinearDirectionalControlValve linearDirectionalControlValve(
+        use_switchingPositionInput=true, m_flowStart=-0.3e-3)
+      annotation (Placement(transformation(
+          extent={{8,-6},{-8,6}},
+          rotation=180,
+          origin={26,56})));
+  equation
+    connect(T_ambient, heatPumpCycle1.T_ambient) annotation (Line(points={{-50,
+            -100},{-50,-14},{-27.4,-14},{-27.4,-8.44444}}, color={0,0,127}));
+    connect(pump.portB,linearDirectionalControlValve. portA)
+      annotation (Line(
+        points={{26,46},{26,50}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(EnableHeatSource, thermalstorageController.EnableHeating)
+      annotation (Line(points={{-10,-100},{-10,-55},{1,-55}}, color={255,0,255}));
+    connect(hotWaterTank.temperatureSensorsOutput[5], thermalstorageController.T_DHW)
+      annotation (Line(points={{69,62.9},{44,62.9},{44,-20},{-6,-20},{-6,-47},{
+            1,-47}}, color={0,0,127}));
+    connect(thermalstorageController.EnableHeatPump, heatPumpCycle1.EnableHeatSource)
+      annotation (Line(points={{19.2,-46},{24,-46},{24,-16},{-16,-16},{-16,
+            -6.88889},{-15,-6.88889}}, color={255,0,255}));
+    connect(thermalstorageController.TSupplySet, linearDirectionalControlValve.switchingPosition_in)
+      annotation (Line(points={{19.2,-50},{52,-50},{52,66},{26,66},{26,62.6}},
+          color={0,0,127}));
+    connect(heatPumpCycle1.WaterOutput, pump.portA) annotation (Line(
+        points={{16,18},{26,18},{26,30}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(linearDirectionalControlValve.portB, hotWaterTank.liquidFluidPortB)
+      annotation (Line(
+        points={{34,58},{60,58},{60,46},{70,46}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(hotWaterTank.liquidFluidPortA, heatPumpCycle1.WaterInput)
+      annotation (Line(
+        points={{70,40},{70,-46},{-64,-46},{-64,18},{-46,18}},
+        color={0,170,238},
+        thickness=0.5));
+    annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+          coordinateSystem(preserveAspectRatio=false)));
+  end HeatPump_ThermalStorage;
+
+  model ThermalstorageController
+    extends Modelica.Blocks.Icons.Block;
+
+    parameter Real THeating = 35
+      "Supply temperature for floor heating in degC";
+
+    parameter Real TDHW = 60
+      "Supply temperature for domestic hot water charging in degC";
+
+    parameter Modelica.Units.SI.Temperature TDHWMin = 45 + 273.15
+      "Lower DHW temperature limit in K";
+
+    parameter Modelica.Units.SI.Temperature TDHWMax = 55 + 273.15
+      "Upper DHW temperature limit in K";
+
+    Boolean DHWmode
+      "True when domestic hot water storage has priority";
+
+    Modelica.Blocks.Interfaces.BooleanInput EnableHeating
+      "Heating demand from the house"
+      annotation (
+        Placement(
+          transformation(extent={{-110,40},{-90,60}}),
+          iconTransformation(extent={{-100,-60},{-80,-40}})));
+
+    Modelica.Blocks.Interfaces.RealInput T_DHW
+      "Domestic hot water tank temperature in K"
+      annotation (
+        Placement(
+          transformation(
+            extent={{-20,-20},{20,20}},
+            rotation=0,
+            origin={-100,-30}),
+          iconTransformation(
+            extent={{-10,-10},{10,10}},
+            rotation=0,
+            origin={-90,30})));
+
+    Modelica.Blocks.Interfaces.RealOutput TSupplySet
+      "Heat pump supply temperature setpoint in degC"
+      annotation (
+        Placement(
+          transformation(extent={{92,22},{108,38}}),
+          iconTransformation(extent={{84,-8},{100,8}})));
+
+    Modelica.Blocks.Interfaces.RealOutput threeWayValve
+      "Control signal for three-way valve"
+      annotation (
+        Placement(
+          transformation(extent={{92,-8},{108,8}}),
+          iconTransformation(extent={{84,-48},{100,-32}})));
+
+    Modelica.Blocks.Interfaces.BooleanOutput EnableHeatPump
+      "Enable signal for heat pump"
+      annotation (
+        Placement(
+          transformation(extent={{92,-38},{108,-22}}),
+          iconTransformation(extent={{84,32},{100,48}})));
+
+    Modelica.Blocks.Logical.Hysteresis tankWarm(
+      uLow=TDHWMin,
+      uHigh=TDHWMax,
+      pre_y_start=false)
+      annotation (
+        Placement(
+          transformation(extent={{-12,-40},{8,-20}})));
+
+  equation
+
+    connect(T_DHW, tankWarm.u);
+
+    DHWmode = not tankWarm.y;
+
+    TSupplySet =
+      if DHWmode then TDHW
+      else THeating;
+
+    threeWayValve =
+      if DHWmode then 0.9999
+      else 0.0001;
+
+    EnableHeatPump =
+      DHWmode or EnableHeating;
+
+    annotation (
+      Icon(
+        coordinateSystem(
+          preserveAspectRatio=false,
+          extent={{-100,-100},{100,100}}),
+        graphics={
+          Text(
+            extent={{-70,20},{70,-20}},
+            textString="Storage\nController")}),
+      Diagram(
+        coordinateSystem(
+          preserveAspectRatio=false,
+          extent={{-100,-100},{100,100}})));
+
+  end ThermalstorageController;
 end HeatingSource;
