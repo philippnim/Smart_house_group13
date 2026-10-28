@@ -454,7 +454,7 @@ package HeatingSource
           extent={{-4,-4},{4,4}},
           rotation=0)));
     TIL.VLEFluidComponents.Separators.Separator separator(
-      pressureStateID=3,
+      pressureStateID=2,
       V=separatorVolume,
       initialFillingLevel=separatorInitialFillingLevel,
       hStart=separatorHStart)
@@ -636,6 +636,12 @@ package HeatingSource
               -28},{-116,-16}})));
     Modelica.Blocks.Sources.RealExpression valveAreaDefrost(y=defrostValveArea)
       annotation (Placement(transformation(extent={{-180,-34},{-148,-18}})));
+    TIL.VLEFluidComponents.Valves.FourWayValve
+                                           fourWayValve(effectiveFlowArea=fourWayValveEffectiveArea)
+      annotation (Placement(transformation(
+          extent={{-8,-8},{8,8}},
+          rotation=270,
+          origin={14,38})));
     HeatPumpController heatPumpController(
       TSupplySet=TSupplySet,
       useDefrost=useDefrost,
@@ -715,14 +721,6 @@ package HeatingSource
       annotation (Placement(transformation(extent={{-16,-8},{16,8}},
           rotation=90,
           origin={106,-48})));
-    TIL.VLEFluidComponents.PressureStateElements.PressureState pressureState_lp1(
-        pressureStateID=3, pInitial=pInitialLow)  annotation (Placement(transformation(
-            extent={{-6,-6},{6,6}},     rotation=0,
-          origin={42,-42})));
-    TIL.VLEFluidComponents.PressureStateElements.PressureState pressureState_lp2(
-        pressureStateID=4, pInitial=pInitialHigh) annotation (Placement(transformation(
-            extent={{-6,-6},{6,6}},     rotation=0,
-          origin={60,42})));
   equation
 
     // ============================================================
@@ -808,6 +806,11 @@ package HeatingSource
           ={0,0,127}));
     connect(switch1.u3,valveAreaDefrost. y)
       annotation (Line(points={{-129.2,-26.8},{-129.2,-26},{-146.4,-26}}, color={0,0,127}));
+    connect(pressureState_hp.portA,fourWayValve. portB)
+      annotation (Line(
+        points={{-20,42},{6,42}},
+        color={153,204,0},
+        thickness=0.5));
     connect(sensor_T_degC.port,pressureState_lp. portA)
       annotation (Line(
         points={{-66,-38},{-66,-42},{-76,-42}},
@@ -816,6 +819,15 @@ package HeatingSource
     connect(evaporator.portA_vle,pressureState_lp. portA)
       annotation (Line(
         points={{-54,-42},{-76,-42}},
+        color={153,204,0},
+        thickness=0.5));
+    connect(evaporator.portB_vle,fourWayValve. portC)
+      annotation (Line(
+        points={{-26,-42},{0,-42},{0,34},{6,34}},
+        color={153,204,0},
+        thickness=0.5));
+    connect(statePoint4.sensorPort,fourWayValve. portC) annotation (Line(
+        points={{-12,-38},{-12,-42},{0,-42},{0,34},{6,34}},
         color={153,204,0},
         thickness=0.5));
     connect(condenser.portA_a,expansionValve. portA)
@@ -841,6 +853,10 @@ package HeatingSource
           color={255,0,255}));
     connect(defrostTriggerOn.y, heatPumpController.defrostTriggerOn) annotation (
         Line(points={{61.3,-77},{71.9785,-77},{71.9785,-78.5},{82.6571,-78.5}},
+          color={255,0,255}));
+    connect(fourWayValve.crossedConnection_in, heatPumpController.fourWayValve)
+      annotation (Line(points={{14,29},{14,-122},{134,-122},{134,-85.5},{
+            126.686,-85.5}},
           color={255,0,255}));
     connect(heatPumpController.controllerSwitch, compressorController.activeInput)
       annotation (Line(points={{126.686,-78.5},{138,-78.5},{138,-78},{148,-78},
@@ -926,33 +942,12 @@ package HeatingSource
     connect(CompressorDisable.y, switch2.u3) annotation (Line(points={{106,-30.4},
             {106,-25.2},{107.2,-25.2}},
                                      color={0,0,127}));
-<<<<<<< HEAD
-    connect(fourWayValve.portA, pressureState_lp2.portB) annotation (Line(
-        points={{22,42},{54,42}},
+    connect(fourWayValve.portD, separator.portInlet) annotation (Line(
+        points={{22,34},{40,34},{40,-42},{61,-42}},
         color={153,204,0},
         thickness=0.5));
-    connect(pressureState_lp2.portA, compressor.portB) annotation (Line(
-        points={{66,42},{86,42},{86,14}},
-        color={153,204,0},
-        thickness=0.5));
-    connect(separator.portInlet, pressureState_lp1.portA) annotation (Line(
-        points={{61,-42},{48,-42}},
-        color={153,204,0},
-        thickness=0.5));
-    connect(pressureState_lp1.portB, fourWayValve.portD) annotation (Line(
-        points={{36,-42},{32,-42},{32,34},{22,34}},
-=======
-    connect(pressureState_hp.portA, compressor.portB) annotation (Line(
-        points={{-20,42},{86,42},{86,14}},
-        color={153,204,0},
-        thickness=0.5));
-    connect(evaporator.portB_vle, separator.portInlet) annotation (Line(
-        points={{-26,-42},{61,-42}},
-        color={153,204,0},
-        thickness=0.5));
-    connect(statePoint4.sensorPort, separator.portInlet) annotation (Line(
-        points={{-12,-38},{-12,-42},{61,-42}},
->>>>>>> origin/FailureAnalzying
+    connect(fourWayValve.portA, compressor.portB) annotation (Line(
+        points={{22,42},{86,42},{86,14}},
         color={153,204,0},
         thickness=0.5));
     annotation (
@@ -1199,27 +1194,11 @@ package HeatingSource
   end HeatPumpController;
 
   model TestHeatPump "Stand-alone test model for validation of heat-pump"
-    TIL.LiquidComponents.Boundaries.Boundary boundary(m_flowFixed=-0.24, TFixed
-        =303.15)
+    TIL.LiquidComponents.Boundaries.Boundary boundary(m_flowFixed=0.5, TFixed=303.15)
       annotation (Placement(transformation(extent={{-104,-10},{-96,10}})));
     TIL.LiquidComponents.Boundaries.Boundary boundary1(boundaryType="p")
       annotation (Placement(transformation(extent={{96,-10},{104,10}})));
-    HeatPumpCycle heatPumpCycle(useDefrost=false,
-      compressorDisplacement=60e-6,
-<<<<<<< HEAD
-      compressorControllerK=1,
-      compressorControllerTi=20,
-=======
-      compressorVolumetricEfficiency=0.7,
-      compressorIsentropicEfficiency=0.7,
-      compressorEffectiveIsentropicEfficiency=0.7,
-      compressorControllerK=1,
-      compressorControllerTi=20,
-      compressorActivationTime=0,
->>>>>>> origin/FailureAnalzying
-      expansionValveAreaMax=6e-6,
-      pInitialHigh=1300000,
-      pInitialLow=300000)
+    HeatPumpCycle heatPumpCycle(useDefrost=false)
       annotation (Placement(transformation(extent={{-32,-28},{30,28}})));
     Modelica.Blocks.Sources.RealExpression T_ambient(y=263.15)
       "Disable compressor when heat source is turned of" annotation (Placement(
@@ -1227,23 +1206,19 @@ package HeatingSource
           extent={{-16,-8},{16,8}},
           rotation=90,
           origin={-12,-72})));
-    Modelica.Blocks.Sources.BooleanExpression Enable(y=false)
-                                                             annotation (
+    Modelica.Blocks.Sources.BooleanExpression Enable(y=true) annotation (
         Placement(transformation(
           extent={{-10,-10},{10,10}},
           rotation=90,
           origin={4,-72})));
-    TIL.LiquidComponents.Sensors.Sensor_T sensor_T(redeclare
-        TIL.Utilities.Units.Conversions.Units.degC unit)
+    TIL.LiquidComponents.Sensors.Sensor_T sensor_T
       annotation (Placement(transformation(extent={{-84,40},{-76,48}})));
-    TIL.LiquidComponents.Sensors.Sensor_T sensor_T1(redeclare
-        TIL.Utilities.Units.Conversions.Units.degC unit)
+    TIL.LiquidComponents.Sensors.Sensor_T sensor_T1
       annotation (Placement(transformation(extent={{62,34},{70,42}})));
-  inner TIL.SystemInformationManager sim(
+   inner TIL.SystemInformationManager sim(
     redeclare TILMedia.VLEFluid.Types.TILMedia_Propane vleFluidType1,
     redeclare TILMedia.Gas.Types.VDI4670_MoistAir gasType1,
-    redeclare TILMedia.Liquid.Types.TILMedia_Water liquidType1)
-    annotation (Placement(transformation(extent={{-62,-66},{-42,-46}})));
+    redeclare TILMedia.Liquid.Types.TILMedia_Water liquidType1);
   equation
     connect(boundary.port, heatPumpCycle.WaterInput) annotation (Line(
         points={{-100,0},{-32,0}},
