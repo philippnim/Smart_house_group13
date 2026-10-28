@@ -231,7 +231,7 @@ package HeatingSource
     annotation(Dialog(tab="Condenser", group="Numerics"));
 
     // --- Compressor ---
-    parameter Modelica.Units.SI.Volume compressorDisplacement = 30e-6
+    parameter Modelica.Units.SI.Volume compressorDisplacement = 60e-6
       "Compressor displacement"
       annotation(Dialog(tab="Compressor", group="Design"));
 
@@ -247,10 +247,10 @@ package HeatingSource
       "Effective isentropic efficiency"
       annotation(Dialog(tab="Compressor", group="Design"));
 
-    parameter Real compressorControllerK = 4e-2
+    parameter Real compressorControllerK = 1
       "Compressor PI controller gain"
       annotation(Dialog(tab="Compressor", group="Controller"));
-    parameter Modelica.Units.SI.Time compressorControllerTi = 100
+    parameter Modelica.Units.SI.Time compressorControllerTi = 20
     "Compressor PI controller integral time"
     annotation(Dialog(tab="Compressor", group="Controller"));
 
@@ -279,7 +279,7 @@ package HeatingSource
       "Expansion-valve PI controller gain"
       annotation(Dialog(tab="Expansion valve", group="Controller"));
 
-    parameter Modelica.Units.SI.Time expansionValveControllerTi = 1000
+    parameter Modelica.Units.SI.Time expansionValveControllerTi = 100
       "Expansion-valve PI integral time"
       annotation(Dialog(tab="Expansion valve", group="Controller"));
 
@@ -287,7 +287,7 @@ package HeatingSource
       "Minimum effective flow area"
       annotation(Dialog(tab="Expansion valve", group="Controller"));
 
-    parameter Modelica.Units.SI.Area expansionValveAreaMax = 0.6e-6
+    parameter Modelica.Units.SI.Area expansionValveAreaMax = 6e-6
       "Maximum effective flow area"
       annotation(Dialog(tab="Expansion valve", group="Controller"));
 
@@ -369,11 +369,11 @@ package HeatingSource
       annotation(Dialog(tab="Ambient", group="Backflow"));
 
     // --- Advanced / initialization ---
-    parameter Modelica.Units.SI.Pressure pInitialHigh = 800000
+    parameter Modelica.Units.SI.Pressure pInitialHigh = 1300000
       "Initial high-side pressure"
       annotation(Dialog(tab="Advanced", group="Initialization"));
 
-    parameter Modelica.Units.SI.Pressure pInitialLow = 800000
+    parameter Modelica.Units.SI.Pressure pInitialLow = 300000
       "Initial low-side pressure"
       annotation(Dialog(tab="Advanced", group="Initialization"));
 
@@ -454,7 +454,7 @@ package HeatingSource
           extent={{-4,-4},{4,4}},
           rotation=0)));
     TIL.VLEFluidComponents.Separators.Separator separator(
-      pressureStateID=2,
+      pressureStateID=3,
       V=separatorVolume,
       initialFillingLevel=separatorInitialFillingLevel,
       hStart=separatorHStart)
@@ -721,6 +721,10 @@ package HeatingSource
       annotation (Placement(transformation(extent={{-16,-8},{16,8}},
           rotation=90,
           origin={106,-48})));
+    TIL.VLEFluidComponents.PressureStateElements.PressureState pressureState_lp1(
+        pressureStateID=3, pInitial=pInitialLow)  annotation (Placement(transformation(
+            extent={{-6,-6},{6,6}},     rotation=0,
+          origin={38,-42})));
   equation
 
     // ============================================================
@@ -942,12 +946,16 @@ package HeatingSource
     connect(CompressorDisable.y, switch2.u3) annotation (Line(points={{106,-30.4},
             {106,-25.2},{107.2,-25.2}},
                                      color={0,0,127}));
-    connect(fourWayValve.portD, separator.portInlet) annotation (Line(
-        points={{22,34},{40,34},{40,-42},{61,-42}},
+    connect(fourWayValve.portD, pressureState_lp1.portB) annotation (Line(
+        points={{22,34},{28,34},{28,-42},{32,-42}},
+        color={153,204,0},
+        thickness=0.5));
+    connect(pressureState_lp1.portA, separator.portInlet) annotation (Line(
+        points={{44,-42},{61,-42}},
         color={153,204,0},
         thickness=0.5));
     connect(fourWayValve.portA, compressor.portB) annotation (Line(
-        points={{22,42},{86,42},{86,14}},
+        points={{22,42},{54,42},{54,40},{86,40},{86,14}},
         color={153,204,0},
         thickness=0.5));
     annotation (
@@ -1194,11 +1202,12 @@ package HeatingSource
   end HeatPumpController;
 
   model TestHeatPump "Stand-alone test model for validation of heat-pump"
-    TIL.LiquidComponents.Boundaries.Boundary boundary(m_flowFixed=0.5, TFixed=303.15)
+    TIL.LiquidComponents.Boundaries.Boundary boundary(m_flowFixed=-0.24, TFixed
+        =303.15)
       annotation (Placement(transformation(extent={{-104,-10},{-96,10}})));
     TIL.LiquidComponents.Boundaries.Boundary boundary1(boundaryType="p")
       annotation (Placement(transformation(extent={{96,-10},{104,10}})));
-    HeatPumpCycle heatPumpCycle(useDefrost=false)
+    HeatPumpCycle heatPumpCycle(useDefrost=true)
       annotation (Placement(transformation(extent={{-32,-28},{30,28}})));
     Modelica.Blocks.Sources.RealExpression T_ambient(y=263.15)
       "Disable compressor when heat source is turned of" annotation (Placement(
