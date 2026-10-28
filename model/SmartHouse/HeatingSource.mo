@@ -454,7 +454,7 @@ package HeatingSource
           extent={{-4,-4},{4,4}},
           rotation=0)));
     TIL.VLEFluidComponents.Separators.Separator separator(
-      pressureStateID=2,
+      pressureStateID=3,
       V=separatorVolume,
       initialFillingLevel=separatorInitialFillingLevel,
       hStart=separatorHStart)
@@ -721,6 +721,14 @@ package HeatingSource
       annotation (Placement(transformation(extent={{-16,-8},{16,8}},
           rotation=90,
           origin={106,-48})));
+    TIL.VLEFluidComponents.PressureStateElements.PressureState pressureState_lp1(
+        pressureStateID=3, pInitial=pInitialLow)  annotation (Placement(transformation(
+            extent={{-6,-6},{6,6}},     rotation=0,
+          origin={42,-42})));
+    TIL.VLEFluidComponents.PressureStateElements.PressureState pressureState_lp2(
+        pressureStateID=4, pInitial=pInitialHigh) annotation (Placement(transformation(
+            extent={{-6,-6},{6,6}},     rotation=0,
+          origin={60,42})));
   equation
 
     // ============================================================
@@ -942,12 +950,20 @@ package HeatingSource
     connect(CompressorDisable.y, switch2.u3) annotation (Line(points={{106,-30.4},
             {106,-25.2},{107.2,-25.2}},
                                      color={0,0,127}));
-    connect(fourWayValve.portD, separator.portInlet) annotation (Line(
-        points={{22,34},{40,34},{40,-42},{61,-42}},
+    connect(fourWayValve.portA, pressureState_lp2.portB) annotation (Line(
+        points={{22,42},{54,42}},
         color={153,204,0},
         thickness=0.5));
-    connect(fourWayValve.portA, compressor.portB) annotation (Line(
-        points={{22,42},{86,42},{86,14}},
+    connect(pressureState_lp2.portA, compressor.portB) annotation (Line(
+        points={{66,42},{86,42},{86,14}},
+        color={153,204,0},
+        thickness=0.5));
+    connect(separator.portInlet, pressureState_lp1.portA) annotation (Line(
+        points={{61,-42},{48,-42}},
+        color={153,204,0},
+        thickness=0.5));
+    connect(pressureState_lp1.portB, fourWayValve.portD) annotation (Line(
+        points={{36,-42},{32,-42},{32,34},{22,34}},
         color={153,204,0},
         thickness=0.5));
     annotation (
@@ -1198,7 +1214,13 @@ package HeatingSource
       annotation (Placement(transformation(extent={{-104,-10},{-96,10}})));
     TIL.LiquidComponents.Boundaries.Boundary boundary1(boundaryType="p")
       annotation (Placement(transformation(extent={{96,-10},{104,10}})));
-    HeatPumpCycle heatPumpCycle(useDefrost=false)
+    HeatPumpCycle heatPumpCycle(useDefrost=false,
+      compressorDisplacement=60e-6,
+      compressorControllerK=1,
+      compressorControllerTi=20,
+      expansionValveAreaMax=6e-6,
+      pInitialHigh=1300000,
+      pInitialLow=300000)
       annotation (Placement(transformation(extent={{-32,-28},{30,28}})));
     Modelica.Blocks.Sources.RealExpression T_ambient(y=263.15)
       "Disable compressor when heat source is turned of" annotation (Placement(
