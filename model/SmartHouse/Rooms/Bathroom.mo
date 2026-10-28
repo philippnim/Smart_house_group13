@@ -52,5 +52,10 @@ equation
   connect(BWWVorlauf, parallelFlowHX.portA_liq) annotation (Line(
       points={{100,30},{86,30},{86,18}},
       color={0,170,238},
-      thickness=0.5));
+    thickness=0.5));
+  annotation (Icon(graphics={Bitmap(
+          extent={{-100,-100},{100,100}},
+    fileName="modelica://SmartHouse/Images/bathroom.png"),
+    Rectangle(extent={{-100,100},{100,-100}}, lineColor={28,108,200})}), Diagram(
+        coordinateSystem(preserveAspectRatio=false)));
 end Bathroom;

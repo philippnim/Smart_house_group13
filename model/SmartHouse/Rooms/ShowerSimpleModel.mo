@@ -187,17 +187,19 @@ equation
       thickness=0.5));
   connect(controllerT.y, directionalControlValve.switchingPosition_in)
     annotation (Line(points={{46,73.6},{46,64.6}}, color={0,0,127}));
-  connect(sensor_T.sensorValue, controllerT.u_m) annotation (Line(points={{60,
-          48},{66,48},{66,80},{51.8,80}}, color={0,0,127}));
+  connect(sensor_T.sensorValue, controllerT.u_m) annotation (Line(points={{60,48},
+          {66,48},{66,80},{51.8,80}}, color={0,0,127}));
   connect(realExpression.y, controllerT.u_s)
     annotation (Line(points={{31,100},{46,100},{46,85.6}}, color={0,0,127}));
   connect(controllerVdot.y, valve.effectiveFlowArea_in)
     annotation (Line(points={{63.6,28},{51,28}}, color={0,0,127}));
   connect(sensor_V_flow.sensorValue, controllerVdot.u_m) annotation (Line(
-        points={{20,23},{20,28},{32,28},{32,14},{70,14},{70,22.2}}, color={0,0,
-          127}));
+        points={{20,23},{20,28},{32,28},{32,14},{70,14},{70,22.2}}, color={0,0,127}));
   connect(realExpression1.y, controllerVdot.u_s)
     annotation (Line(points={{93,28},{75.6,28}}, color={0,0,127}));
-  annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+  annotation (Icon(graphics={Bitmap(
+          extent={{-100,-100},{100,100}},
+    fileName="modelica://SmartHouse/Images/shower.png"),
+    Rectangle(extent={{-100,100},{100,-100}}, lineColor={28,108,200})}), Diagram(
         coordinateSystem(preserveAspectRatio=false)));
 end ShowerSimpleModel;

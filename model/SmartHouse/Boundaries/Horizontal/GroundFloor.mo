@@ -95,6 +95,7 @@ equation
 
 
   // Select icon dynamically based on heating status
-  annotation (Icon(graphics={Bitmap(extent={{-74,-72},{74,82}}, fileName=DynamicSelect("modelica://SmartHouse/Images/unheatedFloor.png", if enableFloorHeating then "modelica://SmartHouse/Images/floorHeating.png" else "modelica://SmartHouse/Images/unheatedFloor.png"))}));
+  annotation (Icon(graphics={Bitmap(extent={{-74,-72},{74,82}}, fileName=DynamicSelect("modelica://SmartHouse/Images/unheatedFloor.png", if enableFloorHeating then "modelica://SmartHouse/Images/floorHeating.png" else "modelica://SmartHouse/Images/unheatedFloor.png")),
+    Rectangle(extent={{-100,100},{100,-100}}, lineColor={28,108,200})}));
 
 end GroundFloor;

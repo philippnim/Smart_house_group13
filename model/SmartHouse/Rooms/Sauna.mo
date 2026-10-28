@@ -170,6 +170,9 @@ equation
     annotation (Line(points={{79,28},{47.6,28}}, color={0,0,127}));
   connect(SaunaSwitch, controller.activeInput) annotation (Line(points={{104,90},
           {54,90},{54,31.8},{47.6,31.8}}, color={255,0,255}));
-  annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+  annotation (Icon(graphics={Bitmap(
+          extent={{-100,-100},{100,100}},
+    fileName="modelica://SmartHouse/Images/sauna.png"),
+    Rectangle(extent={{-100,100},{100,-100}}, lineColor={28,108,200})}), Diagram(
         coordinateSystem(preserveAspectRatio=false)));
 end Sauna;
