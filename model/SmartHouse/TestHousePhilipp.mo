@@ -29,7 +29,7 @@ model TestHousePhilipp
     annotation (Placement(transformation(extent={{20,10},{40,30}})));
   Modelica.Blocks.Sources.TimeTable Pel(table=[0.0,0; 28799,0; 28800,50; 61200,
         300; 86400,50])
-    annotation (Placement(transformation(extent={{84,-54},{64,-34}})));
+    annotation (Placement(transformation(extent={{84,-60},{64,-40}})));
   Modelica.Blocks.Sources.TimeTable Occupancy(table=[0,0; 7200,0; 7201,2; 14400,
         2; 14401,0; 86400,0])
     annotation (Placement(transformation(extent={{84,-28},{64,-8}})));
@@ -143,7 +143,7 @@ equation
   connect(Occupancy.y, unheatedRoom1.occupancy)
     annotation (Line(points={{63,-18},{15,-18},{15,-13}}, color={0,0,127}));
   connect(Pel.y, unheatedRoom1.P_el)
-    annotation (Line(points={{63,-44},{20,-44},{20,-22},{9,-22},{9,-13}},
+    annotation (Line(points={{63,-50},{20,-50},{20,-22},{9,-22},{9,-13}},
                                                         color={0,0,127}));
   connect(heatBoundary_wall.heatPort, internalWall.heatPort_A_air) annotation (
       Line(
