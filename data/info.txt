@@ -1,0 +1,23 @@
+This file serves as a brief summary of the relevant datasets
+
+==================================================
+DATASET: weather/weather_data.csv
+==================================================
+
+DESCRIPTION
+Hourly mean wind speed and air temperature for the 
+entire year of 2025, measured at Station SN12680 
+(Lillehammer - Sætherengen).
+
+FILE FORMAT
+- Type:      CSV
+- Separator: Semicolon (;)
+- Decimal:   Dot (.)
+
+COLUMNS
+- Name                        [str]
+- Station                     [str]
+- Time(norwegian mean time)   [str]   (Format: DD.MM.2025 hh:mm)
+- Air temperature             [float]
+- Mean wind speed             [float]
+==================================================
