@@ -20,3 +20,9 @@ success.txt
 dsin.txt
 *.log
 *.bak-mo
+.DS_Store
+dsmodelext*.c
+dsmodel.c
+dsres.mat
+dsin.txt
+*.bak-mo
