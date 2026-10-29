@@ -25,3 +25,4 @@ dsmodelext*.c
 dsmodel.c
 dsres.mat
 dsin.txt
+*.bak-mo
