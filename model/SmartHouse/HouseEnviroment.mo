@@ -49,9 +49,9 @@ model HouseEnviroment
   Modelica.Blocks.Sources.TimeTable PelGarage(table=[0.0,0; 28799,0; 28800,50; 61200,
         300; 86400,50])
     annotation (Placement(transformation(extent={{-60,-86},{-40,-66}})));
-  Modelica.Blocks.Sources.RealExpression TOutdoor(y=-2)
+  Modelica.Blocks.Sources.RealExpression TOutdoor(y=271.15)
     annotation (Placement(transformation(extent={{-8,74},{12,94}})));
-  Modelica.Blocks.Sources.RealExpression TGround(y=5)
+  Modelica.Blocks.Sources.RealExpression TGround(y=278.15)
     annotation (Placement(transformation(extent={{-10,-84},{10,-64}})));
   TIL.LiquidComponents.Boundaries.BoundaryOverdetermined bathroomHeatIn(
     liquidType=sim.liquidType1,
@@ -93,6 +93,8 @@ model HouseEnviroment
   TIL.LiquidComponents.Boundaries.BoundaryUnderdetermined livingroomHeatOut(
       liquidType=sim.liquidType1)
     annotation (Placement(transformation(extent={{98,-108},{106,-88}})));
+  Modelica.Blocks.Sources.BooleanStep SaunaOnStep(startTime=14400)
+    annotation (Placement(transformation(extent={{-16,46},{4,66}})));
 equation
   // Occupancy: sauna, bathroom, bedroom, kitchen, living room, garage.
   connect(OccupancySauna.y,      house.houseInputs.occupancy[1]);
@@ -110,7 +112,7 @@ equation
   connect(PelGarage.y,     house.houseInputs.P_el[5]);
 
   // Sauna control and environmental temperatures.
-  connect(SaunaOn.y,  house.houseInputs.saunaOn);
+  connect(SaunaOnStep.y,  house.houseInputs.saunaOn);
   connect(TOutdoor.y, house.houseInputs.TOutdoor);
   connect(TGround.y,  house.houseInputs.TGround);
 
