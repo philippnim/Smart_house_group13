@@ -451,4 +451,238 @@ package ventilation
             fillColor={255,255,255}, fillPattern=FillPattern.Solid),
           Text(extent={{-90,40},{90,-40}}, textString="Moist\nRec", lineColor={0,0,127})}));
   end MoistureRecovery;
+
+  connector VentilationPorts
+    "Air connections between the ventilation unit and the house"
+    // gasType is set by the model that uses the plug, e.g. ventilationPorts(supply(each gasType=sim.gasType1), ...)
+    TIL.Connectors.GasPort supply[4]
+      "Fresh air into the rooms. Order: bathroom, bedroom, kitchen, living room";
+    TIL.Connectors.GasPort exhaust[4]
+      "Used air out of the rooms. Order: bathroom, bedroom, kitchen, living room";
+
+    annotation (
+      Icon(graphics={
+        Rectangle(
+          extent={{-100,100},{100,-100}},
+          lineColor={255,153,0},
+          fillColor={255,230,200},
+          fillPattern=FillPattern.Solid),
+        Text(
+          extent={{-90,50},{90,-50}},
+          textString="air",
+          lineColor={255,153,0})}));
+  end VentilationPorts;
+
+  model VentilationChannel
+    parameter Modelica.Units.SI.Volume V_room = 60 "Room volume";
+    outer TIL.SystemInformationManager sim "Comes from the model around it";
+
+    TIL.GasComponents.Boundaries.BoundaryOverdetermined
+      boundaryOverdetermined_circulation(
+      gasType=sim.gasType1,
+      streamVariablesInputType="T",
+      streamVariablesInputTypeConcentration="xi",
+      use_temperatureInput=true,
+      TFixed=278.15,
+      use_mixingRatioInput=true,
+      boundaryType="p, V_flow",
+      pFixed=101300,
+      use_volumeFlowRateInput=true,
+      V_flowFixed(displayUnit="m3/h") = -0.0083333333333333)
+      annotation (Placement(transformation(extent={{84,20},{92,40}})));
+    TIL.GasComponents.Boundaries.BoundaryUnderdetermined
+      boundaryUnderdetermined_circulation(gasType=sim.gasType1)
+      annotation (Placement(transformation(extent={{86,-20},{94,0}})));
+    TIL.GasComponents.Tubes.Tube supplyTube(
+      tubeGeometry(
+        innerDiameter=0.05,
+        length=1,
+        nParallelTubes=10),
+      pressureDropPosition=TIL.Internals.PressureDropPosition.port_a,
+      nCells=10,
+      enableHeatPorts=true,
+      redeclare model HeatTransferModel =
+          TIL.GasComponents.Tubes.TransportPhenomena.HeatTransfer.ConstantAlpha
+          (constantAlpha=100),
+      redeclare model PressureDropModel =
+          TIL.GasComponents.Tubes.TransportPhenomena.PressureDrop.ZeroPressureDrop)
+      annotation (Placement(transformation(
+          extent={{-8,-2},{8,2}},
+          rotation=180,
+          origin={-30,30})));
+    TIL.GasComponents.Tubes.Tube exhaustTube(
+      tubeGeometry(
+        innerDiameter=0.05,
+        length=1,
+        nParallelTubes=10),
+      pressureDropPosition=TIL.Internals.PressureDropPosition.port_a,
+      nCells=10,
+      enableHeatPorts=true,
+      HeatTransferModel(constantAlpha=100),
+      redeclare model PressureDropModel =
+          TIL.GasComponents.Tubes.TransportPhenomena.PressureDrop.ZeroPressureDrop)
+      annotation (Placement(transformation(
+          extent={{-8,2},{8,-2}},
+          rotation=180,
+          origin={-30,-10})));
+    TIL.GasComponents.Sensors.Sensor_T sensor_T_afterRoom
+      annotation (Placement(transformation(extent={{-52,-6},{-44,2}})));
+    VentilationController ventilationController(V_room=V_room)
+      annotation (Placement(transformation(extent={{-18,46},{2,66}})));
+    TIL.GasComponents.Sensors.Sensor_phi sensor_phi
+      annotation (Placement(transformation(extent={{-72,-6},{-64,2}})));
+    MoistureRecovery moistureRecovery
+      annotation (Placement(transformation(extent={{48,10},{68,30}})));
+    TIL.Connectors.GasPort gasPortSupply(gasType=sim.gasType1)
+      annotation (Placement(transformation(extent={{-100,20},{-80,40}})));
+    TIL.Connectors.GasPort gasPortExhaust(gasType=sim.gasType1)
+      annotation (Placement(transformation(extent={{-100,-20},{-80,0}})));
+    Modelica.Blocks.Interfaces.RealInput Occupancy
+      annotation (Placement(transformation(extent={{-106,-102},{-66,-62}})));
+    Modelica.Blocks.Interfaces.RealInput Toutdoor
+      annotation (Placement(transformation(extent={{-106,-72},{-66,-32}})));
+  equation
+
+    connect(boundaryOverdetermined_circulation.port, supplyTube.portA)
+      annotation (Line(
+        points={{88,30},{82,30},{82,32},{22,32},{22,50},{4,50},{4,34},{-22,34},{-22,
+            30}},
+        color={255,153,0},
+        thickness=0.5));
+    connect(boundaryUnderdetermined_circulation.port, exhaustTube.portA)
+      annotation (Line(
+        points={{90,-10},{-22,-10}},
+        color={255,153,0},
+        thickness=0.5));
+    connect(supplyTube.heatPort, exhaustTube.heatPort) annotation (Line(
+        points={{-30,28},{-30,-8}},
+        color={204,0,0},
+        thickness=0.5));
+    connect(ventilationController.V_flow, boundaryOverdetermined_circulation.V_flow_in)
+      annotation (Line(points={{3,56},{26,56},{26,34},{80,34},{80,32},{84,32}},
+                                                                    color={0,0,
+            127}));
+    connect(sensor_phi.sensorValue, ventilationController.phi_room) annotation
+      (Line(points={{-68,0},{-68,52},{-20,52}},              color={0,0,127}));
+    connect(moistureRecovery.mixingRatio, boundaryOverdetermined_circulation.mixingRatio_in)
+      annotation (Line(points={{69,24},{76,24},{76,28},{84,28}},
+                  color={0,0,127}));
+    connect(sensor_phi.sensorValue, moistureRecovery.phi_room) annotation (Line(
+          points={{-68,0},{-68,52},{-32,52},{-32,72},{46,72},{46,27}},
+                                         color={0,0,127}));
+    connect(ventilationController.V_flow, moistureRecovery.V_flow) annotation (
+        Line(points={{3,56},{26,56},{26,34},{80,34},{80,4},{46,4},{46,11}},
+          color={0,0,127}));
+    connect(sensor_T_afterRoom.sensorValue, moistureRecovery.T_room)
+      annotation (Line(points={{-48,0},{-48,8},{20,8},{20,23},{46,23}},
+                                           color={0,0,127}));
+    connect(moistureRecovery.T_supply, boundaryOverdetermined_circulation.T_in)
+      annotation (Line(points={{69,16},{78,16},{78,24},{84,24}},
+          color={0,0,127}));
+    connect(gasPortExhaust, exhaustTube.portB) annotation (Line(
+        points={{-90,-10},{-38,-10}},
+        color={255,153,0},
+        thickness=0.5));
+    connect(gasPortSupply, supplyTube.portB) annotation (Line(
+        points={{-90,30},{-38,30}},
+        color={255,153,0},
+        thickness=0.5));
+    connect(sensor_phi.port, exhaustTube.portB) annotation (Line(
+        points={{-68,-6},{-68,-10},{-38,-10}},
+        color={255,153,0},
+        thickness=0.5));
+    connect(sensor_T_afterRoom.port, exhaustTube.portB) annotation (Line(
+        points={{-48,-6},{-48,-10},{-38,-10}},
+        color={255,153,0},
+        thickness=0.5));
+    connect(Occupancy, ventilationController.occupancy) annotation (Line(points={{-86,-82},
+            {-24,-82},{-24,60},{-20,60}},          color={0,0,127}));
+    connect(Occupancy, moistureRecovery.occupancy) annotation (Line(points={{-86,-82},
+            {34,-82},{34,15},{46,15}},         color={0,0,127}));
+    connect(moistureRecovery.T_out, Toutdoor) annotation (Line(points={{46,19},
+            {24,19},{24,-52},{-86,-52}},           color={0,0,127}));
+    annotation (
+      Icon(coordinateSystem(preserveAspectRatio=false)),
+      Diagram(coordinateSystem(preserveAspectRatio=false)),
+      experiment(StopTime=86400, __Dymola_Algorithm="Dassl"));
+  end VentilationChannel;
+
+  model VentilationUnit "Ventilation for 4 rooms: one channel (heat recovery + controller + moisture) per room"
+    parameter Modelica.Units.SI.Volume V_rooms[4] = {30.8, 52.8, 52.8, 105.6}
+      "Room volumes. Order: bathroom, bedroom, kitchen, living room";
+
+    VentilationChannel channel[4](V_room=V_rooms) "One air channel per room"
+      annotation (Placement(transformation(extent={{-20,-20},{20,20}})));
+    outer TIL.SystemInformationManager sim "Comes from the model around it";
+
+    VentilationPorts ventilationPorts(
+      supply(each gasType=sim.gasType1),
+      exhaust(each gasType=sim.gasType1)) "Plug to the house"
+      annotation (Placement(transformation(extent={{-110,-10},{-90,10}})));
+    Modelica.Blocks.Interfaces.RealInput occupancy[4]
+      "Persons per room. Order: bathroom, bedroom, kitchen, living room"
+      annotation (Placement(transformation(extent={{-20,-20},{20,20}}, rotation=90, origin={-40,-120})));
+    Modelica.Blocks.Interfaces.RealInput TOutdoor(unit="K") "Outdoor temperature"
+      annotation (Placement(transformation(extent={{-20,-20},{20,20}}, rotation=90, origin={40,-120})));
+  equation
+    for i in 1:4 loop
+      connect(channel[i].gasPortSupply, ventilationPorts.supply[i]);
+      connect(channel[i].gasPortExhaust, ventilationPorts.exhaust[i]);
+      connect(occupancy[i], channel[i].Occupancy);
+      connect(TOutdoor, channel[i].Toutdoor);
+    end for;
+    annotation (Icon(graphics={
+          Rectangle(extent={{-100,100},{100,-100}}, lineColor={255,153,0},
+            fillColor={255,255,255}, fillPattern=FillPattern.Solid),
+          Text(extent={{-90,40},{90,-40}}, textString="Vent\nUnit", lineColor={255,153,0})}));
+  end VentilationUnit;
+
+  model HouseVentilation
+    extends House(
+      Kitchen(useVentilation=true,room_volume(fixedInitialPressure=false)),
+      BathroomPlaceholder(useVentilation=true,room_volume(fixedInitialPressure=false)),
+      Bedroom(useVentilation=true,room_volume(fixedInitialPressure=false)),
+      LivingRoom(useVentilation=true,room_volume(fixedInitialPressure=false)));
+   VentilationPorts ventilationPorts(
+    supply(each gasType=gasType),
+    exhaust(each gasType=gasType))
+      annotation (Placement(transformation(extent={{200,-200},{220,-180}})));
+  equation
+    connect(LivingRoom.gasPortA, ventilationPorts.supply[4]) annotation (Line(
+        points={{31.6,-24},{210,-24},{210,-154},{210.05,-154},{210.05,-189.95}},
+        color={255,153,0},
+        thickness=0.5));
+    connect(Kitchen.gasPortA, ventilationPorts.supply[3]) annotation (Line(
+        points={{-120.4,-24},{210,-24},{210,-120},{210.05,-120},{210.05,-189.95}},
+        color={255,153,0},
+        thickness=0.5));
+    connect(ventilationPorts, ventilationPorts)
+      annotation (Line(points={{210,-190},{210,-190}}, color={255,153,0}));
+    connect(BathroomPlaceholder.gasPortA, ventilationPorts.supply[1]) annotation
+      (Line(
+        points={{-20.4,76},{210.05,76},{210.05,-189.95}},
+        color={255,153,0},
+        thickness=0.5));
+    connect(Bedroom.gasPortA, ventilationPorts.supply[2]) annotation (Line(
+        points={{79.6,76},{210.05,76},{210.05,-189.95}},
+        color={255,153,0},
+        thickness=0.5));
+    connect(BathroomPlaceholder.gasPortB, ventilationPorts.exhaust[1])
+      annotation (Line(
+        points={{-20.4,64},{210,64},{210,20},{210.05,20},{210.05,-189.95}},
+        color={255,153,0},
+        thickness=0.5));
+    connect(Bedroom.gasPortB, ventilationPorts.exhaust[2]) annotation (Line(
+        points={{79.6,64},{210,64},{210,44},{210.05,44},{210.05,-189.95}},
+        color={255,153,0},
+        thickness=0.5));
+    connect(Kitchen.gasPortB, ventilationPorts.exhaust[3]) annotation (Line(
+        points={{-120.4,-36},{210,-36},{210,-82},{210.05,-82},{210.05,-189.95}},
+        color={255,153,0},
+        thickness=0.5));
+    connect(LivingRoom.gasPortB, ventilationPorts.exhaust[4]) annotation (Line(
+        points={{31.6,-36},{210,-36},{210,-54},{210.05,-54},{210.05,-189.95}},
+        color={255,153,0},
+        thickness=0.5));
+  end HouseVentilation;
 end ventilation;
