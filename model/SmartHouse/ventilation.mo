@@ -339,7 +339,7 @@ package ventilation
 
     Modelica.Blocks.Sources.Constant baseFlow(k=ACH_min*V_room/3600) "Always 0.5 ACH"
       annotation (Placement(transformation(extent={{-60,60},{-40,80}})));
-    Modelica.Blocks.Math.Gain personFlow(k=25/3600) "25 m3/h per person"
+    Modelica.Blocks.Math.Gain personFlow(k=30/3600) "25 m3/h per person"
       annotation (Placement(transformation(extent={{-60,30},{-40,50}})));
     Modelica.Blocks.Continuous.LimPID humidityPI(
       controllerType=Modelica.Blocks.Types.SimpleController.PI,
@@ -350,22 +350,21 @@ package ventilation
       annotation (Placement(transformation(extent={{-60,-50},{-40,-30}})));
     Modelica.Blocks.Sources.Constant setpoint(k=phi_set) "Humidity setpoint"
       annotation (Placement(transformation(extent={{-90,-90},{-70,-70}})));
-    Modelica.Blocks.Math.Gain sign(k=-1) "TIL: negative = into the room"
-      annotation (Placement(transformation(extent={{60,-10},{80,10}})));
     Modelica.Blocks.Math.Max max1
       annotation (Placement(transformation(extent={{-20,36},{0,56}})));
     Modelica.Blocks.Math.Add add
       annotation (Placement(transformation(extent={{18,-10},{38,10}})));
+    Modelica.Blocks.Continuous.FirstOrder PhiFilter(
+      k=1,
+      T=60,
+      y_start=40)
+      annotation (Placement(transformation(extent={{-92,-50},{-72,-30}})));
   equation
     connect(occupancy, personFlow.u)
       annotation (Line(points={{-120,40},{-62,40}}, color={0,0,127}));
     // Swapped on purpose: measured humidity on u_s, setpoint on u_m -> more air when too humid
-    connect(phi_room, humidityPI.u_s)
-      annotation (Line(points={{-120,-40},{-62,-40}}, color={0,0,127}));
     connect(setpoint.y, humidityPI.u_m)
       annotation (Line(points={{-69,-80},{-50,-80},{-50,-52}}, color={0,0,127}));
-    connect(sign.y, V_flow)
-      annotation (Line(points={{81,0},{110,0}}, color={0,0,127}));
     connect(baseFlow.y, max1.u1) annotation (Line(points={{-39,70},{-30,70},{
             -30,52},{-22,52}}, color={0,0,127}));
     connect(personFlow.y, max1.u2)
@@ -374,8 +373,12 @@ package ventilation
       annotation (Line(points={{1,46},{8,46},{8,6},{16,6}}, color={0,0,127}));
     connect(humidityPI.y, add.u2) annotation (Line(points={{-39,-40},{8,-40},{8,
             -6},{16,-6}}, color={0,0,127}));
-    connect(add.y, sign.u)
-      annotation (Line(points={{39,0},{58,0}}, color={0,0,127}));
+    connect(phi_room, PhiFilter.u)
+      annotation (Line(points={{-120,-40},{-94,-40}}, color={0,0,127}));
+    connect(PhiFilter.y, humidityPI.u_s)
+      annotation (Line(points={{-71,-40},{-62,-40}}, color={0,0,127}));
+    connect(add.y, V_flow)
+      annotation (Line(points={{39,0},{110,0}}, color={0,0,127}));
     annotation (Icon(graphics={
           Rectangle(extent={{-100,100},{100,-100}}, lineColor={0,0,127},
             fillColor={255,255,255}, fillPattern=FillPattern.Solid),
@@ -477,22 +480,6 @@ package ventilation
     parameter Modelica.Units.SI.Volume V_room = 60 "Room volume";
     outer TIL.SystemInformationManager sim "Comes from the model around it";
 
-    TIL.GasComponents.Boundaries.BoundaryOverdetermined
-      boundaryOverdetermined_circulation(
-      gasType=sim.gasType1,
-      streamVariablesInputType="T",
-      streamVariablesInputTypeConcentration="xi",
-      use_temperatureInput=true,
-      TFixed=278.15,
-      use_mixingRatioInput=true,
-      boundaryType="p, V_flow",
-      pFixed=101300,
-      use_volumeFlowRateInput=true,
-      V_flowFixed(displayUnit="m3/h") = -0.0083333333333333)
-      annotation (Placement(transformation(extent={{84,20},{92,40}})));
-    TIL.GasComponents.Boundaries.BoundaryUnderdetermined
-      boundaryUnderdetermined_circulation(gasType=sim.gasType1)
-      annotation (Placement(transformation(extent={{86,-20},{94,0}})));
     TIL.GasComponents.Tubes.Tube supplyTube(
       tubeGeometry(
         innerDiameter=0.05,
@@ -505,7 +492,9 @@ package ventilation
           TIL.GasComponents.Tubes.TransportPhenomena.HeatTransfer.ConstantAlpha
           (constantAlpha=100),
       redeclare model PressureDropModel =
-          TIL.GasComponents.Tubes.TransportPhenomena.PressureDrop.ZeroPressureDrop)
+          TIL.GasComponents.Tubes.TransportPhenomena.PressureDrop.QuadraticMassFlowDependent
+          (mdot_nominal=0.02, pressureDrop_nominal=100),
+      wallCellStateType="state south")
       annotation (Placement(transformation(
           extent={{-8,-2},{8,2}},
           rotation=180,
@@ -520,7 +509,9 @@ package ventilation
       enableHeatPorts=true,
       HeatTransferModel(constantAlpha=100),
       redeclare model PressureDropModel =
-          TIL.GasComponents.Tubes.TransportPhenomena.PressureDrop.ZeroPressureDrop)
+          TIL.GasComponents.Tubes.TransportPhenomena.PressureDrop.QuadraticMassFlowDependent
+          (mdot_nominal=0.02, pressureDrop_nominal=100),
+      wallCellStateType="state south")
       annotation (Placement(transformation(
           extent={{-8,2},{8,-2}},
           rotation=180,
@@ -541,32 +532,28 @@ package ventilation
       annotation (Placement(transformation(extent={{-106,-102},{-66,-62}})));
     Modelica.Blocks.Interfaces.RealInput Toutdoor
       annotation (Placement(transformation(extent={{-106,-72},{-66,-32}})));
+    TIL.GasComponents.Boundaries.Boundary boundary(boundaryType="p")
+      annotation (Placement(transformation(extent={{84,-20},{92,0}})));
+    TIL.GasComponents.Boundaries.Boundary boundary1(
+      use_temperatureInput=true,
+      use_mixingRatioInput=true,
+      boundaryType="p")
+      annotation (Placement(transformation(extent={{118,22},{126,42}})));
+    TIL.GasComponents.Fans.SimpleFan simpleFan(
+      presetVariableType="V_flow",
+      use_volumeFlowRateInput=true,
+      eta=0.33) annotation (Placement(transformation(
+          extent={{8,-8},{-8,8}},
+          rotation=90,
+          origin={94,30})));
   equation
 
-    connect(boundaryOverdetermined_circulation.port, supplyTube.portA)
-      annotation (Line(
-        points={{88,30},{82,30},{82,32},{22,32},{22,50},{4,50},{4,34},{-22,34},{-22,
-            30}},
-        color={255,153,0},
-        thickness=0.5));
-    connect(boundaryUnderdetermined_circulation.port, exhaustTube.portA)
-      annotation (Line(
-        points={{90,-10},{-22,-10}},
-        color={255,153,0},
-        thickness=0.5));
     connect(supplyTube.heatPort, exhaustTube.heatPort) annotation (Line(
         points={{-30,28},{-30,-8}},
         color={204,0,0},
         thickness=0.5));
-    connect(ventilationController.V_flow, boundaryOverdetermined_circulation.V_flow_in)
-      annotation (Line(points={{3,56},{26,56},{26,34},{80,34},{80,32},{84,32}},
-                                                                    color={0,0,
-            127}));
     connect(sensor_phi.sensorValue, ventilationController.phi_room) annotation
       (Line(points={{-68,0},{-68,52},{-20,52}},              color={0,0,127}));
-    connect(moistureRecovery.mixingRatio, boundaryOverdetermined_circulation.mixingRatio_in)
-      annotation (Line(points={{69,24},{76,24},{76,28},{84,28}},
-                  color={0,0,127}));
     connect(sensor_phi.sensorValue, moistureRecovery.phi_room) annotation (Line(
           points={{-68,0},{-68,52},{-32,52},{-32,72},{46,72},{46,27}},
                                          color={0,0,127}));
@@ -576,9 +563,6 @@ package ventilation
     connect(sensor_T_afterRoom.sensorValue, moistureRecovery.T_room)
       annotation (Line(points={{-48,0},{-48,8},{20,8},{20,23},{46,23}},
                                            color={0,0,127}));
-    connect(moistureRecovery.T_supply, boundaryOverdetermined_circulation.T_in)
-      annotation (Line(points={{69,16},{78,16},{78,24},{84,24}},
-          color={0,0,127}));
     connect(gasPortExhaust, exhaustTube.portB) annotation (Line(
         points={{-90,-10},{-38,-10}},
         color={255,153,0},
@@ -601,6 +585,25 @@ package ventilation
             {34,-82},{34,15},{46,15}},         color={0,0,127}));
     connect(moistureRecovery.T_out, Toutdoor) annotation (Line(points={{46,19},
             {24,19},{24,-52},{-86,-52}},           color={0,0,127}));
+    connect(exhaustTube.portA, boundary.port) annotation (Line(
+        points={{-22,-10},{88,-10}},
+        color={255,153,0},
+        thickness=0.5));
+    connect(simpleFan.portA, boundary1.port) annotation (Line(
+        points={{102,30},{112,30},{112,32},{122,32}},
+        color={255,153,0},
+        thickness=0.5));
+    connect(supplyTube.portA, simpleFan.portB) annotation (Line(
+        points={{-22,30},{86,30}},
+        color={255,153,0},
+        thickness=0.5));
+    connect(moistureRecovery.mixingRatio, boundary1.mixingRatio_in) annotation
+      (Line(points={{69,24},{82,24},{82,18},{114,18},{114,30},{118,30}}, color=
+            {0,0,127}));
+    connect(moistureRecovery.T_supply, boundary1.T_in) annotation (Line(points=
+            {{69,16},{116,16},{116,26},{118,26}}, color={0,0,127}));
+    connect(ventilationController.V_flow, simpleFan.V_flow_in)
+      annotation (Line(points={{3,56},{94,56},{94,40}}, color={0,0,127}));
     annotation (
       Icon(coordinateSystem(preserveAspectRatio=false)),
       Diagram(coordinateSystem(preserveAspectRatio=false)),
@@ -639,14 +642,22 @@ package ventilation
 
   model HouseVentilation
     extends House(
-      Kitchen(useVentilation=true,room_volume(fixedInitialPressure=false)),
-      BathroomPlaceholder(useVentilation=true,room_volume(fixedInitialPressure=false)),
-      Bedroom(useVentilation=true,room_volume(fixedInitialPressure=false)),
-      LivingRoom(useVentilation=true,room_volume(fixedInitialPressure=false)));
-   VentilationPorts ventilationPorts(
+      Kitchen(
+        phiInitial=40,
+              useVentilation=true,room_volume(fixedInitialPressure=false)),
+      BathroomPlaceholder(
+        phiInitial=40,    useVentilation=true,room_volume(fixedInitialPressure=false)),
+      Bedroom(
+        phiInitial=40,
+              useVentilation=true,room_volume(fixedInitialPressure=false)),
+      LivingRoom(
+        phiInitial=40,
+                 useVentilation=true,room_volume(fixedInitialPressure=false)));
+  VentilationPorts ventilationPorts(
     supply(each gasType=gasType),
     exhaust(each gasType=gasType))
-      annotation (Placement(transformation(extent={{200,-200},{220,-180}})));
+    annotation (Placement(transformation(extent={{200,-200},{220,-180}}),
+        iconTransformation(extent={{-10,-110},{10,-90}})));
   equation
     connect(LivingRoom.gasPortA, ventilationPorts.supply[4]) annotation (Line(
         points={{31.6,-24},{210,-24},{210,-154},{210.05,-154},{210.05,-189.95}},
@@ -656,8 +667,6 @@ package ventilation
         points={{-120.4,-24},{210,-24},{210,-120},{210.05,-120},{210.05,-189.95}},
         color={255,153,0},
         thickness=0.5));
-    connect(ventilationPorts, ventilationPorts)
-      annotation (Line(points={{210,-190},{210,-190}}, color={255,153,0}));
     connect(BathroomPlaceholder.gasPortA, ventilationPorts.supply[1]) annotation
       (Line(
         points={{-20.4,76},{210.05,76},{210.05,-189.95}},
@@ -685,4 +694,156 @@ package ventilation
         color={255,153,0},
         thickness=0.5));
   end HouseVentilation;
+
+  model HouseEnviromentVentilation
+    HouseVentilation
+          houseVentilation(
+                gasType=sim.gasType1, liquidType=sim.liquidType1)
+                annotation (Placement(transformation(extent={{-22,-20},{22,20}})));
+    Modelica.Blocks.Sources.BooleanExpression SaunaOn
+      annotation (Placement(transformation(extent={{-62,74},{-42,94}})));
+    Modelica.Blocks.Sources.TimeTable OccupancyBathroom(table=[0,0; 7200,0; 7201,2;
+          14400,2; 14401,0; 86400,0]) annotation (Placement(transformation(
+          extent={{-10,-10},{10,10}},
+          rotation=0,
+          origin={-88,52})));
+    Modelica.Blocks.Sources.TimeTable OccupancyBedroom(table=[0,0; 7200,0; 7201,2;
+          14400,2; 14401,0; 86400,0]) annotation (Placement(transformation(
+          extent={{-10,-10},{10,10}},
+          rotation=0,
+          origin={-88,20})));
+    Modelica.Blocks.Sources.TimeTable OccupancyKitchen(table=[0,0; 7200,0; 7201,2;
+          14400,2; 14401,0; 86400,0]) annotation (Placement(transformation(
+          extent={{-10,-10},{10,10}},
+          rotation=0,
+          origin={-88,-12})));
+    Modelica.Blocks.Sources.TimeTable OccupancyLivingRoom(table=[0,0; 7200,0; 7201,
+          2; 14400,2; 14401,0; 86400,0]) annotation (Placement(transformation(
+          extent={{-10,-10},{10,10}},
+          rotation=0,
+          origin={-88,-44})));
+    Modelica.Blocks.Sources.TimeTable OccupancyGarage(table=[0,0; 7200,0; 7201,2;
+          14400,2; 14401,0; 86400,0]) annotation (Placement(transformation(
+          extent={{-10,-10},{10,10}},
+          rotation=0,
+          origin={-88,-76})));
+    Modelica.Blocks.Sources.TimeTable OccupancySauna(table=[0,0; 7200,0; 7201,2; 14400,
+          2; 14401,0; 86400,0]) annotation (Placement(transformation(
+          extent={{-10,-10},{10,10}},
+          rotation=0,
+          origin={-88,84})));
+    Modelica.Blocks.Sources.TimeTable PelBathroom(table=[0.0,0; 28799,0; 28800,50;
+          61200,300; 86400,50])
+      annotation (Placement(transformation(extent={{-60,42},{-40,62}})));
+    Modelica.Blocks.Sources.TimeTable PelBedroom(table=[0.0,0; 28799,0; 28800,50;
+          61200,300; 86400,50])
+      annotation (Placement(transformation(extent={{-60,10},{-40,30}})));
+    Modelica.Blocks.Sources.TimeTable PelKitchen(table=[0.0,0; 28799,0; 28800,50;
+          61200,300; 86400,50])
+      annotation (Placement(transformation(extent={{-60,-22},{-40,-2}})));
+    Modelica.Blocks.Sources.TimeTable PelLivingroom(table=[0.0,0; 28799,0; 28800,50;
+          61200,300; 86400,50])
+      annotation (Placement(transformation(extent={{-60,-54},{-40,-34}})));
+    Modelica.Blocks.Sources.TimeTable PelGarage(table=[0.0,0; 28799,0; 28800,50; 61200,
+          300; 86400,50])
+      annotation (Placement(transformation(extent={{-60,-86},{-40,-66}})));
+    Modelica.Blocks.Sources.RealExpression TOutdoor(y=271.15)
+      annotation (Placement(transformation(extent={{-8,74},{12,94}})));
+    Modelica.Blocks.Sources.RealExpression TGround(y=278.15)
+      annotation (Placement(transformation(extent={{-10,-84},{10,-64}})));
+    TIL.LiquidComponents.Boundaries.BoundaryOverdetermined bathroomHeatIn(
+      liquidType=sim.liquidType1,
+      pFixed=200000,
+      m_flowFixed=-0.05,
+      TFixed=308.15)
+      annotation (Placement(transformation(extent={{98,92},{106,112}})));
+    TIL.LiquidComponents.Boundaries.BoundaryUnderdetermined bathroomHeatOut(
+        liquidType=sim.liquidType1)
+      annotation (Placement(transformation(extent={{98,62},{106,82}})));
+    inner TIL.SystemInformationManager sim(redeclare
+        TILMedia.Gas.Types.VDI4670_MoistAir gasType1, redeclare
+        TILMedia.Liquid.Types.TILMedia_Water liquidType1)
+      annotation (Placement(transformation(extent={{66,80},{86,100}})));
+    TIL.LiquidComponents.Boundaries.BoundaryOverdetermined bedroomHeatIn(
+      liquidType=sim.liquidType1,
+      pFixed=200000,
+      m_flowFixed=-0.05,
+      TFixed=308.15)
+      annotation (Placement(transformation(extent={{98,32},{106,52}})));
+    TIL.LiquidComponents.Boundaries.BoundaryUnderdetermined bedroomHeatOut(
+        liquidType=sim.liquidType1)
+      annotation (Placement(transformation(extent={{98,2},{106,22}})));
+    TIL.LiquidComponents.Boundaries.BoundaryOverdetermined kitchenHeatIn(
+      liquidType=sim.liquidType1,
+      pFixed=200000,
+      m_flowFixed=-0.05,
+      TFixed=308.15)
+      annotation (Placement(transformation(extent={{98,-18},{106,2}})));
+    TIL.LiquidComponents.Boundaries.BoundaryUnderdetermined kitchenHeatOut(
+        liquidType=sim.liquidType1)
+      annotation (Placement(transformation(extent={{98,-48},{106,-28}})));
+    TIL.LiquidComponents.Boundaries.BoundaryOverdetermined livingroomHeatIn(
+      liquidType=sim.liquidType1,
+      pFixed=200000,
+      m_flowFixed=-0.05,
+      TFixed=308.15)
+      annotation (Placement(transformation(extent={{98,-78},{106,-58}})));
+    TIL.LiquidComponents.Boundaries.BoundaryUnderdetermined livingroomHeatOut(
+        liquidType=sim.liquidType1)
+      annotation (Placement(transformation(extent={{98,-108},{106,-88}})));
+    Modelica.Blocks.Sources.BooleanStep SaunaOnStep(startTime=14400)
+      annotation (Placement(transformation(extent={{-16,46},{4,66}})));
+    VentilationUnit ventilationUnit
+      annotation (Placement(transformation(extent={{54,-20},{74,0}})));
+  equation
+    // Occupancy: sauna, bathroom, bedroom, kitchen, living room, garage.
+    connect(OccupancySauna.y, houseVentilation.houseInputs.occupancy[1]);
+    connect(OccupancyBathroom.y, houseVentilation.houseInputs.occupancy[2]);
+    connect(OccupancyBedroom.y, houseVentilation.houseInputs.occupancy[3]);
+    connect(OccupancyKitchen.y, houseVentilation.houseInputs.occupancy[4]);
+    connect(OccupancyLivingRoom.y, houseVentilation.houseInputs.occupancy[5]);
+    connect(OccupancyGarage.y, houseVentilation.houseInputs.occupancy[6]);
+
+    // Electrical loads: bathroom, bedroom, kitchen, living room, garage.
+    connect(PelBathroom.y, houseVentilation.houseInputs.P_el[1]);
+    connect(PelBedroom.y, houseVentilation.houseInputs.P_el[2]);
+    connect(PelKitchen.y, houseVentilation.houseInputs.P_el[3]);
+    connect(PelLivingroom.y, houseVentilation.houseInputs.P_el[4]);
+    connect(PelGarage.y, houseVentilation.houseInputs.P_el[5]);
+
+    // Sauna control and environmental temperatures.
+    connect(SaunaOnStep.y, houseVentilation.houseInputs.saunaOn);
+    connect(TOutdoor.y, houseVentilation.houseInputs.TOutdoor);
+    connect(TGround.y, houseVentilation.houseInputs.TGround);
+
+    // All four heating circuits share the same two liquid boundaries.
+
+    connect(bathroomHeatIn.port, houseVentilation.houseHeatingInput.supplyP[1]);
+    connect(bedroomHeatIn.port, houseVentilation.houseHeatingInput.supplyP[2]);
+    connect(kitchenHeatIn.port, houseVentilation.houseHeatingInput.supplyP[3]);
+    connect(livingroomHeatIn.port, houseVentilation.houseHeatingInput.supplyP[4]);
+    connect(houseVentilation.houseHeatingInput.returnP[1], bathroomHeatOut.port);
+    connect(houseVentilation.houseHeatingInput.returnP[2], bedroomHeatOut.port);
+    connect(houseVentilation.houseHeatingInput.returnP[3], kitchenHeatOut.port);
+    connect(houseVentilation.houseHeatingInput.returnP[4], livingroomHeatOut.port);
+
+    connect(houseVentilation.ventilationPorts, ventilationUnit.ventilationPorts)
+      annotation (Line(points={{0,-10},{54,-10}}, color={255,153,0}));
+    connect(TOutdoor.y, ventilationUnit.TOutdoor)
+      annotation (Line(points={{13,84},{68,84},{68,-22}}, color={0,0,127}));
+    connect(OccupancyBathroom.y, ventilationUnit.occupancy[1]) annotation (Line(
+          points={{-77,52},{-66,52},{-66,-60},{60,-60},{60,-22.75}}, color={0,0,
+            127}));
+    connect(OccupancyBedroom.y, ventilationUnit.occupancy[2]) annotation (Line(
+          points={{-77,20},{-66,20},{-66,-60},{60,-60},{60,-22.25}}, color={0,0,
+            127}));
+    connect(OccupancyKitchen.y, ventilationUnit.occupancy[3]) annotation (Line(
+          points={{-77,-12},{-66,-12},{-66,-60},{60,-60},{60,-21.75}}, color={0,
+            0,127}));
+    connect(OccupancyLivingRoom.y, ventilationUnit.occupancy[4]) annotation (
+        Line(points={{-77,-44},{-66,-44},{-66,-60},{60,-60},{60,-21.25}}, color
+          ={0,0,127}));
+    annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+          coordinateSystem(preserveAspectRatio=false)));
+  end HouseEnviromentVentilation;
 end ventilation;
