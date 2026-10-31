@@ -630,8 +630,10 @@ package HeatingSource
       annotation (Placement(transformation(extent={{34,-108},{60,-92}})));
     Modelica.Blocks.Logical.Switch switch1 annotation (Placement(transformation(extent={{-128,
               -28},{-116,-16}})));
-    Modelica.Blocks.Sources.RealExpression valveAreaDefrost(y=defrostValveArea)
-      annotation (Placement(transformation(extent={{-180,-34},{-148,-18}})));
+    Modelica.Blocks.Sources.RealExpression valveAreaNotNormal(
+    y=if heatPumpController.fourWayValve
+      then defrostValveArea
+      else 0);
     TIL.VLEFluidComponents.Valves.FourWayValve
                                            fourWayValve(effectiveFlowArea=fourWayValveEffectiveArea)
       annotation (Placement(transformation(
@@ -730,14 +732,8 @@ package HeatingSource
           rotation=90,
           origin={80,-170})));
   equation
-
-    // ============================================================
-    // HEAT-PUMP OUTPUTS
-    // ============================================================
-
     P_el = compressor.shaftPower + fan2ndOrder.P_shaft;
     HeatFlow = -condenser.Q_flow;
-
     connect(statePoint1.sensorPort,pressureState_hp. portA) annotation (Line(
         points={{-6,46},{-6,42},{-20,42}},
         color={153,204,0},
@@ -960,7 +956,7 @@ package HeatingSource
     connect(TSupplySet, heatPumpController.TSupplySet) annotation (Line(points=
             {{110,-200},{110,-174},{90,-174},{90,-146},{90.2143,-146},{90.2143,
             -108.25}}, color={0,0,127}));
-    annotation (
+      annotation (Placement(transformation(extent={{-180,-34},{-148,-18}})),
 
     Diagram(
       coordinateSystem(
@@ -976,6 +972,10 @@ package HeatingSource
           extent={{-292,-218},{292,224}},
           fileName=
             "modelica://SmartHouse/Images/HeatPumpCycle.png")}));
+
+    // ============================================================
+    // HEAT-PUMP OUTPUTS
+    // ============================================================
 
   end HeatPumpCycle;
 
@@ -1026,7 +1026,10 @@ package HeatingSource
       annotation (
         Dialog(
           tab="Defrost",
-        group="Trigger"));
+          group="Trigger"));
+
+     parameter Real fanSpeedOff = 12
+    "Minimum fan speed when heat pump is disabled";
 
 
     // ============================================================
@@ -1140,7 +1143,8 @@ package HeatingSource
     // OPERATING MODE OUTPUTS
     // ============================================================
 
-    controllerSwitch = not defrostActive;
+    controllerSwitch =
+    enableHeatPump and not defrostActive;
 
 
     controllerSwitchCompressor = enableHeatPump;
@@ -1148,7 +1152,7 @@ package HeatingSource
     fourWayValve = enableHeatPump and defrostActive;
 
     fanSpeed =
-    if not enableHeatPump then 0
+    if not enableHeatPump then fanSpeedOff
     elseif defrostActive then fanSpeedDefrost
     else fanSpeedHeating;
 
