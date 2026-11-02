@@ -504,7 +504,7 @@ model House
     annotation (Placement(transformation(extent={{-190,-198},{-182,-186}})));
   Connectors.HouseInputs houseInputs
     annotation (Placement(transformation(extent={{-232,-6},{-212,14}})));
-  Connectors.HouseHeatingInput houseHeatingInput
+  Connectors.HouseHeatingInput houseHeatingInput(liquidType = liquidType)
     annotation (Placement(transformation(extent={{204,-10},{224,10}})));
   Modelica.Blocks.Sources.RealExpression realExpression
     annotation (Placement(transformation(extent={{-568,-236},{-548,-216}})));
