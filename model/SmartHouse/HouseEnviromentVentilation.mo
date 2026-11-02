@@ -64,12 +64,8 @@ model HouseEnviromentVentilation
   HeatingSource.ElectricalBoiler_ThermalStorage electricalBoiler_ThermalStorage
     annotation (Placement(transformation(extent={{30,50},{50,70}})));
   HeatingSource.HeatingController heatingController(
-    liquidType=sim.liquidType1,
-    T_set1=21,
-    T_set2=21,
-    T_set3=21,
-    T_set4=21)
-    annotation (Placement(transformation(extent={{32,14},{52,34}})));
+    liquidType=sim.liquidType1)
+    annotation (Placement(transformation(extent={{30,14},{50,34}})));
   Modelica.Blocks.Sources.BooleanExpression booleanExpression(y=true)
     annotation (Placement(transformation(extent={{-4,22},{16,42}})));
   TIL.LiquidComponents.Boundaries.Boundary boundary2(boundaryType="p")
@@ -110,7 +106,8 @@ equation
   connect(houseVentilation.ventilationPorts, ventilationUnit.ventilationPorts)
     annotation (Line(points={{0,-10},{54,-10}}, color={255,153,0}));
   connect(TOutdoor.y, ventilationUnit.TOutdoor)
-    annotation (Line(points={{13,84},{68,84},{68,-22}}, color={0,0,127}));
+    annotation (Line(points={{13,84},{46,84},{46,76},{78,76},{78,-22},{68,-22}},
+                                                        color={0,0,127}));
   connect(OccupancyBathroom.y, ventilationUnit.occupancy[1]) annotation (Line(
         points={{-77,52},{-66,52},{-66,-60},{60,-60},{60,-22.75}}, color={0,0,
           127}));
@@ -132,12 +129,12 @@ equation
     annotation (Line(points={{17,32},{24,32},{24,52},{32,52}}, color={255,0,255}));
   connect(heatingController.WaterReturn, electricalBoiler_ThermalStorage.WaterInput)
     annotation (Line(
-      points={{46,14},{46,10},{56,10},{56,74},{26,74},{26,60},{30,60}},
+      points={{44,14},{44,10},{56,10},{56,74},{26,74},{26,60},{30,60}},
       color={0,170,238},
       thickness=0.5));
   connect(electricalBoiler_ThermalStorage.WaterOutput, heatingController.WaterSupply)
     annotation (Line(
-      points={{50.2,60},{54,60},{54,38},{44,38},{44,34}},
+      points={{50.2,60},{54,60},{54,38},{43.8,38},{43.8,34}},
       color={0,170,238},
       thickness=0.5));
   connect(electricalBoiler_ThermalStorage.WaterOutput1, boundary2.port)
