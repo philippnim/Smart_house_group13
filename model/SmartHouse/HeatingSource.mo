@@ -1710,7 +1710,771 @@ package HeatingSource
 
   end ThermalstorageController;
 
-  model ElectricalBoiler "ElectricalHeatingSystem"
+  model ElectricalBoiler "Simple on/off electric boiler"
     extends PartialHeatSource;
+
+    // ============================================================
+    // MEDIUM
+    // ============================================================
+
+    outer TIL.SystemInformationManager sim;
+
+    replaceable parameter TILMedia.Liquid.Types.BaseLiquid liquidType =
+        sim.liquidType1
+      "Liquid used in the hydronic circuit"
+      annotation (
+        choicesAllMatching=true,
+        Dialog(tab="Medium"));
+
+
+    // ============================================================
+    // BOILER PARAMETERS
+    // ============================================================
+
+    parameter Modelica.Units.SI.Power P_nominal = 9000
+      "Nominal electrical power"
+      annotation (
+        Dialog(tab="Boiler", group="Performance"));
+
+    parameter Real eta(min=0, max=1) = 0.98
+      "Electrical-to-thermal efficiency"
+      annotation (
+        Dialog(tab="Boiler", group="Performance"));
+
+
+
+    // ============================================================
+    // HEATING POWER
+    // ============================================================
+
+    Modelica.Blocks.Sources.RealExpression boilerHeatFlow(y=if EnableHeatSource
+           then -eta*P_nominal else 0)
+      annotation (
+        Placement(transformation(
+          extent={{-30,-10},{30,10}},
+          origin={-54,90})));
+
+
+    // ============================================================
+    // HYDRAULIC COMPONENT
+    // ============================================================
+
+    TIL.LiquidComponents.Tubes.Tube tube1(
+      tubeGeometry(
+        innerDiameter=0.020,
+        wallThickness=0.0015,
+        length=2.5),
+    nCells=1,
+    enableHeatPorts=true,
+
+      redeclare model TubeSideHeatTransferModel =
+          TIL.LiquidComponents.Tubes.TransportPhenomena.HeatTransfer.ConstantAlpha
+          (constantAlpha=4000),
+
+    redeclare model WallHeatConductionModel =
+      TIL.LiquidComponents.Tubes.TransportPhenomena.WallHeatTransfer.GeometryBasedConduction,
+
+    redeclare model PressureDropModel =
+      TIL.LiquidComponents.Tubes.TransportPhenomena.PressureDrop.ZeroPressureDrop
+
+)   annotation (
+      Placement(transformation(
+        extent={{-8,-2},{8,2}})));
+
+
+    // ============================================================
+    // THERMAL BOUNDARY
+    // ============================================================
+
+    TIL.OtherComponents.Thermal.HeatBoundary heatBoundary(
+      boundaryType="Q_flow",
+      use_heatFlowRateInput=true)
+      annotation (
+        Placement(transformation(
+          extent={{-4,-6},{4,6}},
+          rotation=270,
+          origin={0,72})));
+
+
+  equation
+
+    // ------------------------------------------------------------
+    // Hydraulic circuit
+    // ------------------------------------------------------------
+
+    connect(WaterInput, tube1.portA)
+      annotation (
+        Line(
+          points={{-200,0},{-8,0}},
+          color={0,170,238},
+          thickness=0.5));
+
+    connect(tube1.portB, WaterOutput)
+      annotation (
+        Line(
+          points={{8,0},{200,0}},
+          color={0,170,238},
+          thickness=0.5));
+
+
+    // ------------------------------------------------------------
+    // Heating
+    // ------------------------------------------------------------
+
+    connect(boilerHeatFlow.y, heatBoundary.Q_flow_in)
+      annotation (
+        Line(
+          points={{-21,90},{-2,90},{-2,76}},
+          color={0,0,127}));
+
+    connect(heatBoundary.heatPort, tube1.heatPort[1])
+      annotation (
+        Line(
+          points={{0,72},{0,2}},
+          color={204,0,0},
+          thickness=0.5));
+
+
+    // ------------------------------------------------------------
+    // Outputs
+    // ------------------------------------------------------------
+
+    HeatFlow =
+    if EnableHeatSource then
+      eta*P_nominal
+    else
+      0;
+
+    P_el =
+    if EnableHeatSource then
+      P_nominal
+    else
+      0;
+
+
   end ElectricalBoiler;
+
+  model ElectricalBoiler_ThermalStorage
+    outer TIL.SystemInformationManager sim;
+
+  parameter TILMedia.Liquid.Types.BaseLiquid liquidType =
+    sim.liquidType1
+    "Liquid type";
+    Modelica.Blocks.Interfaces.BooleanInput HeatingDemand
+      "Enable heat source operation" annotation (Placement(transformation(
+          extent={{-20,-20},{20,20}},
+          rotation=90,
+          origin={-10,-100}), iconTransformation(
+          extent={{-20,-20},{20,20}},
+          rotation=90,
+          origin={-80,-80})));
+    ThermalstorageController thermalstorageController
+      annotation (Placement(transformation(extent={{-28,-58},{-8,-38}})));
+    TIL3_AddOn_HeatStorage.ThermalStorages.HotWaterTank
+                                 hotWaterTank(
+      geometry(
+        innerVolume=0.19,
+        innerDiameter=0.4,
+        innerTotalHeight=1.5,
+        wallThickness=0.003,
+        heightTemperatureSensors={
+    0.15,
+    0.45,
+    0.75,
+    1.05,
+    1.35},
+        heightInletPorts={0.1},
+        heightOutletPorts={1.4}),
+      useTemperaturSensorsOutput=true,
+      redeclare model BuoyancyModel =
+          TIL3_AddOn_HeatStorage.ThermalStorages.Components.TransportPhenomena.TankHeatTransfer.Buoyancy.TemperatureDifference
+          (tauMixing=1),
+      redeclare model ThermalConductionModel =
+          TIL3_AddOn_HeatStorage.ThermalStorages.Components.TransportPhenomena.TankHeatTransfer.ThermalConduction.TemperatureDependingConductivity,
+      ambientHeatTransfer=TIL3_AddOn_HeatStorage.ThermalStorages.Internals.AmbientHeatTransfer.OverallHeatTransferNoThermalCapacity,
+      ambientTemperature=288.15,
+      redeclare model AmbientHeatTransferModel =
+          TIL3_AddOn_HeatStorage.ThermalStorages.Components.TransportPhenomena.TankHeatTransfer.Ambient.ConstantOveralHeatTransferCoefficients
+          (
+          UA_tankTopLid=0.4,
+          UA_tankCylinder=1.5,
+          UA_tankBottomLid=0.4),
+      redeclare model LiquidToTankWallHeatTransferModel =
+          TIL3_AddOn_HeatStorage.ThermalStorages.Components.TransportPhenomena.TankHeatTransfer.Ambient.CylinderVerticalFreeConvection,
+      useMantleHX=false,
+      useInternalHX_a=true,
+      nInternalHXCellsPerTankCell_a=4,
+      internalHXGeometry_a(meanDiameterHeatExchanger=0.34),
+      redeclare model TubeSideHeatTransferModelInternalHX_a =
+          TIL.LiquidComponents.Tubes.TransportPhenomena.HeatTransfer.ConstantAlpha
+          (constantAlpha=4000),
+      redeclare model PressureDropModelInternalHX_a =
+          TIL.LiquidComponents.Tubes.TransportPhenomena.PressureDrop.ZeroPressureDrop,
+      redeclare model WallHeatConductionModelInternalHX_a =
+          TIL.LiquidComponents.Tubes.TransportPhenomena.WallHeatTransfer.GeometryBasedConduction,
+      redeclare model WallMaterialInternalHX_a =
+          TILMedia.Solid.Types.TILMedia_Steel,
+      redeclare model TankToInternalHXHeatTransferModel_a =
+          TIL3_AddOn_HeatStorage.ThermalStorages.Components.TransportPhenomena.InternalHXHeatTransfer.LiquidTankSide.ConstantAlpha
+          (constantAlpha=2000),
+      useInternalHX_b=false,
+      redeclare model TubeSideHeatTransferModelInternalHX_b =
+          TIL.LiquidComponents.Tubes.TransportPhenomena.HeatTransfer.ConstantAlpha,
+      initMethod="constantTemperature",
+      TInitial=303.15,
+      TInitialLiquidInternalHX_a=303.15,
+      TInitialWallInternalHX_a=303.15,
+      TInitialTankWall=303.15,
+      TInitialInsulation=303.15)
+  annotation (Placement(transformation(extent={{70,38},{90,78}})));
+    TIL.LiquidComponents.Pumps.SimplePump pump(
+      presetVariableType="V_flow",
+      m_flowFixed=0.03,
+      use_volumeFlowRateInput=true)
+                          annotation (Placement(transformation(
+          origin={28,30},
+          extent={{8,-8},{-8,8}},
+          rotation=0)));
+    TIL.LiquidComponents.Valves.LinearDirectionalControlValve linearDirectionalControlValve(
+        use_switchingPositionInput=true, m_flowStart=-0.3e-3)
+      annotation (Placement(transformation(
+          extent={{-12.0001,-9},{11.9999,9}},
+          rotation=180,
+          origin={27.9999,57})));
+    TIL.Connectors.LiquidPort WaterInput(liquidType=liquidType)
+      "Return water"
+      annotation (Placement(
+        transformation(extent={{-110,-10},{-90,10}}),  iconTransformation(
+            extent={{-110,-10},{-90,10}})));
+    TIL.Connectors.LiquidPort WaterOutput(liquidType=liquidType)
+      "Supply water"
+      annotation (Placement(
+        transformation(extent={{-110,50},{-90,70}}), iconTransformation(extent={{92,-10},
+              {112,10}})));
+    TIL.Connectors.LiquidPort WaterOutput1(liquidType=liquidType)
+      "Domestic hot water outlet"
+      annotation (Placement(
+        transformation(extent={{90,60},{110,80}}),   iconTransformation(extent={{-10,90},
+              {10,110}})));
+    TIL.Connectors.LiquidPort WaterInput1(liquidType=liquidType)
+      "Cold domestic water inlet"
+      annotation (Placement(
+        transformation(extent={{90,36},{110,56}}),     iconTransformation(
+            extent={{-10,-110},{10,-90}})));
+    TIL.LiquidComponents.JunctionElements.VolumeJunction junction annotation (
+        Placement(transformation(
+          extent={{-4,-4},{4,4}},
+          rotation=180,
+          origin={-86,0})));
+    TIL.LiquidComponents.HydraulicCapacitors.ExpansionTank expansionTank(
+      volume=0.008,
+      TInitial=303.15,
+      pInitial=300000,
+      fixedInitialPressure=true) annotation (Placement(transformation(extent={{-76,-4},
+              {-60,12}})));
+    Modelica.Blocks.Sources.RealExpression pumpFlow(
+    y=if thermalstorageController.EnableHeatPump
+      then 0.25e-3
+      else 0)
+      "Pump flow: 0.25 l/s when heat source is active"
+      annotation (Placement(transformation(
+      extent={{0,-10},{20,10}},
+      origin={90,30},
+          rotation=180)));
+    ElectricalBoiler electricalBoiler
+      annotation (Placement(transformation(extent={{-22,-18},{18,18}})));
+  equation
+    connect(pump.portB,linearDirectionalControlValve. portA)
+      annotation (Line(
+        points={{28,38},{28,48}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(HeatingDemand, thermalstorageController.EnableHeating) annotation (
+        Line(points={{-10,-100},{-10,-62},{-32,-62},{-32,-53},{-27,-53}}, color
+          ={255,0,255}));
+    connect(hotWaterTank.temperatureSensorsOutput[5], thermalstorageController.T_DHW)
+      annotation (Line(points={{69,62.9},{52,62.9},{52,-72},{-46,-72},{-46,-46},
+            {-28,-46},{-28,-45},{-27,-45}},
+                     color={0,0,127}));
+    connect(thermalstorageController.threeWayValve, linearDirectionalControlValve.switchingPosition_in)
+      annotation (Line(points={{-8.8,-48},{46,-48},{46,74},{28,74},{28,66.9}},
+                                                                         color={0,
+            0,127}));
+    connect(hotWaterTank.inletPorts[1], WaterInput1) annotation (Line(
+        points={{90,46},{100,46}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(junction.portC, WaterInput) annotation (Line(
+        points={{-90,0},{-100,0}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(WaterOutput, linearDirectionalControlValve.portB) annotation (Line(
+        points={{-100,60},{16,60}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(junction.portB, expansionTank.portA) annotation (Line(
+        points={{-82,0},{-76,0}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(hotWaterTank.outletPorts[1], WaterOutput1) annotation (Line(
+        points={{90,70},{100,70}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(junction.portA, hotWaterTank.liquidFluidPortB) annotation (Line(
+        points={{-86,-4},{-86,-76},{58,-76},{58,46},{70,46}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(linearDirectionalControlValve.portC, hotWaterTank.liquidFluidPortA)
+      annotation (Line(
+        points={{40,60},{42,60},{42,40},{70,40}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(pumpFlow.y, pump.V_flow_in) annotation (Line(points={{69,30},{38,30}},
+                                  color={0,0,127}));
+    connect(electricalBoiler.WaterOutput, pump.portA) annotation (Line(
+        points={{18,0},{28,0},{28,22}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(electricalBoiler.WaterInput, expansionTank.portB) annotation (Line(
+        points={{-22,0},{-60,0}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(electricalBoiler.EnableHeatSource, thermalstorageController.EnableHeatPump)
+      annotation (Line(points={{-2,-16},{-2,-44},{-8.8,-44}}, color={255,0,255}));
+
+                                                      annotation (Placement(
+          transformation(
+          extent={{-10,-10},{10,10}},
+          rotation=180,
+          origin={78,20})),
+                Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+          coordinateSystem(preserveAspectRatio=false)));
+  end ElectricalBoiler_ThermalStorage;
+
+  model TestElectricalBoiler
+    inner TIL.SystemInformationManager sim(
+      redeclare replaceable TILMedia.Liquid.Types.TILMedia_Water liquidType1)
+      annotation (Placement(transformation(extent={{80,80},{100,100}})));
+    Modelica.Blocks.Sources.BooleanExpression Enable(y=false)
+                                                             annotation (
+        Placement(transformation(
+          extent={{-10,-10},{10,10}},
+          rotation=90,
+          origin={-8,-58})));
+    TIL.LiquidComponents.Sensors.Sensor_T sensor_T(redeclare
+        TIL.Utilities.Units.Conversions.Units.degC unit)
+      annotation (Placement(transformation(extent={{-84,60},{-76,68}})));
+    TIL.LiquidComponents.Sensors.Sensor_T sensor_T1(redeclare
+        TIL.Utilities.Units.Conversions.Units.degC unit)
+      annotation (Placement(transformation(extent={{62,54},{70,62}})));
+    TIL.LiquidComponents.Boundaries.Boundary boundary(
+      boundaryType="m_flow",
+      m_flowFixed=0,
+      TFixed=303.15)
+      annotation (Placement(transformation(extent={{-4,-10},{4,10}},
+          rotation=90,
+          origin={0,-90})));
+    TIL.LiquidComponents.Boundaries.Boundary boundary2(boundaryType="p")
+      annotation (Placement(transformation(extent={{-4,-10},{4,10}},
+          rotation=90,
+          origin={0,70})));
+    ElectricalBoiler_ThermalStorage electricalBoiler_ThermalStorage
+      annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
+  equation
+    connect(Enable.y, electricalBoiler_ThermalStorage.HeatingDemand)
+      annotation (Line(points={{-8,-47},{-8,-8}}, color={255,0,255}));
+    connect(boundary.port, electricalBoiler_ThermalStorage.WaterInput1)
+      annotation (Line(
+        points={{0,-90},{0,-10}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(electricalBoiler_ThermalStorage.WaterOutput1, boundary2.port)
+      annotation (Line(
+        points={{0,10},{0,70}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(electricalBoiler_ThermalStorage.WaterInput, sensor_T.port)
+      annotation (Line(
+        points={{-10,0},{-80,0},{-80,60}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(electricalBoiler_ThermalStorage.WaterInput,
+      electricalBoiler_ThermalStorage.WaterOutput) annotation (Line(
+        points={{-10,0},{-14,0},{-14,14},{14,14},{14,0},{10.2,0}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(electricalBoiler_ThermalStorage.WaterOutput, sensor_T1.port)
+      annotation (Line(
+        points={{10.2,0},{14,0},{14,48},{66,48},{66,54}},
+        color={0,170,238},
+        thickness=0.5));
+    annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+          coordinateSystem(preserveAspectRatio=false)));
+  end TestElectricalBoiler;
+
+  model HeatingController
+    "Controlls the massflows for floorheating in each room"
+
+      outer TIL.SystemInformationManager sim;
+
+    replaceable parameter TILMedia.Liquid.Types.BaseLiquid liquidType =
+        sim.liquidType1
+      "Liquid used in the heating circuit"
+      annotation(
+        choicesAllMatching=true,
+        Dialog(tab="Medium"));
+
+    // ============================================================
+    // ROOM TEMPERATURE SETPOINTS
+    // ============================================================
+
+    parameter Real T_set1 = 21
+      "Room 1 temperature setpoint in degC"
+      annotation(Dialog(tab="Room setpoints", group="Room temperatures"));
+
+    parameter Real T_set2 = 21
+      "Room 2 temperature setpoint in degC"
+      annotation(Dialog(tab="Room setpoints", group="Room temperatures"));
+
+    parameter Real T_set3 = 21
+      "Room 3 temperature setpoint in degC"
+      annotation(Dialog(tab="Room setpoints", group="Room temperatures"));
+
+    parameter Real T_set4 = 21
+      "Room 4 temperature setpoint in degC"
+      annotation(Dialog(tab="Room setpoints", group="Room temperatures"));
+
+    // ============================================================
+    // PID PARAMETERS
+    // ============================================================
+
+    parameter Real k = 0.025
+      "PID proportional gain"
+      annotation(Dialog(tab="Controller", group="PID"));
+
+    parameter Modelica.Units.SI.Time Ti = 900
+      "PID integral time"
+      annotation(Dialog(tab="Controller", group="PID"));
+
+    parameter Modelica.Units.SI.Time Td = 30
+      "PID derivative time"
+      annotation(Dialog(tab="Controller", group="PID"));
+  parameter Modelica.Units.SI.Area A_eff_max = 2e-5
+    "Maximum effective flow area of room valve";
+
+
+
+  // ============================================================
+    // HYDRAULIC PORTS
+    // ============================================================
+
+    TIL.Connectors.LiquidPort WaterSupply
+      "Heating water supply from thermal storage"
+      annotation(Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        origin={20,100}),
+        iconTransformation(
+          extent={{-10,-10},{10,10}},
+          origin={20,100})));
+
+    TIL.Connectors.LiquidPort WaterReturn
+      "Heating water return to thermal storage"
+      annotation(Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        origin={40,-100}),
+        iconTransformation(
+          extent={{-10,-10},{10,10}},
+          origin={40,-100})));
+
+    TIL.Connectors.LiquidPort Room1Supply
+      "Supply to floor heating room 1"
+      annotation(Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        origin={100,80}),
+        iconTransformation(
+          extent={{-10,-10},{10,10}},
+          origin={100,80})));
+
+    TIL.Connectors.LiquidPort Room1Return
+      "Return from floor heating room 1"
+      annotation(Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        origin={100,100}),
+        iconTransformation(
+          extent={{-10,-10},{10,10}},
+          origin={100,100})));
+
+
+    TIL.Connectors.LiquidPort Room2Supply
+      "Supply to floor heating room 2"
+      annotation(Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        origin={100,40}),
+        iconTransformation(
+          extent={{-10,-10},{10,10}},
+          origin={100,40})));
+
+    TIL.Connectors.LiquidPort Room2Return
+      "Return from floor heating room 2"
+      annotation(Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        origin={100,20}),
+        iconTransformation(
+          extent={{-10,-10},{10,10}},
+          origin={100,20})));
+
+
+    TIL.Connectors.LiquidPort Room3Supply
+      "Supply to floor heating room 3"
+      annotation(Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        origin={100,-20}),
+        iconTransformation(
+          extent={{-10,-10},{10,10}},
+          origin={100,-20})));
+
+    TIL.Connectors.LiquidPort Room3Return
+      "Return from floor heating room 3"
+      annotation(Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        origin={100,-40}),
+        iconTransformation(
+          extent={{-10,-10},{10,10}},
+          origin={100,-40})));
+
+
+    TIL.Connectors.LiquidPort Room4Supply
+      "Supply to floor heating room 4"
+      annotation(Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        origin={100,-80}),
+        iconTransformation(
+          extent={{-10,-10},{10,10}},
+          origin={100,-80})));
+
+    TIL.Connectors.LiquidPort Room4Return
+      "Return from floor heating room 4"
+      annotation(Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        origin={100,-100}),
+        iconTransformation(
+          extent={{-10,-10},{10,10}},
+          origin={100,-100})));
+
+    // ============================================================
+    // PID CONTROLLERS
+    // ============================================================
+
+    Modelica.Blocks.Continuous.LimPID pid1(
+      controllerType=Modelica.Blocks.Types.SimpleController.PID,
+      k=k,
+      Ti=Ti,
+      Td=Td,
+      yMin=0,
+      yMax=A_eff_max)
+      annotation(Placement(transformation(
+        extent={{-12,-12},{12,12}},
+        origin={-40,80})));
+
+    Modelica.Blocks.Continuous.LimPID pid2(
+      controllerType=Modelica.Blocks.Types.SimpleController.PID,
+      k=k,
+      Ti=Ti,
+      Td=Td,
+      yMin=0,
+      yMax=A_eff_max)
+      annotation(Placement(transformation(
+        extent={{-12,-12},{12,12}},
+        origin={0,40})));
+
+    Modelica.Blocks.Continuous.LimPID pid3(
+      controllerType=Modelica.Blocks.Types.SimpleController.PID,
+      k=k,
+      Ti=Ti,
+      Td=Td,
+      yMin=0,
+      yMax=A_eff_max)
+      annotation(Placement(transformation(
+        extent={{-12,-12},{12,12}},
+        origin={-40,-20})));
+
+    Modelica.Blocks.Continuous.LimPID pid4(
+      controllerType=Modelica.Blocks.Types.SimpleController.PID,
+      k=k,
+      Ti=Ti,
+      Td=Td,
+      yMin=0,
+      yMax=A_eff_max)
+      annotation(Placement(transformation(
+        extent={{-12,-12},{12,12}},
+        origin={0,-60})));
+
+  // ============================================================
+    // CONSTANT SETPOINTS
+    // ============================================================
+
+    Modelica.Blocks.Sources.RealExpression setpoint1(y=T_set1)
+      annotation(Placement(transformation(
+        extent={{-12,-8},{12,8}},
+        origin={-100,94})));
+
+    Modelica.Blocks.Sources.RealExpression setpoint2(y=T_set2)
+      annotation(Placement(transformation(
+        extent={{-12,-8},{12,8}},
+        origin={-100,10})));
+
+    Modelica.Blocks.Sources.RealExpression setpoint3(y=T_set3)
+      annotation(Placement(transformation(
+        extent={{-12,-8},{12,8}},
+        origin={-100,-8})));
+
+    Modelica.Blocks.Sources.RealExpression setpoint4(y=T_set4)
+      annotation(Placement(transformation(
+        extent={{-12,-8},{12,8}},
+        origin={-100,-90})));
+
+    Modelica.Blocks.Interfaces.RealInput T_room1 "Current temperature room 1"
+      annotation (Placement(transformation(
+          extent={{-20,-20},{20,20}},
+          rotation=0,
+          origin={-100,70}), iconTransformation(
+          extent={{-10,-10},{10,10}},
+          rotation=0,
+          origin={-90,70})));
+    Modelica.Blocks.Interfaces.RealInput T_room2 "Current temperature room 2"
+      annotation (Placement(transformation(
+          extent={{-20,-20},{20,20}},
+          rotation=0,
+          origin={-100,30}), iconTransformation(
+          extent={{-10,-10},{10,10}},
+          rotation=0,
+          origin={-90,30})));
+    Modelica.Blocks.Interfaces.RealInput T_room3 "Current temperature room 3"
+      annotation (Placement(transformation(
+          extent={{-20,-20},{20,20}},
+          rotation=0,
+          origin={-100,-30}), iconTransformation(
+          extent={{-10,-10},{10,10}},
+          rotation=0,
+          origin={-90,-30})));
+    Modelica.Blocks.Interfaces.RealInput T_room4 "Current temperature room 4"
+      annotation (Placement(transformation(
+          extent={{-20,-20},{20,20}},
+          rotation=0,
+          origin={-100,-70}), iconTransformation(
+          extent={{-10,-10},{10,10}},
+          rotation=0,
+          origin={-90,-60})));
+    TIL.LiquidComponents.Sensors.Sensor_m_flow sensor_m_flow_Room1
+      annotation (Placement(transformation(extent={{86,96},{94,104}})));
+    TIL.LiquidComponents.Sensors.Sensor_m_flow sensor_m_flow_Room2
+      annotation (Placement(transformation(extent={{86,36},{94,44}})));
+    TIL.LiquidComponents.Sensors.Sensor_m_flow sensor_m_flow_Room3
+      annotation (Placement(transformation(extent={{86,-24},{94,-16}})));
+    TIL.LiquidComponents.Sensors.Sensor_m_flow sensor_m_flow_Room4
+      annotation (Placement(transformation(extent={{86,-84},{94,-76}})));
+    TIL.LiquidComponents.Valves.OrificeValve valveRoom1(
+        use_effectiveFlowAreaInput=true)
+      annotation (Placement(transformation(extent={{62,96},{78,104}})));
+    TIL.LiquidComponents.Valves.OrificeValve valveRoom2(
+        use_effectiveFlowAreaInput=true)
+      annotation (Placement(transformation(extent={{62,36},{78,44}})));
+    TIL.LiquidComponents.Valves.OrificeValve valveRoom3(
+        use_effectiveFlowAreaInput=true)
+      annotation (Placement(transformation(extent={{62,-24},{78,-16}})));
+    TIL.LiquidComponents.Valves.OrificeValve valveRoom4(
+        use_effectiveFlowAreaInput=true)
+      annotation (Placement(transformation(extent={{62,-84},{78,-76}})));
+  equation
+    connect(Room2Return, WaterReturn) annotation (Line(
+        points={{100,20},{40,20},{40,-100}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(Room1Supply, WaterReturn) annotation (Line(
+        points={{100,80},{40,80},{40,-100}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(sensor_m_flow_Room1.portB, Room1Return) annotation (Line(
+        points={{93,100},{100,100}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(sensor_m_flow_Room2.portB, Room2Supply) annotation (Line(
+        points={{93,40},{100,40}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(sensor_m_flow_Room3.portB, Room3Supply) annotation (Line(
+        points={{93,-20},{100,-20}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(sensor_m_flow_Room4.portB, Room4Supply) annotation (Line(
+        points={{93,-80},{100,-80}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(Room3Return, WaterReturn) annotation (Line(
+        points={{100,-40},{40,-40},{40,-100}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(Room4Return, WaterReturn) annotation (Line(
+        points={{100,-100},{40,-100}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(WaterSupply, valveRoom1.portA) annotation (Line(
+        points={{20,100},{62,100}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(WaterSupply, valveRoom2.portA) annotation (Line(
+        points={{20,100},{20,40},{62,40}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(valveRoom4.portA, valveRoom2.portA) annotation (Line(
+        points={{62,-80},{20,-80},{20,40},{62,40}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(valveRoom3.portA, valveRoom2.portA) annotation (Line(
+        points={{62,-20},{20,-20},{20,40},{62,40}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(valveRoom1.portB, sensor_m_flow_Room1.portA) annotation (Line(
+        points={{78,100},{87,100}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(valveRoom2.portB, sensor_m_flow_Room2.portA) annotation (Line(
+        points={{78,40},{87,40}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(valveRoom3.portB, sensor_m_flow_Room3.portA) annotation (Line(
+        points={{78,-20},{87,-20}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(valveRoom4.portB, sensor_m_flow_Room4.portA) annotation (Line(
+        points={{78,-80},{87,-80}},
+        color={0,170,238},
+        thickness=0.5));
+    connect(pid4.y, valveRoom4.effectiveFlowArea_in)
+      annotation (Line(points={{13.2,-60},{70,-60},{70,-75}}, color={0,0,127}));
+    connect(pid3.y, valveRoom3.effectiveFlowArea_in) annotation (Line(points={{-26.8,
+            -20},{0,-20},{0,0},{70,0},{70,-15}}, color={0,0,127}));
+    connect(pid2.y, valveRoom2.effectiveFlowArea_in) annotation (Line(points={{13.2,
+            40},{30,40},{30,52},{70,52},{70,45}}, color={0,0,127}));
+    connect(pid1.y, valveRoom1.effectiveFlowArea_in) annotation (Line(points={{-26.8,
+            80},{0,80},{0,114},{70,114},{70,105}}, color={0,0,127}));
+    connect(setpoint1.y, pid1.u_s) annotation (Line(points={{-86.8,94},{-62,94},{-62,
+            80},{-54.4,80}}, color={0,0,127}));
+    connect(T_room1, pid1.u_m) annotation (Line(points={{-100,70},{-58,70},{-58,56},
+            {-40,56},{-40,65.6}}, color={0,0,127}));
+    connect(T_room2, pid2.u_m) annotation (Line(points={{-100,30},{-18,30},{-18,16},
+            {0,16},{0,25.6}}, color={0,0,127}));
+    connect(setpoint2.y, pid2.u_s) annotation (Line(points={{-86.8,10},{-68,10},{-68,
+            40},{-14.4,40}}, color={0,0,127}));
+    connect(setpoint3.y, pid3.u_s) annotation (Line(points={{-86.8,-8},{-60,-8},{-60,
+            -20},{-54.4,-20}}, color={0,0,127}));
+    connect(T_room3, pid3.u_m) annotation (Line(points={{-100,-30},{-70,-30},{-70,
+            -40},{-40,-40},{-40,-34.4}}, color={0,0,127}));
+    connect(setpoint4.y, pid4.u_s) annotation (Line(points={{-86.8,-90},{-66,-90},
+            {-66,-60},{-14.4,-60}}, color={0,0,127}));
+    connect(T_room4, pid4.u_m) annotation (Line(points={{-100,-70},{-76,-70},{-76,
+            -80},{0,-80},{0,-74.4}}, color={0,0,127}));
+    annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+          coordinateSystem(preserveAspectRatio=false)));
+  end HeatingController;
 end HeatingSource;
