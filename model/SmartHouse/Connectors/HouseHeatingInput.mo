@@ -6,7 +6,7 @@ connector HouseHeatingInput
   "Liquid type supplied by enclosing model";
 
   Modelica.Blocks.Interfaces.RealOutput roomTemp[4](
-    each unit="degK")
+    each unit="K")
     "Order: bathroom, bedroom, kitchen, living room";
   TIL.Connectors.LiquidPort supplyP[4](
     each liquidType=liquidType)
