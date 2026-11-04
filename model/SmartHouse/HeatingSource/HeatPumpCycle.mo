@@ -6,56 +6,26 @@ model HeatPumpCycle "Simplified air-to-water heat pump model"
   // USER PARAMETERS
   // ============================================================
 
-  // --- Defrost controller ---
-  parameter Boolean useDefrost = true
-    "Enable automatic defrost"
-    annotation(Dialog(tab="Defrost", group="General"));
 
-  parameter Modelica.Units.SI.Time minTriggerOnTime = 60
-    "Defrost trigger must remain active before defrost starts"
-    annotation(Dialog(tab="Defrost", group="Timing"));
-
-  parameter Modelica.Units.SI.Time minTriggerOffTime = 30
-    "Defrost-off trigger must remain active before defrost stops"
-    annotation(Dialog(tab="Defrost", group="Timing"));
-
-  parameter Modelica.Units.SI.Time minOffTimeAfterDefrost = 2400
-    "Minimum time between two defrost cycles"
-    annotation(Dialog(tab="Defrost", group="Timing"));
-
-  parameter Real defrostTriggerOnThreshold = -570
-    "Threshold used by the evaporator defrost-on criterion"
-    annotation(Dialog(tab="Defrost", group="Trigger"));
-
-  parameter Real defrostStopTemperature = 5
-    "Refrigerant temperature in degC above which defrost may stop"
-    annotation(Dialog(tab="Defrost", group="Trigger"));
-
-  parameter Real compressorSpeedDefrost = 60
-    "Compressor speed command during defrost"
-    annotation(Dialog(tab="Defrost", group="Operation"));
-
-  parameter Real fanSpeedHeating = 12
+  // --- Fan control ---
+  parameter Real fanSpeedHeating = 15
     "Fan speed during normal heating"
     annotation(Dialog(tab="Fan", group="Control"));
 
-  parameter Real fanSpeedDefrost = 1
-    "Fan speed during defrost"
+  parameter Real fanSpeedOff = 0.1
+    "Fan speed when heat pump is disabled"
     annotation(Dialog(tab="Fan", group="Control"));
 
-  parameter Modelica.Units.SI.Area defrostValveArea = 0.7e-6
-    "Expansion-valve effective flow area during defrost"
-    annotation(Dialog(tab="Defrost", group="Operation"));
 
 // ============================================================
 // EVAPORATOR GEOMETRY
 // ============================================================
 
-parameter Modelica.Units.SI.Length evaporatorFinnedTubeLength = 0.6
+parameter Modelica.Units.SI.Length evaporatorFinnedTubeLength = 8
   "Length of finned tubes"
   annotation(Dialog(tab="Evaporator", group="Geometry"));
 
-parameter Integer evaporatorNSerialTubes = 3
+parameter Integer evaporatorNSerialTubes = 5
   "Number of tube rows in air-flow direction"
   annotation(Dialog(tab="Evaporator", group="Geometry"));
 
@@ -63,7 +33,7 @@ parameter Modelica.Units.SI.Length evaporatorSerialTubeDistance = 22e-3
   "Distance between serial tubes"
   annotation(Dialog(tab="Evaporator", group="Geometry"));
 
-parameter Integer evaporatorNParallelTubes = 24
+parameter Integer evaporatorNParallelTubes = 30
   "Number of parallel tubes"
   annotation(Dialog(tab="Evaporator", group="Geometry"));
 
@@ -174,7 +144,7 @@ parameter Integer condenserNCells(min=1) = 15
   "Compressor PI controller integral time"
   annotation(Dialog(tab="Compressor", group="Controller"));
 
-  parameter Real compressorSpeedMin = 20
+  parameter Real compressorSpeedMin = 5
     "Minimum compressor speed command"
     annotation(Dialog(tab="Compressor", group="Controller"));
 
@@ -227,11 +197,6 @@ parameter Integer condenserNCells(min=1) = 15
     "Fixed valve area parameter of the TIL valve (normally overridden by input)"
     annotation(Dialog(tab="Expansion valve", group="Advanced"));
 
-  // --- Four-way valve ---
-  parameter Modelica.Units.SI.Area fourWayValveEffectiveArea = 2e-5
-    "Effective flow area of four-way valve"
-    annotation(Dialog(tab="General", group="Four-way valve"));
-
   // --- Fan / outside air ---
   parameter Real fanNominalSpeed = 13
     "Nominal fan speed"
@@ -277,6 +242,9 @@ parameter Integer condenserNCells(min=1) = 15
     "Temperature used if reverse flow occurs at gas sink"
     annotation(Dialog(tab="Ambient", group="Backflow"));
 
+
+
+
   parameter Real fanFixedSpeedFallback = 10
     "Fixed fan speed used only if mechanical speed input is disabled"
     annotation(Dialog(tab="Fan", group="Advanced"));
@@ -306,26 +274,6 @@ parameter Integer condenserNCells(min=1) = 15
     "Initial separator specific enthalpy"
     annotation(Dialog(tab="Advanced", group="Separator"));
 
-  parameter Modelica.Units.SI.Length dischargeTubeLength = 1
-    "Length of compressor discharge tube"
-    annotation(Dialog(tab="Advanced", group="Discharge tube"));
-
-  parameter Modelica.Units.SI.CoefficientOfHeatTransfer dischargeTubeAlpha = 500
-    "Constant heat-transfer coefficient of discharge tube"
-    annotation(Dialog(tab="Advanced", group="Discharge tube"));
-
-  parameter Modelica.Units.SI.MassFlowRate dischargeTubeMFlowStart = 0.03
-    "Initial refrigerant mass flow in discharge tube"
-    annotation(Dialog(tab="Advanced", group="Discharge tube"));
-
-  parameter Modelica.Units.SI.SpecificEnthalpy dischargeTubeHInitial = 500e3
-    "Initial refrigerant specific enthalpy in discharge tube"
-    annotation(Dialog(tab="Advanced", group="Discharge tube"));
-
-  parameter Modelica.Units.SI.Pressure dischargeTubePStart = 10000000
-    "Initial pressure in discharge tube"
-    annotation(Dialog(tab="Advanced", group="Discharge tube"));
-
   parameter Modelica.Units.SI.SpecificEnthalpy condenserHInitial = 280e3
     "Initial condenser refrigerant specific enthalpy"
     annotation(Dialog(tab="Advanced", group="Condenser initialization"));
@@ -337,15 +285,13 @@ parameter Integer condenserNCells(min=1) = 15
   parameter Modelica.Units.SI.SpecificEnthalpy condenserHInitialCellN = 350e3
     "Initial condenser specific enthalpy in last cell"
     annotation(Dialog(tab="Advanced", group="Condenser initialization"));
-  parameter Modelica.Units.SI.Mass frostMassDefrostStart = 0.1
-  "Minimum frost mass required to start defrost";
 
-  inner TIL.SystemInformationManager sim1(
-    redeclare replaceable TILMedia.VLEFluid.Types.TILMedia_Propane
-      vleFluidType1,
-    redeclare replaceable TILMedia.Gas.Types.VDI4670_MoistAir gasType1,
-    redeclare replaceable TILMedia.Liquid.Types.TILMedia_Water liquidType1)
-    annotation (Placement(transformation(extent={{100,118},{120,138}}, rotation=0)));
+  // ============================================================
+  // COMPONENTS
+  // ============================================================
+  // No local SystemInformationManager is declared here.
+  // The parent model must provide the common inner TIL.SystemInformationManager.
+
   TIL.VLEFluidComponents.PressureStateElements.PressureState pressureState_hp(
       pressureStateID=1, pInitial=pInitialHigh)  annotation (Placement(transformation(
           extent={{-32,36},{-20,48}},
@@ -372,11 +318,11 @@ parameter Integer condenserNCells(min=1) = 15
         extent={{-4,-4},{4,4}},
         rotation=0)));
   TIL.VLEFluidComponents.Separators.Separator separator(
-    pressureStateID=3,
+    pressureStateID=2,
     V=separatorVolume,
     initialFillingLevel=separatorInitialFillingLevel,
     hStart=separatorHStart)
-                annotation (Placement(transformation(extent={{60,-56},{72,-36}},
+                annotation (Placement(transformation(extent={{62,-58},{74,-38}},
           rotation=0)));
   TIL.VLEFluidComponents.Compressors.EffCompressor compressor(
     use_mechanicalPort=true,
@@ -385,29 +331,22 @@ parameter Integer condenserNCells(min=1) = 15
     volumetricEfficiency=compressorVolumetricEfficiency,
     isentropicEfficiency=compressorIsentropicEfficiency,
     effectiveIsentropicEfficiency=compressorEffectiveIsentropicEfficiency) annotation (Placement(transformation(
-          extent={{78,-2},{94,14}}, rotation=0)));
+          extent={{76,4},{92,20}},  rotation=0)));
   TIL.VLEFluidComponents.Sensors.StatePoint statePoint4(stateViewerIndex=3)
     annotation (Placement(transformation(
         extent={{-4,-4},{4,4}},
         rotation=0,
         origin={-12,-34})));
-  TIL.VLEFluidComponents.Sensors.StatePoint statePoint6(stateViewerIndex=5)
-    annotation (Placement(transformation(
-        extent={{-4,-4},{4,4}},
-        rotation=0,
-        origin={54,-34})));
   TIL.LiquidComponents.Sensors.Sensor_T      sensor_T_degC_waterOut(
     useTimeConstant=true,
     tau=0.5,
     useSteadyStateInitialization=false,
-    redeclare TIL.Utilities.Units.Conversions.Units.degC unit,
+    redeclare TIL.Utilities.Units.Conversions.Units.K unit,
     initialSensorValue=30)
     annotation (Placement(transformation(extent={{-52,64},{-44,72}})));
   TIL.LiquidComponents.Sensors.Sensor_T      sensor_T_degC_waterIn(redeclare
-      TIL.Utilities.Units.Conversions.Units.degC unit)
+      TIL.Utilities.Units.Conversions.Units.K unit)
     annotation (Placement(transformation(extent={{-88,64},{-80,72}})));
-  TIL.VLEFluidComponents.Sensors.StatePoint statePoint0(stateViewerIndex=7)
-    annotation (Placement(transformation(extent={{82,46},{90,54}}, rotation=0)));
  TIL.HeatExchangers.Plate.VLEFluidLiquid.ParallelFlowHX condenser(
 
   redeclare TIL.HeatExchangers.Plate.Geometry.Example hxGeometry(
@@ -451,7 +390,7 @@ redeclare model HeatTransferModel_b =
 ) annotation (
     Placement(
       transformation(extent={{-80,36},{-52,64}})));
-  TIL.HeatExchangers.FinAndTube.MoistAirVLEFluid.CrossFlowHX evaporator(
+  TIL.HeatExchangers.FinAndTube.GasVLEFluid.CrossFlowHX evaporator(
     redeclare TIL.HeatExchangers.FinAndTube.Geometry.KKI001 hxGeometry(
     finnedTubeLength=evaporatorFinnedTubeLength,
     nSerialTubes=evaporatorNSerialTubes,
@@ -463,6 +402,7 @@ redeclare model HeatTransferModel_b =
     tubeInnerDiameter=evaporatorTubeInnerDiameter,
     tubeWallThickness=evaporatorTubeWallThickness,
     nTubeSideParallelHydraulicFlows=evaporatorNParallelHydraulicFlows),
+    TInitialWall=278.15,
 
   nCells=evaporatorNCells,
     pressureStateID=2,
@@ -480,11 +420,7 @@ redeclare model HeatTransferModel_b =
     redeclare model FinSideHeatTransferModel =
         TIL.HeatExchangers.FinAndTube.TransportPhenomena.FinSideHeatTransfer.Haaf,
     redeclare model FinSidePressureDropModel =
-        TIL.HeatExchangers.FinAndTube.TransportPhenomena.FinSidePressureDrop.ZeroPressureDrop,
-    flagActivateDynWaterBalance=true,
-    redeclare model FrostingModel =
-        TIL.HeatExchangers.FinAndTube.TransportPhenomena.FinSideFrosting.ConstantPorosityFrostIce
-        (defrostTimeConstant=2))
+        TIL.HeatExchangers.FinAndTube.TransportPhenomena.FinSidePressureDrop.ZeroPressureDrop)
                 annotation (Placement(transformation(extent={{-54,-56},{-26,-28}})));
   TIL.VLEFluidComponents.Sensors.Sensor_subcooling sensor_subcooling(
     useTimeConstant=true,
@@ -516,17 +452,17 @@ redeclare model HeatTransferModel_b =
         rotation=0,
         origin={78,-34})));
   TIL.OtherComponents.Controllers.PIController compressorController(
-  controllerType="PI",
-  invertFeedback=false,
-  integralParameterType="Ti",
-  k=compressorControllerK,
-  Ti=compressorControllerTi,
-  yMax=compressorSpeedMax,
-  yMin=compressorSpeedMin,
-  yInitial=compressorSpeedInitial,
-  use_activeInput=true,
-  use_y_notActive=true,
-  activationTime=compressorActivationTime)
+    controllerType="PI",
+    invertFeedback=false,
+    integralParameterType="Ti",
+    k=compressorControllerK,
+    Ti=compressorControllerTi,
+    yMax=compressorSpeedMax,
+    yMin=compressorSpeedMin,
+    yInitial=compressorSpeedInitial,
+    use_activeInput=true,
+    use_y_notActive=false,
+    activationTime=compressorActivationTime)
     annotation (Placement(transformation(extent={{138,16},{126,4}})));
   TIL.OtherComponents.Mechanical.RotatoryBoundary rotatoryBoundary1(
       use_nInput=true, nFixed=compressorSpeedInitial)
@@ -534,57 +470,27 @@ redeclare model HeatTransferModel_b =
   TIL.VLEFluidComponents.Sensors.Sensor_T      sensor_T_degC(redeclare
       TIL.Utilities.Units.Conversions.Units.degC unit)
     annotation (Placement(transformation(extent={{-70,-38},{-62,-30}})));
-  Modelica.Blocks.Sources.RealExpression speedDefrost(y=compressorSpeedDefrost)
-    annotation (Placement(transformation(extent={{-13,-8},{13,8}},
-        rotation=90,
-        origin={135,-22})));
   Modelica.Blocks.Sources.RealExpression valveAreaRestart(y=expansionValveAreaRestart)
     annotation (Placement(transformation(extent={{-180,-14},{-148,2}})));
   Modelica.Blocks.Sources.RealExpression COP(
-    y=if P_el > 1e-3 then HeatFlow/P_el else 0)                                          annotation (Placement(transformation(extent={{62,120},
-            {78,136}})));
-  Modelica.Blocks.Sources.BooleanExpression defrostTriggerOn(
-  y=EnableHeatSource
-    and heatPumpController.controllerSwitch
-    and evaporator.summary.waterBalance.mass_frostAndIce
-        > frostMassDefrostStart
-    and
-    (sensor_T_degC_ambientAirIn.sensorValue
-      - sensor_T_degC.sensorValue > 0.5)
-    and
-    (-evaporator.Q_flow
-      /(sensor_T_degC_ambientAirIn.sensorValue
-        - sensor_T_degC.sensorValue)
-      > defrostTriggerOnThreshold));
-  Modelica.Blocks.Sources.BooleanExpression defrostTriggerOff(
-  y=heatPumpController.fourWayValve
-    and sensor_T_degC.sensorValue > defrostStopTemperature);
-  Modelica.Blocks.Logical.Switch switch1 annotation (Placement(transformation(extent={{-128,
+    y=if P_el > 1e-3 then HeatFlow/P_el else 0)
+    annotation (
+      Placement(
+        transformation(extent={{62,120},{78,136}})));
+  Modelica.Blocks.Logical.Switch expansionValveSwitch annotation (Placement(transformation(extent={{-128,
             -28},{-116,-16}})));
-  Modelica.Blocks.Sources.RealExpression valveAreaNotNormal(
-  y=if heatPumpController.fourWayValve
-    then defrostValveArea
-    else 0)
-  annotation (
-    Placement(
-      transformation(
-        extent={{-16,-8},{16,8}},
-        origin={-160,-26})));
-  TIL.VLEFluidComponents.Valves.FourWayValve fourWayValve(
-  effectiveFlowArea=fourWayValveEffectiveArea,
-  mdotSmooth=0.002)
-    annotation (Placement(transformation(
-        extent={{-8,-8},{8,8}},
-        rotation=270,
-        origin={14,38})));
+  Modelica.Blocks.Sources.RealExpression valveDisable(y=0)
+    "Close expansion valve when heat pump is disabled"
+    annotation (
+      Placement(
+        transformation(
+          extent={{-16,-8},{16,8}},
+          origin={-160,-26})));
+
   HeatPumpController heatPumpController(
-    useDefrost=useDefrost,
-    minTriggerOnTime=minTriggerOnTime,
-    minTriggerOffTime=minTriggerOffTime,
-    minOffTimeAfterDefrost=minOffTimeAfterDefrost,
     fanSpeedHeating=fanSpeedHeating,
-    fanSpeedDefrost=fanSpeedDefrost)
-    annotation (Placement(transformation(extent={{82,-110},{128,-68}})));
+    fanSpeedOff=fanSpeedOff)
+    annotation (Placement(transformation(extent={{80,-110},{126,-68}})));
   Modelica.Blocks.Interfaces.RealInput T_ambient
     "Temperature of the ambient in K" annotation (Placement(transformation(
         extent={{-20,-20},{20,20}},
@@ -594,41 +500,42 @@ redeclare model HeatTransferModel_b =
         rotation=90,
         origin={-80,-170})));
   TIL.GasComponents.Boundaries.Boundary gasSource(
-    streamVariablesInputType="T",
-    streamVariablesInputTypeConcentration="phi",
-    use_temperatureInput=true,
-    phiFixed=ambientRelativeHumidity,
-    boundaryType="p",
-    pFixed=ambientPressure) "Outside moist air used in the evaporator" annotation (
-      Placement(transformation(
+  streamVariablesInputType="T",
+  streamVariablesInputTypeConcentration="xi",
+  use_temperatureInput=true,
+  boundaryType="p",
+  pFixed=ambientPressure)
+  "Outside dry air used in the evaporator"
+  annotation (
+    Placement(
+      transformation(
         extent={{-4,-10},{4,10}},
         rotation=90,
         origin={-40,2})));
   TIL.GasComponents.Sensors.Sensor_T      sensor_T_degC_ambientAirIn(redeclare
-      TIL.Utilities.Units.Conversions.Units.degC unit)
+      TIL.Utilities.Units.Conversions.Units.K unit)
     annotation (Placement(transformation(extent={{-16,-16},{-8,-8}})));
-  TIL.GasComponents.Sensors.Sensor_phi sensor_phi_ambientAirIn
-    annotation (Placement(transformation(extent={{-30,-16},{-22,-8}})));
   TIL.GasComponents.Sensors.StatePoint statePoint annotation (Placement(transformation(extent={{-64,-16},
             {-56,-8}})));
   TIL.GasComponents.Boundaries.Boundary gasSink(
-    pFixed=ambientPressure,
-    V_flowFixed=sinkFixedVolumeFlow,
-    phiFixed=sinkBackflowRelativeHumidity,
-    boundaryType="p",
-    TFixed=sinkBackflowTemperature,
-    streamVariablesInputTypeConcentration="phi") annotation (Placement(
-        transformation(extent={{4,10},{-4,-10}},     rotation=90,
+  pFixed=ambientPressure,
+  V_flowFixed=sinkFixedVolumeFlow,
+  boundaryType="p",
+  TFixed=sinkBackflowTemperature,
+  streamVariablesInputTypeConcentration="xi")
+  annotation (
+    Placement(
+      transformation(
+        extent={{4,10},{-4,-10}},
+        rotation=90,
         origin={-40,-132})));
   TIL.GasComponents.Sensors.Sensor_T      sensor_T_degC_ambientAirOut(
-      redeclare TIL.Utilities.Units.Conversions.Units.degC unit)
+      redeclare TIL.Utilities.Units.Conversions.Units.K unit)
     annotation (Placement(transformation(extent={{-28,-118},{-20,-110}})));
   TIL.GasComponents.Sensors.Sensor_V_flow sensor_V_flow_ambientAir
     annotation (Placement(transformation(extent={{4,-4},{-4,4}},
         rotation=90,
         origin={-40,-116})));
-  TIL.GasComponents.Sensors.Sensor_phi sensor_phi_ambientAirOut
-    annotation (Placement(transformation(extent={{-14,-118},{-6,-110}})));
   TIL.GasComponents.Fans.Fan2ndOrder fan2ndOrder(
     use_mechanicalPort=true,
     steadyStateMomentum=true,
@@ -646,45 +553,17 @@ redeclare model HeatTransferModel_b =
     annotation (Placement(transformation(extent={{-20,-104},{-28,-84}})));
   TIL.GasComponents.Sensors.StatePoint statePoint5(index=1)
     annotation (Placement(transformation(extent={{-64,-118},{-56,-110}})));
-  Modelica.Blocks.Logical.Switch switch2 annotation (Placement(transformation(extent={{6,-6},{
+  Modelica.Blocks.Logical.Switch compressorSwitch annotation (Placement(transformation(extent={{6,-6},{
             -6,6}},
         rotation=270,
         origin={112,-18})));
-  Modelica.Blocks.Sources.RealExpression CompressorDisable(y=0)
-    "Disable compressor when heat source is turned of"
+  Modelica.Blocks.Sources.RealExpression compressorDisable(y=0)
+    "Set compressor speed to zero when heat pump is disabled"
     annotation (Placement(transformation(extent={{-16,-8},{16,8}},
         rotation=90,
         origin={106,-48})));
-  TIL.VLEFluidComponents.PressureStateElements.PressureState pressureState_lp1(
-      pressureStateID=3, pInitial=pInitialLow)  annotation (Placement(transformation(
-          extent={{-6,-6},{6,6}},     rotation=270,
-        origin={28,-10})));
-  Modelica.Blocks.Logical.Switch pumpDownSwitch
-  annotation (
-    Placement(
-      transformation(
-        extent={{6,-6},{-6,6}},
-        rotation=270,
-          origin={112,2})));
-  Modelica.Blocks.Sources.RealExpression pumpDownSpeedSignal(
-  y=40)
-  annotation (
-    Placement(
-      transformation(
-        extent={{-16,-8},{16,8}},
-        rotation=90,
-          origin={160,-24})));
-TIL.VLEFluidComponents.Valves.OrificeValve suctionShutoffValve(
-  valveFlowVariableType=
-    TIL.Internals.ValveFlowVariableType.EffectiveFlowArea,
-  use_effectiveFlowAreaInput=true,
-  effectiveFlowAreaFixed=1e-4)
-  "Shut-off valve in suction line";
-Modelica.Blocks.Sources.RealExpression suctionValveArea(
-  y=if heatPumpController.controllerSwitchCompressor
-       or heatPumpController.pumpDownActive
-    then 1e-4
-    else 0);
+  TIL.VLEFluidComponents.Sensors.Sensor_superheating sensor_superheating
+    annotation (Placement(transformation(extent={{4,-26},{12,-18}})));
 equation
   P_el = compressor.shaftPower + fan2ndOrder.P_shaft;
   HeatFlow = -condenser.Q_flow;
@@ -692,13 +571,9 @@ equation
       points={{-6,46},{-6,42},{-20,42}},
       color={153,204,0},
       thickness=0.5));
-  connect(statePoint0.sensorPort,compressor. portB) annotation (Line(
-      points={{86,46},{86,14}},
-      color={153,204,0},
-      thickness=0.5));
   connect(separator.portGas,compressor. portA)
     annotation (Line(
-      points={{71,-42},{86,-42},{86,-2}},
+      points={{73,-44},{86,-44},{86,2},{84,2},{84,4}},
       color={153,204,0},
       thickness=0.5));
   connect(sensor_T_degC_waterIn.port,condenser. portA_b)
@@ -715,23 +590,19 @@ equation
     annotation (Line(points={{-146.5,6},{-137.6,6}}, color={0,0,127}));
   connect(statePoint7.sensorPort,compressor. portA)
     annotation (Line(
-      points={{78,-38},{78,-42},{86,-42},{86,-2}},
+      points={{78,-38},{78,-42},{86,-42},{86,2},{84,2},{84,4}},
       color={153,204,0},
       thickness=0.5));
   connect(rotatoryBoundary1.rotatoryFlange,compressor. rotatoryFlange)
     annotation (Line(
-      points={{98,6},{94,6}},
+      points={{98,6},{98,30},{92,30},{92,12}},
       color={135,135,135},
       thickness=0.5));
   connect(compressorController.u_m, sensor_T_degC_waterOut.sensorValue)
     annotation (Line(points={{132,15.8},{132,80},{-48,80},{-48,70}}, color={0,0,
           127}));
-  connect(speedDefrost.y, compressorController.y_notActive) annotation (Line(
-        points={{135,-7.7},{135,-4},{132,-4},{132,4.2}},            color={0,0,127}));
   connect(valveAreaRestart.y, expansionValveController.y_notActive) annotation
     (Line(points={{-146.4,-6},{-132,-6},{-132,0.2}}, color={0,0,127}));
-  connect(sensor_subcooling.sensorValue, expansionValveController.u_m)
-    annotation (Line(points={{-118,32},{-132,32},{-132,11.8}}, color={0,0,127}));
   connect(statePoint2.sensorPort,expansionValve. portA)
     annotation (Line(
       points={{-92,26},{-92,24},{-106,24},{-106,14}},
@@ -752,24 +623,14 @@ equation
       points={{-106,-2},{-106,-42},{-88,-42}},
       color={153,204,0},
       thickness=0.5));
-  connect(statePoint6.sensorPort,separator. portInlet)
-    annotation (Line(
-      points={{54,-38},{54,-42},{61,-42}},
-      color={153,204,0},
-      thickness=0.5));
-  connect(switch1.y,expansionValve. effectiveFlowArea_in)
+  connect(expansionValveSwitch.y,expansionValve. effectiveFlowArea_in)
     annotation (Line(points={{-115.4,-22},{-114,-22},{-114,6},{-111,6}}, color={0,0,127}));
-  connect(switch1.u1, expansionValveController.y) annotation (Line(points={{-129.2,
+  connect(expansionValveSwitch.u1, expansionValveController.y) annotation (Line(points={{-129.2,
           -17.2},{-132,-17.2},{-132,-10},{-120,-10},{-120,6},{-125.6,6}}, color
         ={0,0,127}));
-  connect(valveAreaNotNormal.y, switch1.u3)
+  connect(valveDisable.y, expansionValveSwitch.u3)
     annotation (Line(points={{-142.4,-26},{-142.4,-26.8},{-129.2,-26.8}},
                                                                         color={0,0,127}));
-  connect(pressureState_hp.portA,fourWayValve. portB)
-    annotation (Line(
-      points={{-20,42},{6,42}},
-      color={153,204,0},
-      thickness=0.5));
   connect(sensor_T_degC.port,pressureState_lp. portA)
     annotation (Line(
       points={{-66,-38},{-66,-42},{-76,-42}},
@@ -777,16 +638,7 @@ equation
       thickness=0.5));
   connect(evaporator.portA_vle,pressureState_lp. portA)
     annotation (Line(
-      points={{-54,-42},{-76,-42}},
-      color={153,204,0},
-      thickness=0.5));
-  connect(evaporator.portB_vle,fourWayValve. portC)
-    annotation (Line(
-      points={{-26,-42},{0,-42},{0,34},{6,34}},
-      color={153,204,0},
-      thickness=0.5));
-  connect(statePoint4.sensorPort,fourWayValve. portC) annotation (Line(
-      points={{-12,-38},{-12,-42},{0,-42},{0,34},{6,34}},
+      points={{-54,-42},{-66,-42},{-66,-42},{-76,-42}},
       color={153,204,0},
       thickness=0.5));
   connect(condenser.portA_a,expansionValve. portA)
@@ -807,30 +659,18 @@ equation
       points={{-52,58},{200,58},{200,0}},
       color={0,170,238},
       thickness=0.5));
-  connect(defrostTriggerOff.y, heatPumpController.defrostTriggerOff)
-    annotation (Line(points={{61.3,-100},{72,-100},{72,-99.5},{82.6571,-99.5}},
-        color={255,0,255}));
-  connect(defrostTriggerOn.y, heatPumpController.defrostTriggerOn) annotation (
-      Line(points={{61.3,-77},{71.9785,-77},{71.9785,-78.5},{82.6571,-78.5}},
-        color={255,0,255}));
-  connect(fourWayValve.crossedConnection_in, heatPumpController.fourWayValve)
-    annotation (Line(points={{14,29},{14,-122},{134,-122},{134,-85.5},{126.686,
-          -85.5}},
-        color={255,0,255}));
   connect(heatPumpController.controllerSwitch, compressorController.activeInput)
-    annotation (Line(points={{126.686,-78.85},{138,-78.85},{138,-78},{148,-78},
-          {148,13.8},{137.6,13.8}},
-                               color={255,0,255}));
+    annotation (Line(points={{124.686,-78.85},{154,-78.85},{154,13.8},{137.6,
+          13.8}},              color={255,0,255}));
   connect(heatPumpController.controllerSwitch, expansionValveController.activeInput)
-    annotation (Line(points={{126.686,-78.85},{138,-78.85},{138,-78},{148,-78},
-          {148,20},{-142,20},{-142,9.8},{-137.6,9.8}},
-                                                  color={255,0,255}));
-  connect(heatPumpController.controllerSwitch, switch1.u2) annotation (Line(
-        points={{126.686,-78.85},{148,-78.85},{148,20},{-142,20},{-142,-22},{
+    annotation (Line(points={{124.686,-78.85},{154,-78.85},{154,24},{-142,24},{
+          -142,9.8},{-137.6,9.8}},                color={255,0,255}));
+  connect(heatPumpController.controllerSwitch, expansionValveSwitch.u2) annotation (Line(
+        points={{124.686,-78.85},{154,-78.85},{154,24},{-142,24},{-142,-22},{
           -129.2,-22}},
                  color={255,0,255}));
   connect(heatPumpController.TemperatureSetpoint, compressorController.u_s)
-    annotation (Line(points={{126.686,-92.5},{142,-92.5},{142,10},{137.6,10}},
+    annotation (Line(points={{124.686,-92.5},{142,-92.5},{142,10},{137.6,10}},
         color={0,0,127}));
   connect(evaporator.portA_gas, gasSource.port) annotation (Line(
       points={{-40,-28},{-40,2}},
@@ -838,10 +678,6 @@ equation
       thickness=0.5));
   connect(statePoint.port, gasSource.port) annotation (Line(
       points={{-60,-16},{-40,-16},{-40,2}},
-      color={255,153,0},
-      thickness=0.5));
-  connect(sensor_phi_ambientAirIn.port, gasSource.port) annotation (Line(
-      points={{-26,-16},{-40,-16},{-40,2}},
       color={255,153,0},
       thickness=0.5));
   connect(sensor_T_degC_ambientAirIn.port, gasSource.port) annotation (Line(
@@ -857,69 +693,66 @@ equation
       points={{-24,-118},{-24,-124},{-40,-124},{-40,-132}},
       color={255,153,0},
       thickness=0.5));
-  connect(sensor_phi_ambientAirOut.port,gasSink. port) annotation (Line(
-      points={{-10,-118},{-10,-124},{-40,-124},{-40,-132}},
-      color={255,153,0},
-      thickness=0.5));
   connect(statePoint5.port,gasSink. port) annotation (Line(
       points={{-60,-118},{-60,-124},{-40,-124},{-40,-132}},
       color={255,153,0},
       thickness=0.5));
-  connect(fan2ndOrder.portB,sensor_V_flow_ambientAir. portA);
+
   connect(fan2ndOrder.rotatoryFlange,rotatoryBoundary. rotatoryFlange)
     annotation (Line(
       points={{-32,-94},{-24,-94}},
       color={135,135,135},
       thickness=0.5));
   connect(fan2ndOrder.portA, evaporator.portB_gas) annotation (Line(
-      points={{-40,-86},{-40,-56}},
+      points={{-40,-86},{-40,-68},{-40,-56},{-40,-56}},
       color={255,153,0},
       thickness=0.5));
   connect(T_ambient, gasSource.T_in) annotation (Line(points={{-120,-200},{-120,
           -32},{-110,-32},{-110,-24},{-60,-24},{-60,-20},{-38,-20},{-38,-8},{-34,
           -8},{-34,-2}},                              color={0,0,127}));
   connect(heatPumpController.fanSpeed, rotatoryBoundary.n_in) annotation (Line(
-        points={{126.686,-99.5},{152,-99.5},{152,-132},{2,-132},{2,-94},{-20,
+        points={{124.686,-99.5},{152,-99.5},{152,-132},{2,-132},{2,-94},{-20,
           -94}}, color={0,0,127}));
-  connect(heatPumpController.enableHeatPump, EnableHeatSource) annotation (Line(
-        points={{82.6571,-89},{74,-89},{74,-174},{0,-174},{0,-200}},
-                                                                   color={255,0,
-          255}));
-  connect(compressorController.y, switch2.u1) annotation (Line(points={{125.6,10},
+  connect(compressorController.y, compressorSwitch.u1) annotation (Line(points={{125.6,10},
           {122,10},{122,-32},{116.8,-32},{116.8,-25.2}}, color={0,0,127}));
-   connect(switch2.y, pumpDownSwitch.u3);
-connect(heatPumpController.pumpDownActive,
-        pumpDownSwitch.u2);
-connect(pumpDownSpeedSignal.y,
-        pumpDownSwitch.u1);
-connect(pumpDownSwitch.y,
-        rotatoryBoundary1.n_in);
-  connect(heatPumpController.controllerSwitchCompressor, switch2.u2)
-    annotation (Line(points={{126.686,-71.5},{134,-71.5},{134,-42},{112,-42},{
+  connect(heatPumpController.controllerSwitchCompressor, compressorSwitch.u2)
+    annotation (Line(points={{124.686,-71.5},{134,-71.5},{134,-42},{112,-42},{
           112,-25.2}},
                    color={255,0,255}));
-  connect(CompressorDisable.y, switch2.u3) annotation (Line(points={{106,-30.4},
+  connect(compressorDisable.y, compressorSwitch.u3) annotation (Line(points={{106,-30.4},
           {106,-25.2},{107.2,-25.2}},
                                    color={0,0,127}));
-  connect(fourWayValve.portA, compressor.portB) annotation (Line(
-      points={{22,42},{54,42},{54,40},{86,40},{86,14}},
+  connect(compressor.portB, pressureState_hp.portA) annotation (Line(
+      points={{84,20},{84,42},{-20,42}},
       color={153,204,0},
       thickness=0.5));
-  connect(pressureState_lp1.portA, separator.portInlet) annotation (Line(
-      points={{28,-16},{28,-42},{61,-42}},
+  connect(compressorSwitch.y, rotatoryBoundary1.n_in)
+    annotation (Line(points={{112,-11.4},{112,6},{102,6}}, color={0,0,127}));
+  connect(evaporator.portB_vle, separator.portInlet) annotation (Line(
+      points={{-26,-42},{18,-42},{18,-44},{63,-44}},
       color={153,204,0},
       thickness=0.5));
- connect(fourWayValve.portD,
-        suctionShutoffValve.portA);
-connect(suctionShutoffValve.portB,
-        pressureState_lp1.portB);
-connect(suctionValveArea.y,
-        suctionShutoffValve.effectiveFlowArea_in);
+  connect(statePoint4.sensorPort, separator.portInlet) annotation (Line(
+      points={{-12,-38},{-12,-44},{63,-44}},
+      color={153,204,0},
+      thickness=0.5));
+  connect(fan2ndOrder.portB, sensor_V_flow_ambientAir.portA) annotation (Line(
+      points={{-40,-102},{-40,-113}},
+      color={255,153,0},
+      thickness=0.5));
+  connect(sensor_superheating.port, statePoint4.sensorPort) annotation (Line(
+      points={{8,-26},{8,-42},{-12,-42},{-12,-38}},
+      color={153,204,0},
+      thickness=0.5));
+  connect(sensor_subcooling.sensorValue, expansionValveController.u_m)
+    annotation (Line(points={{-118,32},{-118,38},{-128,38},{-128,16},{-132,16},
+          {-132,11.8}}, color={0,0,127}));
   connect(heatPumpController.TSupplySet, TSupplySet) annotation (Line(points={{
-          90.2143,-108.25},{90.2143,-174},{132,-174},{132,-200}}, color={0,0,
+          88.2143,-108.25},{88.2143,-174},{132,-174},{132,-200}}, color={0,0,
           127}));
-    annotation (Placement(transformation(extent={{34,-84},{60,-70}})),
-                Placement(transformation(extent={{34,-108},{60,-92}})),
+  connect(EnableHeatSource, heatPumpController.enableHeatPump) annotation (Line(
+        points={{0,-200},{0,-89},{80.6571,-89}}, color={255,0,255}));
+  annotation (
   Diagram(
     coordinateSystem(
       extent={{-200,-180},{200,180}})),
@@ -933,5 +766,6 @@ connect(suctionValveArea.y,
       Bitmap(
         extent={{-292,-218},{292,224}},
         fileName="modelica://SmartHouse/Images/HeatPumpCycle.png")}));
+
 
 end HeatPumpCycle;

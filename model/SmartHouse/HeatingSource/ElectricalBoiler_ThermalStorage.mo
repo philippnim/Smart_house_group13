@@ -14,11 +14,6 @@ model ElectricalBoiler_ThermalStorage
   parameter Modelica.Units.SI.PressureDifference pDiff = 10000
     "Pressure Difference of the pump";
 
-  final parameter Modelica.Units.SI.PressureDifference dp_dhw_nominal = pDiff
-    "Nominal pressure drop of the DHW system";
-
-
-
   parameter Modelica.Units.SI.Temperature T_supplyFloorHeating = 35 + 273.15
     "Supply temperature for floor heating"
     annotation(Dialog(group="Temperatures"));
@@ -55,6 +50,8 @@ parameter TILMedia.Liquid.Types.BaseLiquid liquidType =
     origin={-80,-80})));
 
   ThermalstorageController thermalstorageController(
+    useHP=false,
+    useBoiler=true,
     THeating=T_supplyFloorHeating,
     TDHW=T_supply_DHW,
     TDHWMin=T_min_DHW,
@@ -171,7 +168,7 @@ annotation (Placement(transformation(extent={{70,38},{90,78}})));
         rotation=180,
         origin={-50,36})));
   TIL.LiquidComponents.HydraulicResistors.LinearHydraulicResistor
-    linearHydraulicResistor_dhw(dp_nominal = dp_dhw_nominal,
+    linearHydraulicResistor_dhw(dp_nominal=pDiff,
       mdot_nominal=mdot_dhw_nominal) annotation (Placement(transformation(
         extent={{-8,-2.99998},{8,2.99998}},
         rotation=90,
@@ -192,7 +189,7 @@ equation
           -46},{-28,-48},{-27,-48}},
                    color={0,0,127}));
   connect(thermalstorageController.threeWayValve, linearDirectionalControlValve.switchingPosition_in)
-    annotation (Line(points={{-8.8,-48},{46,-48},{46,74},{28,74},{28,66.9}},
+    annotation (Line(points={{-8.8,-46},{46,-46},{46,74},{28,74},{28,66.9}},
                                                                        color={0,
           0,127}));
   connect(hotWaterTank.inletPorts[1], WaterInput1) annotation (Line(
@@ -228,8 +225,8 @@ equation
       points={{-22,0},{-60,0}},
       color={0,170,238},
       thickness=0.5));
-  connect(electricalBoiler.EnableHeatSource, thermalstorageController.EnableHeater)
-    annotation (Line(points={{-2,-16},{-2,-44},{-8.8,-44}}, color={255,0,255}));
+  connect(electricalBoiler.EnableHeatSource,thermalstorageController.EnableBoiler)
+    annotation (Line(points={{-2,-16},{-2,-54},{-8.8,-54}}, color={255,0,255}));
 
   connect(sensor_T_direct_floorheating.port, linearDirectionalControlValve.portB)
     annotation (Line(
@@ -248,7 +245,7 @@ equation
       color={0,170,238},
       thickness=0.5));
   connect(thermalstorageController.TSupplySet, electricalBoiler.TSupplySet)
-    annotation (Line(points={{-8.8,-52},{6,-52},{6,-17}}, color={0,0,127}));
+    annotation (Line(points={{-8.8,-42},{6,-42},{6,-17}}, color={0,0,127}));
                                                     annotation (Placement(
         transformation(
         extent={{-10,-10},{10,10}},

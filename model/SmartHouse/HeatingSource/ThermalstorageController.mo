@@ -2,26 +2,22 @@ within SmartHouse.HeatingSource;
 model ThermalstorageController
   extends Modelica.Blocks.Icons.Block;
 
+  parameter Boolean useHP;
+
+  parameter Boolean useBoiler;
+
   parameter Modelica.Units.SI.Temperature THeating = 35 + 273.15
     "Supply temperature for floor heating in K";
-
   parameter Modelica.Units.SI.Temperature TDHW = 60 + 273.15
     "Supply temperature for domestic hot water charging in K";
-
   parameter Modelica.Units.SI.Temperature TDHWMin = 45 + 273.15
     "Lower DHW temperature limit in K";
-
   parameter Modelica.Units.SI.Temperature TDHWMax = 58 + 273.15
     "Upper DHW temperature limit in K";
-
   parameter Modelica.Units.SI.TemperatureDifference  deltaT = 1
     "Delta T for Hysterese control of boiler limit";
-
   parameter Modelica.Units.SI.Temperature TdirectMax = 40 + 273.15
     "Upper temperature limit in K for the bypass for floor heating for safety off switch";
-
-  Boolean DHWmode
-    "True when domestic hot water storage has priority";
 
   Modelica.Blocks.Interfaces.BooleanInput EnableHeating
     "Heating demand from the house"
@@ -30,7 +26,7 @@ model ThermalstorageController
         transformation(extent={{-110,40},{-90,60}}),
         iconTransformation(extent={{-100,-60},{-80,-40}})));
 
-  Modelica.Blocks.Interfaces.RealInput T_DHW
+  Modelica.Blocks.Interfaces.RealInput T_DHW(unit="K")
     "Domestic hot water tank temperature in K"
     annotation (
       Placement(
@@ -43,26 +39,25 @@ model ThermalstorageController
           rotation=0,
           origin={-90,0})));
 
-  Modelica.Blocks.Interfaces.RealOutput TSupplySet
+  Modelica.Blocks.Interfaces.RealOutput TSupplySet(unit="K")
     "Heat pump supply temperature setpoint in degC"
-    annotation (
-      Placement(
-        transformation(extent={{92,22},{108,38}}),
-        iconTransformation(extent={{84,-48},{100,-32}})));
+    annotation (Placement(transformation(extent={{92,22},{108,38}}),
+        iconTransformation(extent={{84,52},{100,68}})));
 
   Modelica.Blocks.Interfaces.RealOutput threeWayValve
     "Control signal for three-way valve"
-    annotation (
-      Placement(
-        transformation(extent={{92,-8},{108,8}}),
-        iconTransformation(extent={{84,-8},{100,8}})));
+    annotation (Placement(transformation(extent={{92,-8},{108,8}}),
+        iconTransformation(extent={{84,12},{100,28}})));
 
-  Modelica.Blocks.Interfaces.BooleanOutput EnableHeater
-    "Enable signal for heater"
-    annotation (
-      Placement(
-        transformation(extent={{92,-38},{108,-22}}),
-        iconTransformation(extent={{84,32},{100,48}})));
+  Modelica.Blocks.Interfaces.BooleanOutput EnableBoiler
+    "Enable signal for boiler"
+    annotation (Placement(transformation(extent={{92,-38},{108,-22}}),
+        iconTransformation(extent={{84,-68},{100,-52}})));
+
+  Modelica.Blocks.Interfaces.BooleanOutput EnableHeatPump
+    "Enable signal for heat pump"
+    annotation (Placement(transformation(extent={{92,-68},{108,-52}}),
+      iconTransformation(extent={{84,-28},{100,-12}})));
 
   Modelica.Blocks.Logical.Hysteresis tankWarm(
     uLow=TDHWMin,
@@ -72,7 +67,7 @@ model ThermalstorageController
       Placement(
         transformation(extent={{-12,-40},{8,-20}})));
 
-  Modelica.Blocks.Interfaces.RealInput T_direct
+  Modelica.Blocks.Interfaces.RealInput T_direct(unit="K")
     "Domestic hot water tank temperature in K" annotation (Placement(
         transformation(
         extent={{-20,-20},{20,20}},
@@ -82,39 +77,43 @@ model ThermalstorageController
         rotation=0,
         origin={-90,90})));
 
-  // Temperature hysteresis for DHW tank
-
-  // Temperature hysteresis for direct heating bypass
+  // Temperature hysteresis for floor heating bypass
   Modelica.Blocks.Logical.Hysteresis directOverTemp(uLow=TdirectMax - deltaT,
       uHigh=TdirectMax)
     annotation (Placement(transformation(extent={{-10,70},{10,90}})));
 
+
+  // Variables
+  Boolean DHWmode "True when domestic hot water storage has priority";
+  Boolean enableHeater "True when heat generation is required";
+
+
 equation
 
+  // Hysteresis inputs
   connect(T_DHW, tankWarm.u);
+  connect(T_direct, directOverTemp.u);
 
   // DHW priority control
   DHWmode = not tankWarm.y;
 
-  // Supply temperature setpoint
-  TSupplySet =
-    if DHWmode then TDHW
-    else THeating;
+  // Supply temperature setpoint based on DHW or floor heating
+  TSupplySet = if DHWmode then TDHW else THeating;
 
   // Three-way valve
-  threeWayValve =
-    if DHWmode then 0.9999
-    else 0;
+  threeWayValve = if DHWmode then 0.9999 else 0;
 
   // Heater control depending on active circuit
-  EnableHeater =
-    if DHWmode then
-      true
-    else
-      EnableHeating and not directOverTemp.y;
+  enableHeater = if DHWmode
+    then true
+    else  EnableHeating and not directOverTemp.y;
 
-  connect(T_direct, directOverTemp.u) annotation (Line(points={{-100,90},{-20,90},
-          {-20,80},{-12,80}}, color={0,0,127}));
+  // Heater must be activated and system currently heating
+  EnableBoiler = enableHeater and useBoiler;
+  EnableHeatPump = enableHeater and useHP;
+
+
+
   annotation (
     Icon(
       coordinateSystem(

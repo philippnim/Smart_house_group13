@@ -125,7 +125,7 @@ model HeatingController
       use_effectiveFlowAreaInput=true)
     annotation (Placement(transformation(extent={{62,-24},{78,-16}})));
   Connectors.HouseHeatingOutput houseHeatingOutput(liquidType=liquidType)
-    annotation (Placement(transformation(extent={{-62,-108},{-42,-88}})));
+    annotation (Placement(transformation(extent={{80,-100},{100,-80}})));
 equation
   connect(WaterSupply, valveRoom1.portA) annotation (Line(
       points={{38,100},{62,100}},

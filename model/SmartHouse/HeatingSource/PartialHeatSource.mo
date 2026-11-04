@@ -53,7 +53,7 @@ partial model PartialHeatSource
         rotation=90,
         origin={0,-160})));
   Modelica.Blocks.Interfaces.RealInput TSupplySet
-    "Supply water temperature setpoint in degC"
+    "Supply water temperature setpoint in K"
                                       annotation (Placement(transformation(
         extent={{-20,-20},{20,20}},
         rotation=90,

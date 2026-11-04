@@ -129,11 +129,9 @@ model HouseEnviroment
     dp_nominal_inf(displayUnit="Pa") = 100,
     mdot_nominal_inf=0.001)
     annotation (Placement(transformation(extent={{54,-20},{74,0}})));
-  HeatingSource.ElectricalBoiler_ThermalStorage electricalBoiler_ThermalStorage
-    annotation (Placement(transformation(extent={{30,50},{50,70}})));
   HeatingSource.HeatingController heatingController(
     liquidType=sim.liquidType1)
-    annotation (Placement(transformation(extent={{30,14},{50,34}})));
+    annotation (Placement(transformation(extent={{34,14},{54,34}})));
   Modelica.Blocks.Sources.BooleanExpression booleanExpression(y=true)
     annotation (Placement(transformation(extent={{-4,22},{16,42}})));
   TIL.LiquidComponents.Boundaries.Boundary boundary2(boundaryType="p")
@@ -146,12 +144,15 @@ model HouseEnviroment
     TFixed=303.15)
     annotation (Placement(transformation(extent={{-4,-10},{4,10}},
         rotation=90,
-        origin={82,36})));
+        origin={90,36})));
   Modelica.Blocks.Sources.TimeTable SaunaSwitch(table=[0,0; 248400,0; 248401,1;
         252000,1; 252001,0; 586800,0; 586801,1; 590400,1; 590401,0; 604800,0])
     annotation (Placement(transformation(extent={{-60,74},{-40,94}})));
   Modelica.Blocks.Logical.GreaterEqualThreshold saunaSwitchBool(threshold=1)
     annotation (Placement(transformation(extent={{-32,78},{-20,90}})));
+  HeatingSource.HeatPump_ThermalStorage heatPump_ThermalStorage(useHP=false,
+      useBoiler=true)
+    annotation (Placement(transformation(extent={{34,48},{54,68}})));
 equation
   // Occupancy: sauna, bathroom, bedroom, kitchen, living room, garage.
   connect(OccupancySauna.y, houseVentilation.houseInputs.occupancy[1]);
@@ -181,7 +182,7 @@ equation
   connect(houseVentilation.ventilationPorts, ventilationUnit.ventilationPorts)
     annotation (Line(points={{0,-10},{54,-10}}, color={255,153,0}));
   connect(TOutdoor.y, ventilationUnit.TOutdoor)
-    annotation (Line(points={{13,84},{46,84},{46,76},{78,76},{78,-22},{68,-22}},
+    annotation (Line(points={{13,84},{46,84},{46,78},{78,78},{78,-22},{68,-22}},
                                                         color={0,0,127}));
   connect(OccupancyBathroom.y, ventilationUnit.occupancy[1]) annotation (Line(
         points={{-77,52},{-66,52},{-66,-60},{60,-60},{60,-22.75}}, color={0,0,
@@ -199,29 +200,31 @@ equation
   // Connect
   connect(houseVentilation.houseHeatingInput, heatingController.houseHeatingOutput);
 
-  connect(booleanExpression.y, electricalBoiler_ThermalStorage.HeatingDemand)
-    annotation (Line(points={{17,32},{24,32},{24,52},{32,52}}, color={255,0,255}));
-  connect(heatingController.WaterReturn, electricalBoiler_ThermalStorage.WaterInput)
-    annotation (Line(
-      points={{44,14},{44,10},{56,10},{56,74},{26,74},{26,60},{30,60}},
+  connect(booleanExpression.y, heatPump_ThermalStorage.SpaceHeatingDemand)
+    annotation (Line(points={{17,32},{30,32},{30,40},{41,40},{41,49}}, color={
+          255,0,255}));
+  connect(boundary.port, heatPump_ThermalStorage.WaterInput1) annotation (Line(
+      points={{90,36},{74,36},{74,55},{54,55}},
       color={0,170,238},
       thickness=0.5));
-  connect(electricalBoiler_ThermalStorage.WaterOutput, heatingController.WaterSupply)
-    annotation (Line(
-      points={{50.2,60},{54,60},{54,38},{43.8,38},{43.8,34}},
+  connect(boundary2.port, heatPump_ThermalStorage.WaterOutput1) annotation (
+      Line(
+      points={{90,62},{90,54},{76,54},{76,61},{54,61}},
       color={0,170,238},
       thickness=0.5));
-  connect(electricalBoiler_ThermalStorage.WaterOutput1, boundary2.port)
+  connect(heatingController.WaterReturn, heatPump_ThermalStorage.WaterInput)
     annotation (Line(
-      points={{40,70},{40,106},{90,106},{90,62}},
+      points={{48,14},{48,10},{26,10},{26,55},{34,55}},
       color={0,170,238},
       thickness=0.5));
-  connect(boundary.port, electricalBoiler_ThermalStorage.WaterInput1)
+  connect(heatingController.WaterSupply, heatPump_ThermalStorage.WaterOutput)
     annotation (Line(
-      points={{82,36},{82,44},{40,44},{40,50}},
+      points={{47.8,34},{47.8,44},{24,44},{24,61},{34,61}},
       color={0,170,238},
       thickness=0.5));
-
+  connect(TOutdoor.y, heatPump_ThermalStorage.T_ambient) annotation (Line(
+        points={{13,84},{46,84},{46,78},{78,78},{78,46},{47,46},{47,49}}, color
+        ={0,0,127}));
   annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
         coordinateSystem(preserveAspectRatio=false)),
     experiment(StopTime=604800, __Dymola_Algorithm="Dassl"));
