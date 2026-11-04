@@ -1,6 +1,7 @@
 within SmartHouse.ventilation;
 model VentilationUnit "Ventilation for 4 rooms: one channel (heat recovery + controller + moisture) per room.
 And Infiltration to the outside. Additionally also handles air exchange between the rooms."
+  import SI = Modelica.Units.SI;
 
   // Room order:
   // 1 Sauna
@@ -18,14 +19,19 @@ And Infiltration to the outside. Additionally also handles air exchange between 
     4, 5, 80]
     "Room A, Room B, total exchange in m3/h";
 
-parameter Real ACH_inf[6](each unit="1/h") = {
-  0.05,
-  0.05,
-  0.05,
-  0.07,
-  0.05,
-  0.25}
-  "Natural infiltration air change rate with the outside air";
+  parameter Real ACH_inf[6](each unit="1/h") = {
+    0.05,
+    0.05,
+    0.05,
+    0.07,
+    0.05,
+    0.25}
+    "Natural infiltration air change rate with the outside air";
+
+  parameter SI.Pressure dp_nominal_door;
+  parameter SI.MassFlowRate mdot_nominal_door;
+  parameter SI.Pressure dp_nominal_inf;
+  parameter SI.MassFlowRate mdot_nominal_inf;
 
 
 outer TIL.SystemInformationManager sim "Comes from the model around it";
@@ -47,7 +53,7 @@ outer TIL.SystemInformationManager sim "Comes from the model around it";
     "Room volumes for all 6 rooms";
 
   // Outdoor humidity and pressure for infiltration
-  parameter Real phi_outdoor(min=0, max=1) = 0.5 "Outdoor relative humidity";
+  parameter Real phi_outdoor(min=0, max=100) = 50 "Outdoor relative humidity";
   parameter Modelica.Units.SI.AbsolutePressure p_outdoor = 101325 "Outdoor pressure";
 
   // Pass only rooms 2..5 to the 4 active ventilation channels
@@ -59,7 +65,11 @@ outer TIL.SystemInformationManager sim "Comes from the model around it";
     gasType=sim.gasType1,
     V_rooms=V_rooms,
     doorConnections=doorConnections,
-    ACH_inf=ACH_inf)
+    ACH_inf=ACH_inf,
+    dp_nominal_door=dp_nominal_door,
+    mdot_nominal_door=mdot_nominal_door,
+    dp_nominal_inf=dp_nominal_inf,
+    mdot_nominal_inf=mdot_nominal_inf)
     annotation (Placement(transformation(extent={{-20,30},{20,70}})));
 
   Modelica.Blocks.Sources.Constant constPhi(k=phi_outdoor);

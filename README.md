@@ -60,3 +60,19 @@ Here notes can be added about features that could later be implemented if of int
 - Especially also regarding the internal gains through hot water pipes and showers etc. Maybe implement a DHW pipe which will also be connected to the wall heat ports. They are responsible for hot water circulation and model the heat losses lost to the rooms. Additionally a DHW consumer class could be implemented to simulate the bathroom.
 - infiltration of each room in the final model
 - better tracking of energy consumption in each room
+
+
+
+## Citations
+
+Time Series Clustering through tsam
+@article{Teichgraeber2019joss,
+   author = {Teichgraeber, Holger and Kuepper, Lucas Elias and Brandt, Adam R},
+   doi = {https://doi.org/10.21105/joss.01573},
+   journal = {Journal of Open Source Software},
+   number = {41},
+   pages = {1573},
+   title = {TimeSeriesClustering : An extensible framework in Julia},
+   volume = {4},
+   year = {2019}
+}

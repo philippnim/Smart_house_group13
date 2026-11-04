@@ -2,10 +2,10 @@ within SmartHouse.ventilation;
 connector VentilationPorts
   "Air connections between the ventilation unit and the house"
   // gasType is set by the model that uses the plug, e.g. ventilationPorts(supply(each gasType=sim.gasType1), ...)
-  TIL.Connectors.GasPort supply[4]
-    "Fresh air into the rooms. Order: bathroom, bedroom, kitchen, living room";
-  TIL.Connectors.GasPort exhaust[4]
-    "Used air out of the rooms. Order: bathroom, bedroom, kitchen, living room";
+  TIL.Connectors.GasPort supply[6]
+    "Fresh air into the rooms. Order: 1 Sauna, 2 Bathroom, 3 Bedroom, 4 Kitchen, 5 Living room, 6 Garage";
+  TIL.Connectors.GasPort exhaust[6]
+    "Used air out of the rooms. Order: 1 Sauna, 2 Bathroom, 3 Bedroom, 4 Kitchen, 5 Living room, 6 Garage";
 
   annotation (
     Icon(graphics={

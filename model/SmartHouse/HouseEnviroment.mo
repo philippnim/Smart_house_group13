@@ -123,7 +123,11 @@ model HouseEnviroment
       TILMedia.Gas.Types.VDI4670_MoistAir gasType1, redeclare
       TILMedia.Liquid.Types.TILMedia_Water liquidType1)
     annotation (Placement(transformation(extent={{66,80},{86,100}})));
-  ventilation.VentilationUnit ventilationUnit
+  ventilation.VentilationUnit ventilationUnit(
+    dp_nominal_door(displayUnit="Pa") = 10,
+    mdot_nominal_door=0,
+    dp_nominal_inf(displayUnit="Pa") = 100,
+    mdot_nominal_inf=0)
     annotation (Placement(transformation(extent={{54,-20},{74,0}})));
   HeatingSource.ElectricalBoiler_ThermalStorage electricalBoiler_ThermalStorage
     annotation (Placement(transformation(extent={{30,50},{50,70}})));

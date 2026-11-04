@@ -2,10 +2,10 @@ within SmartHouse.HeatingSource;
 model ThermalstorageController
   extends Modelica.Blocks.Icons.Block;
 
-  parameter Real THeating = 35 + 273.15
+  parameter Modelica.Units.SI.Temperature THeating = 35 + 273.15
     "Supply temperature for floor heating in K";
 
-  parameter Real TDHW = 60 + 273.15
+  parameter Modelica.Units.SI.Temperature TDHW = 60 + 273.15
     "Supply temperature for domestic hot water charging in K";
 
   parameter Modelica.Units.SI.Temperature TDHWMin = 45 + 273.15

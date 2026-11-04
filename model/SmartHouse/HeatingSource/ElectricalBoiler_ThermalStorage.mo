@@ -11,17 +11,40 @@ model ElectricalBoiler_ThermalStorage
   parameter Modelica.Units.SI.MassFlowRate mdot_dhw_nominal = 0.25
   "Nominal mass flow rate of the DHW system";
 
-  parameter Modelica.Units.SI.PressureDifference dp_dhw_nominal = 10000
-  "Nominal pressure drop of the DHW system";
-
   parameter Modelica.Units.SI.PressureDifference pDiff = 10000
-  "Pressure Difference of the pump";
+    "Pressure Difference of the pump";
+
+  final parameter Modelica.Units.SI.PressureDifference dp_dhw_nominal = pDiff
+    "Nominal pressure drop of the DHW system";
+
+
+
+  parameter Modelica.Units.SI.Temperature T_supplyFloorHeating = 35 + 273.15
+    "Supply temperature for floor heating"
+    annotation(Dialog(group="Temperatures"));
+  parameter Modelica.Units.SI.Temperature T_supply_DHW = 60 + 273.15
+    "Supply temperature for domestic hot water charging (Boiler output target)"
+    annotation(Dialog(group="Temperatures"));
+  parameter Modelica.Units.SI.Temperature T_min_DHW = 50 + 273.15
+    "Temperature of the tank where the boiler starts heating up the tank again"
+    annotation(Dialog(group="Temperatures"));
+  parameter Modelica.Units.SI.Temperature T_max_DHW = 58 + 273.15
+    "Temperature of the tank where the boiler stops heating up the tank"
+    annotation(Dialog(group="Temperatures"));
+  parameter Modelica.Units.SI.Temperature T_maxFloorHeating = 40 + 273.15
+    "Failsafe temperature at which point the boiler is shut down"
+    annotation(Dialog(group="Temperatures"));
+  parameter Modelica.Units.SI.TemperatureDifference deltaT = 1
+    "delta when the boiler is activated again after failsafe"
+    annotation(Dialog(group="Temperatures"));
 
   outer TIL.SystemInformationManager sim;
 
 parameter TILMedia.Liquid.Types.BaseLiquid liquidType =
   sim.liquidType1
-  "Liquid type";
+    "Liquid type";
+
+
   Modelica.Blocks.Interfaces.BooleanInput HeatingDemand
     "Enable heat source operation" annotation (Placement(transformation(
         extent={{-20,-20},{20,20}},
@@ -31,7 +54,13 @@ parameter TILMedia.Liquid.Types.BaseLiquid liquidType =
         rotation=90,
     origin={-80,-80})));
 
-  ThermalstorageController thermalstorageController
+  ThermalstorageController thermalstorageController(
+    THeating=T_supplyFloorHeating,
+    TDHW=T_supply_DHW,
+    TDHWMin=T_min_DHW,
+    TDHWMax=T_max_DHW,
+    deltaT=deltaT,
+    TdirectMax=T_maxFloorHeating)
     annotation (Placement(transformation(extent={{-28,-58},{-8,-38}})));
 
   TIL3_AddOn_HeatStorage.ThermalStorages.HotWaterTank
@@ -147,6 +176,8 @@ annotation (Placement(transformation(extent={{70,38},{90,78}})));
         extent={{-8,-2.99998},{8,2.99998}},
         rotation=90,
         origin={57,-14})));
+
+
 equation
   connect(pump.portB,linearDirectionalControlValve. portA)
     annotation (Line(
