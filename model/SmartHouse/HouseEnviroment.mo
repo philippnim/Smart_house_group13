@@ -125,9 +125,9 @@ model HouseEnviroment
     annotation (Placement(transformation(extent={{66,80},{86,100}})));
   ventilation.VentilationUnit ventilationUnit(
     dp_nominal_door(displayUnit="Pa") = 10,
-    mdot_nominal_door=0,
+    mdot_nominal_door=0.01,
     dp_nominal_inf(displayUnit="Pa") = 100,
-    mdot_nominal_inf=0)
+    mdot_nominal_inf=0.001)
     annotation (Placement(transformation(extent={{54,-20},{74,0}})));
   HeatingSource.ElectricalBoiler_ThermalStorage electricalBoiler_ThermalStorage
     annotation (Placement(transformation(extent={{30,50},{50,70}})));
