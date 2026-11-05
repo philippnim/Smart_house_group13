@@ -1,6 +1,7 @@
 within SmartHouse.PowerSupply;
 model ElectricSystem
   ""
+  import SI = Modelica.Units.SI;
 
 
   // ---------- Parameter PV ----------
@@ -22,7 +23,7 @@ model ElectricSystem
 
 
 
-  PV_Battery_Simple pV_Battery_Simple(
+  PV_Battery_Wind_Simple pV_Battery_Simple(
     A_PV=A_PV,
     eta_PV=eta_PV,
     eta_inv=eta_inv,

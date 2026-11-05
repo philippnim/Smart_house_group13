@@ -505,7 +505,7 @@ model House
   Connectors.HouseInputs houseInputs
     annotation (Placement(transformation(extent={{-232,-6},{-212,14}})));
   Connectors.HouseHeatingInput houseHeatingInput(liquidType = liquidType)
-    annotation (Placement(transformation(extent={{204,-10},{224,10}})));
+    annotation (Placement(transformation(extent={{210,-10},{230,10}})));
   Modelica.Blocks.Sources.RealExpression realExpression
     annotation (Placement(transformation(extent={{-568,-236},{-548,-216}})));
   Modelica.Blocks.Sources.RealExpression realExpression1(y=0)
@@ -523,6 +523,19 @@ model House
         origin={-28,-88})));
   Modelica.Blocks.Sources.RealExpression solarRadDoor(y=0)
     annotation (Placement(transformation(extent={{-30,-128},{-10,-108}})));
+  Modelica.Blocks.Interfaces.RealOutput aggPel_Demand annotation (Placement(
+        transformation(
+        extent={{-18,-18},{18,18}},
+        rotation=90,
+        origin={210,218}), iconTransformation(
+        extent={{-14,-14},{14,14}},
+        rotation=90,
+        origin={-40,114})));
+  Modelica.Blocks.Math.MultiSum multiSum(nu=6) annotation (Placement(
+        transformation(
+        extent={{-6,-6},{6,6}},
+        rotation=90,
+        origin={210,186})));
 equation
   // Occupancy: all six rooms.
   connect(houseInputs.occupancy[1], Sauna.occupancy);
@@ -759,7 +772,7 @@ equation
       color={204,0,0},
       thickness=0.5));
   connect(compositeWall3.heatPort_A, OutdoorTemp.heatPort) annotation (Line(
-      points={{198,-32},{204,-32},{204,192},{-186,192}},
+      points={{198,-32},{204,-32},{204,2},{164,2},{164,192},{-186,192}},
       color={204,0,0},
       thickness=0.5));
   connect(compositeWall1.heatPort_A, OutdoorTemp.heatPort) annotation (Line(
@@ -767,7 +780,7 @@ equation
       color={204,0,0},
       thickness=0.5));
   connect(compositeWall2.heatPort_A, OutdoorTemp.heatPort) annotation (Line(
-      points={{22,-76},{202,-76},{202,190},{-186,190},{-186,192}},
+      points={{22,-76},{22,-96},{204,-96},{204,2},{164,2},{164,192},{-186,192}},
       color={204,0,0},
       thickness=0.5));
   connect(KitchenFloor.heatPort_down, GroundTemp.heatPort) annotation (Line(
@@ -850,7 +863,7 @@ equation
       color={204,0,0},
       thickness=0.5));
   connect(externalDoor.heatPort_A_air, OutdoorTemp.heatPort) annotation (Line(
-      points={{-28,-98},{6,-98},{6,-84},{202,-84},{202,192},{-186,192}},
+      points={{-28,-98},{204,-98},{204,2},{164,2},{164,192},{-186,192}},
       color={204,0,0},
       thickness=0.5));
   connect(externalDoor.solarGains, LivingRoomFloor.heatPort_surfaceConnection)
@@ -860,6 +873,20 @@ equation
       thickness=0.5));
   connect(solarRadDoor.y, externalDoor.RadiationInput) annotation (Line(points=
           {{-9,-118},{-9,-104},{-16,-104},{-16,-92}}, color={0,0,127}));
+  connect(multiSum.y, aggPel_Demand)
+    annotation (Line(points={{210,193.02},{210,218}}, color={0,0,127}));
+
+
+
+  // Connect the electric demands
+  connect(Sauna.aggPel_Demand, multiSum.u[1]);
+  connect(BathroomPlaceholder.aggPel_Demand, multiSum.u[2]);
+  connect(Bedroom.aggPel_Demand, multiSum.u[3]);
+  connect(Kitchen.aggPel_Demand, multiSum.u[4]);
+  connect(LivingRoom.aggPel_Demand, multiSum.u[5]);
+  connect(Garage.aggPel_Demand, multiSum.u[6]);
+
+
   annotation (Icon(coordinateSystem(extent={{-220,-200},{220,200}}),
                    graphics={Bitmap(
           extent={{-200,-200},{200,200}},
