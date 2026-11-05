@@ -17,6 +17,19 @@ model HouseEnviroment
   parameter String scenario = "summer"
     "Define the scenario use the inputs defined by the python script name of the folder";
 
+  parameter Boolean useHP "Enable heat pump in this scenario"
+    annotation(Dialog(group="Operatiopn"));
+  parameter Boolean useBoiler "Enable electric boiler in this scenario"
+    annotation(Dialog(group="Operatiopn"));
+  parameter Boolean enablePV "PV an/aus"
+    annotation(Dialog(group="Operatiopn"));
+  parameter Boolean enableWind "Wind an/aus"
+    annotation(Dialog(group="Operatiopn"));
+  parameter Boolean enableBattery "Batterie an/aus"
+    annotation(Dialog(group="Operatiopn"));
+
+
+
   final parameter String scenarioDirectory = Modelica.Utilities.Files.fullPathName(Modelica.Utilities.Files.loadResource("modelica://SmartHouse/") + "/../../data/scenarios/" + scenario + "/") + "/";
 
   // Filenames
@@ -187,10 +200,13 @@ model HouseEnviroment
         origin={90,36})));
   Modelica.Blocks.Logical.GreaterEqualThreshold saunaSwitchBool(threshold=1)
     annotation (Placement(transformation(extent={{-32,84},{-20,96}})));
-  HeatingSource.HeatPump_ThermalStorage heatPump_ThermalStorage(useHP=false,
-      useBoiler=true)
+  HeatingSource.HeatPump_ThermalStorage heatPump_ThermalStorage(useHP=useHP,
+      useBoiler=useBoiler)
     annotation (Placement(transformation(extent={{34,48},{54,68}})));
-  PowerSupply.ElectricSystem electricSystem
+  PowerSupply.ElectricSystem electricSystem(
+    enablePV=enablePV,
+    enableWind=enableWind,
+    enableBattery=enableBattery)
     annotation (Placement(transformation(extent={{22,-70},{42,-50}})));
 
   Modelica.Blocks.Interaction.Show.RealValue currentHeatload
@@ -295,5 +311,8 @@ equation
     annotation (Line(points={{37,-40.5},{37,-48}}, color={0,0,127}));
   annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
         coordinateSystem(preserveAspectRatio=false)),
-    experiment(StopTime=1209600, __Dymola_Algorithm="Dassl"));
+    experiment(
+      StopTime=1209600,
+      Interval=900,
+      __Dymola_Algorithm="Dassl"));
 end HouseEnviroment;
