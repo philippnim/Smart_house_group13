@@ -530,12 +530,15 @@ model House
         origin={210,218}), iconTransformation(
         extent={{-14,-14},{14,14}},
         rotation=90,
-        origin={-40,114})));
+        origin={184,214})));
   Modelica.Blocks.Math.MultiSum multiSum(nu=6) annotation (Placement(
         transformation(
         extent={{-6,-6},{6,6}},
         rotation=90,
         origin={210,186})));
+  Modelica.Blocks.Interfaces.RealVectorInput radInput[4]
+    "Order: north - east - south - west"
+    annotation (Placement(transformation(extent={{-20,-230},{20,-190}})));
 equation
   // Occupancy: all six rooms.
   connect(houseInputs.occupancy[1], Sauna.occupancy);
