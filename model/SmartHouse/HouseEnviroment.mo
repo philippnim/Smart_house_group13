@@ -124,6 +124,7 @@ model HouseEnviroment
       TILMedia.Liquid.Types.TILMedia_Water liquidType1)
     annotation (Placement(transformation(extent={{66,80},{86,100}})));
   ventilation.VentilationUnit ventilationUnit(
+    useAirNetwork=false,
     dp_nominal_door(displayUnit="Pa") = 10,
     mdot_nominal_door=0,
     dp_nominal_inf(displayUnit="Pa") = 100,

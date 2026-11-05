@@ -26,3 +26,5 @@ dsmodel.c
 dsres.mat
 dsin.txt
 *.bak-mo
+timers.txt
+simulation_summary.txt
