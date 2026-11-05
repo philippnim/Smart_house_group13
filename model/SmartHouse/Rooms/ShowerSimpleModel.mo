@@ -86,7 +86,7 @@ model ShowerSimpleModel
         rotation=180,
         origin={-8,34})));
   TIL.Connectors.LiquidPort BWWVorlauf(liquidType=liquidType)
-    annotation (Placement(transformation(extent={{92,50},{112,70}})));
+    annotation (Placement(transformation(extent={{92,70},{112,90}})));
   TIL.Connectors.LiquidPort BWWRuecklauf(liquidType=liquidType)
     annotation (Placement(transformation(extent={{90,-90},{110,-70}})));
   TIL.Connectors.GasPort ShowerAirIn(gasType=gasType)
@@ -94,10 +94,11 @@ model ShowerSimpleModel
   TIL.Connectors.GasPort ShowerAirOut(gasType=gasType)
     annotation (Placement(transformation(extent={{-110,-90},{-90,-70}})));
   TIL.LiquidComponents.Valves.DirectionalControlValve directionalControlValve(
-      use_switchingPositionInput=true) annotation (Placement(transformation(
+      use_switchingPositionInput=true, switchingPositionFixed=0.5)
+                                       annotation (Placement(transformation(
         extent={{8,-6},{-8,6}},
         rotation=180,
-        origin={46,58})));
+        origin={46,78})));
   TIL.LiquidComponents.Valves.OrificeValve valve(use_effectiveFlowAreaInput=true)
     annotation (Placement(transformation(
         extent={{-8,-4},{8,4}},
@@ -107,14 +108,14 @@ model ShowerSimpleModel
     boundaryType="p",
     pFixed=p_ColdWater,
     TFixed=T_coldWater)
-    annotation (Placement(transformation(extent={{-4,52},{4,72}})));
+    annotation (Placement(transformation(extent={{-4,72},{4,92}})));
   TIL.LiquidComponents.Sensors.Sensor_V_flow sensor_V_flow
     annotation (Placement(transformation(extent={{24,16},{16,24}})));
   TIL.LiquidComponents.Sensors.Sensor_T sensor_T annotation (Placement(
         transformation(
         extent={{-4,-4},{4,4}},
         rotation=270,
-        origin={58,48})));
+        origin={58,68})));
   TIL.OtherComponents.Controllers.PIController controllerT(
     controllerType="PI",
     invertFeedback=true,
@@ -125,21 +126,49 @@ model ShowerSimpleModel
     yInitial=0.5) annotation (Placement(transformation(
         extent={{-6,6},{6,-6}},
         rotation=270,
-        origin={46,80})));
+        origin={46,100})));
   Modelica.Blocks.Sources.RealExpression realExpression(y=T_shower)
-    annotation (Placement(transformation(extent={{10,90},{30,110}})));
+    annotation (Placement(transformation(extent={{10,110},{30,130}})));
   TIL.OtherComponents.Controllers.PIController controllerVdot(
     controllerType="PI",
     invertFeedback=false,
     k=k_Vdot,
     Ti=Ti_Vdot,
     yMax=1e-3,
-    yMin=0) annotation (Placement(transformation(
+    yMin=1e-9,
+    yInitial=1e-9)
+            annotation (Placement(transformation(
         extent={{6,-6},{-6,6}},
         rotation=0,
         origin={70,28})));
   Modelica.Blocks.Sources.RealExpression realExpression1(y=Vdot_shower)
     annotation (Placement(transformation(extent={{114,18},{94,38}})));
+  TIL.LiquidComponents.HydraulicInductors.HydraulicInductor hydraulicInductor(
+      momentumFactor=0.01) annotation (Placement(transformation(
+        extent={{-6,-6},{6,6}},
+        rotation=270,
+        origin={46,60})));
+  TIL.LiquidComponents.Tubes.Tube tube(
+    tubeGeometry(
+      innerDiameter=0.1,
+      wallThickness=0.01,
+      length=1,
+      nParallelTubes=1),
+    nCells=1,
+    redeclare model TubeSideHeatTransferModel =
+        TIL.LiquidComponents.Tubes.TransportPhenomena.HeatTransfer.ConstantAlpha
+        (constantAlpha=0),
+    redeclare model PressureDropModel =
+        TIL.LiquidComponents.Tubes.TransportPhenomena.PressureDrop.ZeroPressureDrop)
+    annotation (Placement(transformation(
+        extent={{-8,-2},{8,2}},
+        rotation=270,
+        origin={64,46})));
+  TIL.LiquidComponents.Pumps.SimplePump simplePump(presetVariableType="dp",
+      dpFixed=20000)
+    annotation (Placement(transformation(extent={{-8,-8},{8,8}},
+        rotation=270,
+        origin={16,82})));
 equation
   connect(BWWRuecklauf, BWWRuecklauf) annotation (Line(
       points={{100,-80},{100,-80}},
@@ -158,19 +187,11 @@ equation
       color={255,153,0},
       thickness=0.5));
   connect(BWWVorlauf, directionalControlValve.portB) annotation (Line(
-      points={{102,60},{54,60}},
+      points={{102,80},{54,80}},
       color={0,170,238},
       thickness=0.5));
   connect(parallelFlowHX.portB_liq, BWWRuecklauf) annotation (Line(
       points={{8,-16},{8,-80},{100,-80}},
-      color={0,170,238},
-      thickness=0.5));
-  connect(boundary.port, directionalControlValve.portC) annotation (Line(
-      points={{0,62},{34,62},{34,60},{38,60}},
-      color={0,170,238},
-      thickness=0.5));
-  connect(directionalControlValve.portA, valve.portA) annotation (Line(
-      points={{46,52},{46,36}},
       color={0,170,238},
       thickness=0.5));
   connect(valve.portB, sensor_V_flow.portA) annotation (Line(
@@ -181,22 +202,44 @@ equation
       points={{17,20},{8,20},{8,12}},
       color={0,170,238},
       thickness=0.5));
-  connect(sensor_T.port, valve.portA) annotation (Line(
-      points={{54,48},{46,48},{46,36}},
-      color={0,170,238},
-      thickness=0.5));
   connect(controllerT.y, directionalControlValve.switchingPosition_in)
-    annotation (Line(points={{46,73.6},{46,64.6}}, color={0,0,127}));
-  connect(sensor_T.sensorValue, controllerT.u_m) annotation (Line(points={{60,48},
-          {66,48},{66,80},{51.8,80}}, color={0,0,127}));
+    annotation (Line(points={{46,93.6},{46,84.6}}, color={0,0,127}));
+  connect(sensor_T.sensorValue, controllerT.u_m) annotation (Line(points={{60,68},
+          {66,68},{66,100},{51.8,100}},
+                                      color={0,0,127}));
   connect(realExpression.y, controllerT.u_s)
-    annotation (Line(points={{31,100},{46,100},{46,85.6}}, color={0,0,127}));
+    annotation (Line(points={{31,120},{46,120},{46,105.6}},color={0,0,127}));
   connect(controllerVdot.y, valve.effectiveFlowArea_in)
     annotation (Line(points={{63.6,28},{51,28}}, color={0,0,127}));
   connect(sensor_V_flow.sensorValue, controllerVdot.u_m) annotation (Line(
         points={{20,23},{20,28},{32,28},{32,14},{70,14},{70,22.2}}, color={0,0,127}));
   connect(realExpression1.y, controllerVdot.u_s)
     annotation (Line(points={{93,28},{75.6,28}}, color={0,0,127}));
+  connect(directionalControlValve.portA, hydraulicInductor.portA) annotation (
+      Line(
+      points={{46,72},{46,66}},
+      color={0,170,238},
+      thickness=0.5));
+  connect(sensor_T.port, hydraulicInductor.portA) annotation (Line(
+      points={{54,68},{46,68},{46,66}},
+      color={0,170,238},
+      thickness=0.5));
+  connect(hydraulicInductor.portB, tube.portA) annotation (Line(
+      points={{46,54},{46,50},{56,50},{56,58},{64,58},{64,54}},
+      color={0,170,238},
+      thickness=0.5));
+  connect(valve.portA, tube.portB) annotation (Line(
+      points={{46,36},{46,40},{58,40},{58,38},{64,38}},
+      color={0,170,238},
+      thickness=0.5));
+  connect(boundary.port, simplePump.portA) annotation (Line(
+      points={{0,82},{8,82}},
+      color={0,170,238},
+      thickness=0.5));
+  connect(simplePump.portB, directionalControlValve.portC) annotation (Line(
+      points={{24,82},{34,82},{34,80},{38,80}},
+      color={0,170,238},
+      thickness=0.5));
   annotation (Icon(graphics={Bitmap(
           extent={{-100,-100},{100,100}},
     fileName="modelica://SmartHouse/Images/shower.png"),
