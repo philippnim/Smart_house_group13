@@ -126,6 +126,10 @@ model HeatingController
     annotation (Placement(transformation(extent={{62,-24},{78,-16}})));
   Connectors.HouseHeatingOutput houseHeatingOutput(liquidType=liquidType)
     annotation (Placement(transformation(extent={{80,-100},{100,-80}})));
+  TIL.LiquidComponents.Sensors.Sensor_h sensor_h_return
+    annotation (Placement(transformation(extent={{40,-72},{48,-64}})));
+  TIL.LiquidComponents.Sensors.Sensor_h sensor_h_in
+    annotation (Placement(transformation(extent={{12,86},{28,102}})));
 equation
   connect(WaterSupply, valveRoom1.portA) annotation (Line(
       points={{38,100},{62,100}},
@@ -187,6 +191,14 @@ equation
       thickness=0.5));
   connect(valveRoom4.portA, WaterSupply) annotation (Line(
       points={{62,-20},{38,-20},{38,100}},
+      color={0,170,238},
+      thickness=0.5));
+  connect(sensor_h_return.port, WaterReturn) annotation (Line(
+      points={{44,-72},{44,-86},{40,-86},{40,-100}},
+      color={0,170,238},
+      thickness=0.5));
+  connect(sensor_h_in.port, WaterSupply) annotation (Line(
+      points={{20,86},{20,78},{38,78},{38,100}},
       color={0,170,238},
       thickness=0.5));
     annotation(

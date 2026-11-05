@@ -510,6 +510,19 @@ model House
     annotation (Placement(transformation(extent={{-568,-236},{-548,-216}})));
   Modelica.Blocks.Sources.RealExpression realExpression1(y=0)
     annotation (Placement(transformation(extent={{-216,-68},{-196,-48}})));
+  Boundaries.Walls.Window externalDoor(
+    lengthWall=1,
+    heightWall=2,
+    alpha_A=1,
+    alpha_B=1,
+    g_value=0,
+    thicknessWindow=0.10,
+    lambdaWindow=10) annotation (Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        rotation=90,
+        origin={-28,-88})));
+  Modelica.Blocks.Sources.RealExpression solarRadDoor(y=0)
+    annotation (Placement(transformation(extent={{-30,-128},{-10,-108}})));
 equation
   // Occupancy: all six rooms.
   connect(houseInputs.occupancy[1], Sauna.occupancy);
@@ -831,6 +844,22 @@ equation
       points={{184,-42},{162,-42},{162,-145.6},{140.4,-145.6}},
       color={204,0,0},
       thickness=0.5));
+  connect(externalDoor.heatPort_B_air, LivingRoom.heatPort_walls) annotation (
+      Line(
+      points={{-28,-78},{-28,-66},{-2,-66},{-2,-52},{8,-52},{8,-30},{12.6,-30}},
+      color={204,0,0},
+      thickness=0.5));
+  connect(externalDoor.heatPort_A_air, OutdoorTemp.heatPort) annotation (Line(
+      points={{-28,-98},{6,-98},{6,-84},{202,-84},{202,192},{-186,192}},
+      color={204,0,0},
+      thickness=0.5));
+  connect(externalDoor.solarGains, LivingRoomFloor.heatPort_surfaceConnection)
+    annotation (Line(
+      points={{-18,-84},{0,-84},{0,-125.6},{10.4,-125.6}},
+      color={204,0,0},
+      thickness=0.5));
+  connect(solarRadDoor.y, externalDoor.RadiationInput) annotation (Line(points=
+          {{-9,-118},{-9,-104},{-16,-104},{-16,-92}}, color={0,0,127}));
   annotation (Icon(coordinateSystem(extent={{-220,-200},{220,200}}),
                    graphics={Bitmap(
           extent={{-200,-200},{200,200}},

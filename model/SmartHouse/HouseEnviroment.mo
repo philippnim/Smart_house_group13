@@ -125,9 +125,9 @@ model HouseEnviroment
     annotation (Placement(transformation(extent={{66,80},{86,100}})));
   ventilation.VentilationUnit ventilationUnit(
     dp_nominal_door(displayUnit="Pa") = 10,
-    mdot_nominal_door=0.01,
+    mdot_nominal_door=0,
     dp_nominal_inf(displayUnit="Pa") = 100,
-    mdot_nominal_inf=0.001)
+    mdot_nominal_inf=0)
     annotation (Placement(transformation(extent={{54,-20},{74,0}})));
   HeatingSource.HeatingController heatingController(
     liquidType=sim.liquidType1)
