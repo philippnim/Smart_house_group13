@@ -187,9 +187,6 @@ model HouseEnviroment
     annotation (Placement(transformation(extent={{34,14},{54,34}})));
   Modelica.Blocks.Sources.BooleanExpression booleanExpression(y=true)
     annotation (Placement(transformation(extent={{-4,22},{16,42}})));
-  Modelica.Blocks.Sources.TimeTable SaunaSwitch(table=[0,0; 248400,0; 248401,1;
-        252000,1; 252001,0; 586800,0; 586801,1; 590400,1; 590401,0; 604800,0])
-    annotation (Placement(transformation(extent={{-60,74},{-40,94}})));
   Modelica.Blocks.Logical.GreaterEqualThreshold saunaSwitchBool(threshold=1)
     annotation (Placement(transformation(extent={{-32,84},{-20,96}})));
   HeatingSource.HeatPump_ThermalStorage heatPump_ThermalStorage(useHP=useHP,
