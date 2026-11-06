@@ -154,6 +154,13 @@ model HouseEnviroment
         extent={{-10,-10},{10,10}},
         rotation=0,
         origin={-20,52})));
+  TIL.LiquidComponents.Boundaries.Boundary cold_water_in(
+    boundaryType="p",
+    pFixed=200000,
+    m_flowFixed=2,
+    use_temperatureInput=false,
+    TFixed=283.15)
+    annotation (Placement(transformation(extent={{92,44},{100,64}})));
 equation
   // Occupancy: sauna, bathroom, bedroom, kitchen, living room, garage.
   connect(OccupancySauna.y, houseVentilation.houseInputs.occupancy[1]);
@@ -217,16 +224,16 @@ equation
   connect(TOutdoor.y, heatPump_ThermalStorage.T_ambient) annotation (Line(
         points={{13,84},{46,84},{46,78},{78,78},{78,46},{47,46},{47,49}}, color
         ={0,0,127}));
-  connect(heatPump_ThermalStorage.WaterInput1, houseVentilation.BWWOut)
-    annotation (Line(
-      points={{54,55},{60,55},{60,6},{26,6},{26,9},{22.2,9}},
-      color={0,170,238},
-      thickness=0.5));
   connect(ShowerOnOff.y, houseVentilation.showerOn) annotation (Line(points={{
           -9,52},{8,52},{8,16},{23.4,16},{23.4,15.6}}, color={0,0,127}));
   connect(heatPump_ThermalStorage.WaterOutput1, houseVentilation.BWWIn)
     annotation (Line(
       points={{54,61},{58,61},{58,42},{28,42},{28,24},{22.2,24},{22.2,12.4}},
+      color={0,170,238},
+      thickness=0.5));
+  connect(cold_water_in.port, heatPump_ThermalStorage.WaterInput1) annotation (
+      Line(
+      points={{96,54},{60,54},{60,55},{54,55}},
       color={0,170,238},
       thickness=0.5));
   annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(

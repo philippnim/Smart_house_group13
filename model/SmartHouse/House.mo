@@ -354,7 +354,7 @@ model House
     cp_B=1000)
     annotation (Placement(transformation(extent={{10,-10},{-10,10}},
         rotation=90,
-        origin={-20,112})));
+        origin={-30,106})));
   Boundaries.Horizontal.GroundFloor SaunaFloor(
     length=2.5,
     width=4,
@@ -500,7 +500,7 @@ model House
   Connectors.HouseInputs houseInputs
     annotation (Placement(transformation(extent={{-232,-6},{-212,14}})));
   Connectors.HouseHeatingInput houseHeatingInput(liquidType = liquidType)
-    annotation (Placement(transformation(extent={{210,-10},{230,10}})));
+    annotation (Placement(transformation(extent={{204,-10},{224,10}})));
   Modelica.Blocks.Sources.RealExpression realExpression
     annotation (Placement(transformation(extent={{-568,-236},{-548,-216}})));
   Modelica.Blocks.Sources.RealExpression realExpression1(y=0)
@@ -518,22 +518,6 @@ model House
         origin={-28,-88})));
   Modelica.Blocks.Sources.RealExpression solarRadDoor(y=0)
     annotation (Placement(transformation(extent={{-30,-128},{-10,-108}})));
-  Modelica.Blocks.Interfaces.RealOutput aggPel_Demand annotation (Placement(
-        transformation(
-        extent={{-18,-18},{18,18}},
-        rotation=90,
-        origin={210,218}), iconTransformation(
-        extent={{-14,-14},{14,14}},
-        rotation=90,
-        origin={184,214})));
-  Modelica.Blocks.Math.MultiSum multiSum(nu=6) annotation (Placement(
-        transformation(
-        extent={{-6,-6},{6,6}},
-        rotation=90,
-        origin={210,186})));
-  Modelica.Blocks.Interfaces.RealVectorInput radInput[4]
-    "Order: north - east - south - west"
-    annotation (Placement(transformation(extent={{-20,-230},{20,-190}})));
   Rooms.Bathroom bathroom(
     A_floor=14,
     h=2.2,
@@ -544,8 +528,6 @@ model House
     annotation (Placement(transformation(extent={{-40,60},{-20,80}})));
   TIL.Connectors.LiquidPort BWWIn(liquidType=liquidType)
     annotation (Placement(transformation(extent={{212,114},{232,134}})));
-  TIL.Connectors.LiquidPort BWWOut(liquidType=liquidType)
-    annotation (Placement(transformation(extent={{212,80},{232,100}})));
   Modelica.Blocks.Interfaces.RealInput showerOn annotation (Placement(
         transformation(
         extent={{-20,-20},{20,20}},
@@ -744,7 +726,7 @@ equation
       color={204,0,0},
       thickness=0.5));
   connect(compositeWall5.heatPort_A, OutdoorTemp.heatPort) annotation (Line(
-      points={{-20,122},{-20,136},{-96,136},{-96,192},{-186,192}},
+      points={{-30,116},{-30,152},{-14,152},{-14,192},{-186,192}},
       color={204,0,0},
       thickness=0.5));
   connect(compositeWall4.heatPort_A, OutdoorTemp.heatPort) annotation (Line(
@@ -752,7 +734,7 @@ equation
       color={204,0,0},
       thickness=0.5));
   connect(compositeWall3.heatPort_A, OutdoorTemp.heatPort) annotation (Line(
-      points={{198,-32},{204,-32},{204,2},{164,2},{164,192},{-186,192}},
+      points={{198,-32},{174,-32},{174,192},{-186,192}},
       color={204,0,0},
       thickness=0.5));
   connect(compositeWall1.heatPort_A, OutdoorTemp.heatPort) annotation (Line(
@@ -760,7 +742,7 @@ equation
       color={204,0,0},
       thickness=0.5));
   connect(compositeWall2.heatPort_A, OutdoorTemp.heatPort) annotation (Line(
-      points={{22,-76},{22,-96},{204,-96},{204,2},{164,2},{164,192},{-186,192}},
+      points={{22,-76},{202,-76},{202,190},{-186,190},{-186,192}},
       color={204,0,0},
       thickness=0.5));
   connect(KitchenFloor.heatPort_down, GroundTemp.heatPort) annotation (Line(
@@ -788,8 +770,8 @@ equation
       color={204,0,0},
       thickness=0.5));
   connect(compositeWall5.RadiationInput, realExpression1.y) annotation (Line(
-        points={{-8,116},{4,116},{4,132},{-104,132},{-104,-58},{-195,-58}},
-                                  color={0,0,127}));
+        points={{-18,110},{-12,110},{-12,212},{-240,212},{-240,-36},{-188,-36},
+          {-188,-58},{-195,-58}}, color={0,0,127}));
   connect(compositeWall.RadiationInput, realExpression1.y) annotation (Line(
         points={{-174,58},{-174,44},{-240,44},{-240,-36},{-188,-36},{-188,-58},
           {-195,-58}}, color={0,0,127}));
@@ -824,8 +806,7 @@ equation
       thickness=0.5));
   connect(compositeWall5.solarGains, BathroomFloor.heatPort_surfaceConnection)
     annotation (Line(
-      points={{-10,108},{4,108},{4,-72},{-52,-72},{-52,-136},{-45.6,-136},{
-          -45.6,-145.6}},
+      points={{-20,102},{-12,102},{-12,52},{-45.6,52},{-45.6,-145.6}},
       color={204,0,0},
       thickness=0.5));
   connect(compositeWall4.solarGains, BedroomFloor.heatPort_surfaceConnection)
@@ -844,7 +825,7 @@ equation
       color={204,0,0},
       thickness=0.5));
   connect(externalDoor.heatPort_A_air, OutdoorTemp.heatPort) annotation (Line(
-      points={{-28,-98},{204,-98},{204,2},{164,2},{164,192},{-186,192}},
+      points={{-28,-98},{6,-98},{6,-84},{202,-84},{202,192},{-186,192}},
       color={204,0,0},
       thickness=0.5));
   connect(externalDoor.solarGains, LivingRoomFloor.heatPort_surfaceConnection)
@@ -854,20 +835,6 @@ equation
       thickness=0.5));
   connect(solarRadDoor.y, externalDoor.RadiationInput) annotation (Line(points=
           {{-9,-118},{-9,-104},{-16,-104},{-16,-92}}, color={0,0,127}));
-  connect(multiSum.y, aggPel_Demand)
-    annotation (Line(points={{210,193.02},{210,218}}, color={0,0,127}));
-
-
-
-  // Connect the electric demands
-  connect(Sauna.aggPel_Demand, multiSum.u[1]);
-  connect(bathroom.aggPel_Demand, multiSum.u[2]);
-  connect(Bedroom.aggPel_Demand, multiSum.u[3]);
-  connect(Kitchen.aggPel_Demand, multiSum.u[4]);
-  connect(LivingRoom.aggPel_Demand, multiSum.u[5]);
-  connect(Garage.aggPel_Demand, multiSum.u[6]);
-
-
   connect(internalWall.heatPort_B_air, bathroom.heatPort_walls) annotation (
       Line(
       points={{-70,70},{-39.4,70}},
@@ -893,25 +860,17 @@ equation
           {-39.4,60.6}},
       color={204,0,0},
       thickness=0.5));
+  connect(bathroom.heatPort_ceiling, compositeWall5.heatPort_B) annotation (
+      Line(
+      points={{-39.4,79.4},{-39.4,96},{-30,96}},
+      color={204,0,0},
+      thickness=0.5));
   connect(BWWIn, bathroom.BWWVorlauf) annotation (Line(
       points={{222,124},{0,124},{0,73},{-20,73}},
       color={0,170,238},
       thickness=0.5));
-  connect(BWWOut, bathroom.BWWRuecklauf) annotation (Line(
-      points={{222,90},{132,90},{132,44},{-8,44},{-8,67},{-20,67}},
-      color={0,170,238},
-      thickness=0.5));
   connect(showerOn, bathroom.showercontroll) annotation (Line(points={{234,156},
           {105,156},{105,80.8},{-23.4,80.8}}, color={0,0,127}));
-  connect(compositeWall5.heatPort_B, bathroom.heatPort_walls) annotation (Line(
-      points={{-20,102},{-20,88},{-48,88},{-48,70},{-39.4,70}},
-      color={204,0,0},
-      thickness=0.5));
-  connect(BathroomRoof.heatPort_down, bathroom.heatPort_ceiling) annotation (
-      Line(
-      points={{-30,160.4},{-30,152},{-56,152},{-56,79.4},{-39.4,79.4}},
-      color={204,0,0},
-      thickness=0.5));
   annotation (Icon(coordinateSystem(extent={{-220,-200},{220,200}}),
                    graphics={Bitmap(
           extent={{-200,-200},{200,200}},

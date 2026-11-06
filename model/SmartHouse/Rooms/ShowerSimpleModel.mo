@@ -88,8 +88,6 @@ model ShowerSimpleModel
         origin={-8,34})));
   TIL.Connectors.LiquidPort BWWVorlauf(liquidType=liquidType)
     annotation (Placement(transformation(extent={{92,70},{112,90}})));
-  TIL.Connectors.LiquidPort BWWRuecklauf(liquidType=liquidType)
-    annotation (Placement(transformation(extent={{90,-90},{110,-70}})));
   TIL.Connectors.GasPort ShowerAirIn(gasType=gasType)
     annotation (Placement(transformation(extent={{-110,70},{-90,90}})));
   TIL.Connectors.GasPort ShowerAirOut(gasType=gasType)
@@ -176,6 +174,12 @@ model ShowerSimpleModel
     annotation (Placement(transformation(extent={{-8,-8},{8,8}},
         rotation=90,
         origin={76,80})));
+  TIL.LiquidComponents.Boundaries.Boundary drain(
+    streamVariablesInputType="T",
+    boundaryType="p",
+    pFixed=150000,
+    TFixed=298.15)
+    annotation (Placement(transformation(extent={{94,-64},{102,-44}})));
 equation
   // Stop both controllers regulating while the shower is off.
    controllerT.activeInput = false;
@@ -185,10 +189,6 @@ equation
 // Hold a neutral mixing position and a small flow-valve area.
   controllerT.y_notActive = 0.5;
   controllerVdot.y_notActive = 1e-9;
-  connect(BWWRuecklauf, BWWRuecklauf) annotation (Line(
-      points={{100,-80},{100,-80}},
-      color={0,170,238},
-      thickness=0.5));
   connect(simpleFan.portB, parallelFlowHX.portA_gas) annotation (Line(
       points={{-8,26},{-8,12}},
       color={255,153,0},
@@ -200,10 +200,6 @@ equation
   connect(ShowerAirOut, parallelFlowHX.portB_gas) annotation (Line(
       points={{-100,-80},{-8,-80},{-8,-16}},
       color={255,153,0},
-      thickness=0.5));
-  connect(parallelFlowHX.portB_liq, BWWRuecklauf) annotation (Line(
-      points={{8,-16},{8,-80},{100,-80}},
-      color={0,170,238},
       thickness=0.5));
   connect(valve.portB, sensor_V_flow.portA) annotation (Line(
       points={{46,20},{23,20}},
@@ -253,6 +249,10 @@ equation
       thickness=0.5));
   connect(sensor_T.port, directionalControlValve.portA) annotation (Line(
       points={{54,68},{50,68},{50,72},{44,72}},
+      color={0,170,238},
+      thickness=0.5));
+  connect(parallelFlowHX.portB_liq, drain.port) annotation (Line(
+      points={{8,-16},{8,-54},{98,-54}},
       color={0,170,238},
       thickness=0.5));
   annotation (Icon(graphics={Bitmap(
