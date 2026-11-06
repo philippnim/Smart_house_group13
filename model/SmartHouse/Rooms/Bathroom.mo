@@ -13,8 +13,8 @@ model Bathroom "simpler Batrhroom"
     T_coldWater=283.15,
     T_shower=313.15,
     Vdot_shower=0.0001,
-    k_Temp=0.1,
-    Ti_Temp=5,
+    k_Temp=0.01,
+    Ti_Temp=10,
     k_Vdot=1,
     Ti_Vdot=0.5)
     annotation (Placement(transformation(extent={{58,-4},{78,16}})));

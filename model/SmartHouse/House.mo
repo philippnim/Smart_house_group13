@@ -860,17 +860,21 @@ equation
           {-39.4,60.6}},
       color={204,0,0},
       thickness=0.5));
-  connect(bathroom.heatPort_ceiling, compositeWall5.heatPort_B) annotation (
-      Line(
-      points={{-39.4,79.4},{-39.4,96},{-30,96}},
-      color={204,0,0},
-      thickness=0.5));
   connect(BWWIn, bathroom.BWWVorlauf) annotation (Line(
       points={{222,124},{0,124},{0,73},{-20,73}},
       color={0,170,238},
       thickness=0.5));
   connect(showerOn, bathroom.showercontroll) annotation (Line(points={{234,156},
           {105,156},{105,80.8},{-23.4,80.8}}, color={0,0,127}));
+  connect(compositeWall5.heatPort_B, bathroom.heatPort_walls) annotation (Line(
+      points={{-30,96},{-30,88},{-48,88},{-48,70},{-39.4,70}},
+      color={204,0,0},
+      thickness=0.5));
+  connect(BathroomRoof.heatPort_down, bathroom.heatPort_ceiling) annotation (
+      Line(
+      points={{-30,160.4},{-30,152},{-56,152},{-56,79.4},{-39.4,79.4}},
+      color={204,0,0},
+      thickness=0.5));
   annotation (Icon(coordinateSystem(extent={{-220,-200},{220,200}}),
                    graphics={Bitmap(
           extent={{-200,-200},{200,200}},

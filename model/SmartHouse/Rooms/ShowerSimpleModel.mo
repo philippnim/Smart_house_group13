@@ -182,8 +182,8 @@ model ShowerSimpleModel
     annotation (Placement(transformation(extent={{94,-64},{102,-44}})));
 equation
   // Stop both controllers regulating while the shower is off.
-   controllerT.activeInput = false;
-   //connect(showerEnabled, controllerT.activeInput);
+  // controllerT.activeInput = false; only for testing
+   connect(showerEnabled, controllerT.activeInput);
    connect(showerEnabled, controllerVdot.activeInput);
 
 // Hold a neutral mixing position and a small flow-valve area.
