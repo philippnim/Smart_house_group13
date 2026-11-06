@@ -313,6 +313,6 @@ equation
         coordinateSystem(preserveAspectRatio=false)),
     experiment(
       StopTime=1209600,
-      Interval=900,
+      Interval=300,
       __Dymola_Algorithm="Dassl"));
 end HouseEnviroment;
