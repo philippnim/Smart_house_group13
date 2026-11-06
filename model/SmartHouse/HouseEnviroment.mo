@@ -1,180 +1,128 @@
 within SmartHouse;
 model HouseEnviroment
-
-
-  // Room order:
-  // 1 Sauna
-  // 2 Bathroom
-  // 3 Bedroom
-  // 4 Kitchen
-  // 5 Living room
-  // 6 Garage
-
-  // Path from here:
-  // package path: Smart_house_group13\model\SmartHouse
-  // scenario path: Smart_house_group13\data\scenarios
-
-  parameter String scenario = "summer"
-    "Define the scenario use the inputs defined by the python script name of the folder";
-
-  parameter Boolean useHP "Enable heat pump in this scenario"
-    annotation(Dialog(group="Operatiopn"));
-  parameter Boolean useBoiler "Enable electric boiler in this scenario"
-    annotation(Dialog(group="Operatiopn"));
-  parameter Boolean enablePV "PV an/aus"
-    annotation(Dialog(group="Operatiopn"));
-  parameter Boolean enableWind "Wind an/aus"
-    annotation(Dialog(group="Operatiopn"));
-  parameter Boolean enableBattery "Batterie an/aus"
-    annotation(Dialog(group="Operatiopn"));
-
-
-
-  final parameter String scenarioDirectory = Modelica.Utilities.Files.fullPathName(Modelica.Utilities.Files.loadResource("modelica://SmartHouse/") + "/../../data/scenarios/" + scenario + "/") + "/";
-
-  // Filenames
-
-  // Occupancy
-  parameter String filenameOccSauna = "Sauna_occupancy.txt"  annotation(Dialog(tab="Occupancy Filenames", group="Occupancy Filenames"));
-  parameter String filenameOccBathroom = "Bathroom_occupancy.txt" annotation(Dialog(tab="Occupancy Filenames", group="Occupancy Filenames"));
-  parameter String filenameOccBedroom = "Bedroom_occupancy.txt" annotation(Dialog(tab="Occupancy Filenames", group="Occupancy Filenames"));
-  parameter String filenameOccKitchen = "Kitchen_occupancy.txt" annotation(Dialog(tab="Occupancy Filenames", group="Occupancy Filenames"));
-  parameter String filenameOccLivingRoom = "Living_room_occupancy.txt" annotation(Dialog(tab="Occupancy Filenames", group="Occupancy Filenames"));
-  parameter String filenameOccGarage = "Garage_occupancy.txt" annotation(Dialog(tab="Occupancy Filenames", group="Occupancy Filenames"));
-
-  // Power
-  parameter String filenamePowerBathroom = "Bathroom_power.txt" annotation(Dialog(tab="Power Filenames", group="Power Filenames"));
-  parameter String filenamePowerBedroom = "Bedroom_power.txt" annotation(Dialog(tab="Power Filenames", group="Power Filenames"));
-  parameter String filenamePowerKitchen = "Kitchen_power.txt" annotation(Dialog(tab="Power Filenames", group="Power Filenames"));
-  parameter String filenamePowerLivingRoom = "Living_room_power.txt" annotation(Dialog(tab="Power Filenames", group="Power Filenames"));
-  parameter String filenamePowerGarage = "Garage_power.txt" annotation(Dialog(tab="Power Filenames", group="Power Filenames"));
-
-  // Instead of power for the sauna the switch
-  parameter String filenameSwitchSauna = "Sauna_switch.txt" "Contains not the demand but the on and off times"
-    annotation(Dialog(tab="Power Filenames", group="Power Filenames"));
-
-  // Weather data
-  parameter String filenameTemp = "temperature_weather.txt" annotation(Dialog(tab="Weather Filenames", group="Weather Filenames"));
-  parameter String filenameSolar = "solar_weather.txt" annotation(Dialog(tab="Weather Filenames", group="Weather Filenames"));
-  parameter String filenameWind = "wind_weather.txt" annotation(Dialog(tab="Weather Filenames", group="Weather Filenames"));
-
-
-  // Solar radiation from the four directions
-  parameter String filenameRadNorth = "rad_north_weather.txt" annotation(Dialog(tab="Radiation Filenames", group="Radiation Filenames"));
-  parameter String filenameRadEast = "rad_east_weather.txt" annotation(Dialog(tab="Radiation Filenames", group="Radiation Filenames"));
-  parameter String filenameRadSouth = "rad_south_weather.txt" annotation(Dialog(tab="Radiation Filenames", group="Radiation Filenames"));
-  parameter String filenameRadWest = "rad_west_weather.txt" annotation(Dialog(tab="Radiation Filenames", group="Radiation Filenames"));
-
-
-
-
-
-  // House
   HouseVentilation houseVentilation(gasType=sim.gasType1, liquidType=sim.liquidType1)
     annotation (Placement(transformation(extent={{-22,-20},{22,20}})));
-
-  // Data Sources
-  Modelica.Blocks.Sources.CombiTimeTable OccupancyBathroom(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameOccBathroom, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-    annotation (Placement(transformation(extent={{-10,-10},{10,10}}, rotation=0, origin={-90,60})));
-  Modelica.Blocks.Sources.CombiTimeTable OccupancyBedroom(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameOccBedroom, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-    annotation (Placement(transformation(extent={{-10,-10},{10,10}}, rotation=0, origin={-90,30})));
-  Modelica.Blocks.Sources.CombiTimeTable OccupancyKitchen(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameOccKitchen, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-    annotation (Placement(transformation(extent={{-10,-10},{10,10}}, rotation=0, origin={-90,0})));
-  Modelica.Blocks.Sources.CombiTimeTable OccupancyLivingRoom(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameOccLivingRoom, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-    annotation (Placement(transformation(extent={{-10,-10},{10,10}}, rotation=0, origin={-90,-30})));
-  Modelica.Blocks.Sources.CombiTimeTable OccupancyGarage(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameOccGarage, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-    annotation (Placement(transformation(extent={{-10,-10},{10,10}}, rotation=0, origin={-90,-60})));
-  Modelica.Blocks.Sources.CombiTimeTable OccupancySauna(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameOccSauna, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-    annotation (Placement(transformation(extent={{-10,-10},{10,10}}, rotation=0, origin={-90,90})));
-  Modelica.Blocks.Sources.CombiTimeTable PelBathroom(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenamePowerBathroom, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-    annotation (Placement(transformation(extent={{-60,50},{-40,70}})));
-  Modelica.Blocks.Sources.CombiTimeTable PelBedroom(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenamePowerBedroom, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-    annotation (Placement(transformation(extent={{-60,20},{-40,40}})));
-  Modelica.Blocks.Sources.CombiTimeTable PelKitchen(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenamePowerKitchen, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-    annotation (Placement(transformation(extent={{-60,-10},{-40,10}})));
-  Modelica.Blocks.Sources.CombiTimeTable PelLivingroom(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenamePowerLivingRoom, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-    annotation (Placement(transformation(extent={{-60,-40},{-40,-20}})));
-  Modelica.Blocks.Sources.CombiTimeTable PelGarage(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenamePowerGarage, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-    annotation (Placement(transformation(extent={{-60,-70},{-40,-50}})));
-  Modelica.Blocks.Sources.CombiTimeTable TOutdoor(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameTemp, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+  Modelica.Blocks.Sources.TimeTable OccupancyBathroom(table=[0,0; 23400,0; 23401,
+        2; 25200,2; 25201,0; 109800,0; 109801,2; 111600,2; 111601,0; 196200,0; 196201,
+        1; 198000,1; 198001,0; 199800,0; 199801,1; 201600,1; 201601,0; 282600,0;
+        282601,1; 284400,1; 284401,0; 286200,0; 286201,1; 288000,1; 288001,0; 372600,
+        0; 372601,2; 374400,2; 374401,0; 466200,0; 466201,2; 468000,2; 468001,0;
+        552600,0; 552601,2; 554400,2; 554401,0; 604800,0])
+                                    annotation (Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        rotation=0,
+        origin={-88,52})));
+  Modelica.Blocks.Sources.TimeTable OccupancyBedroom(table=[0,2; 21600,2; 21601,
+        0; 25200,0; 25201,1; 59400,1; 59401,0; 75600,0; 75601,1; 79200,1; 79201,
+        2; 108000,2; 108801,0; 111600,0; 111601,1; 145800,1; 145801,0; 163800,0;
+        163801,2; 194400,2; 194401,1; 232000,1; 232001,0; 252000,0; 252001,2; 280800,
+        2; 280801,1; 318600,1; 318601,0; 334800,0; 334801,1; 338400,1; 338401,2;
+        370800,2; 370801,1; 405000,1; 405001,0; 421200,0; 421201,2; 464400,2; 464401,
+        0; 478800,0; 478801,1; 486000,1; 486001,0; 511200,0; 511201,2; 550800,2;
+        550801,0; 592200,0; 592201,2; 604800,2])
+                                    annotation (Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        rotation=0,
+        origin={-88,20})));
+  Modelica.Blocks.Sources.TimeTable OccupancyKitchen(table=[0,0; 21600,0; 21601,
+        2; 23400,2; 23401,0; 43200,0; 43201,1; 45000,1; 45001,0; 57600,0; 57601,
+        2; 59400,2; 59401,0; 72000,0; 72001,1; 73800,1; 73801,0; 75600,0; 75601,
+        1; 77400,1; 77401,0; 108000,0; 108001,2; 109800,2; 109801,0; 129600,0; 129601,
+        1; 131400,1; 131401,0; 145800,0; 145801,2; 147600,2; 147601,0; 160200,0;
+        160201,2; 162000,2; 162001,0; 194400,0; 194401,1; 196200,1; 196201,0; 198000,
+        0; 198001,1; 199800,1; 199801,0; 217800,0; 217801,1; 219600,1; 219601,0;
+        234000,0; 234001,2; 235800,2; 235801,0; 246600,0; 246601,2; 248400,2; 248401,
+        0; 280800,0; 280801,1; 282600,1; 282601,0; 284400,0; 284401,1; 286200,1;
+        286201,0; 302400,0; 302401,1; 304200,1; 304201,0; 320400,0; 320401,2; 322200,
+        2; 322201,0; 331200,0; 331201,1; 333000,1; 333001,0; 334800,0; 334801,1;
+        336600,1; 336601,0; 370800,0; 370801,2; 372600,2; 372601,0; 392400,0; 392401,
+        2; 394200,2; 394201,0; 405000,0; 405001,2; 406800,2; 406801,0; 417600,0;
+        417601,2; 419400,2; 419401,0; 464400,0; 464401,2; 466200,2; 466201,0; 477000,
+        0; 477001,2; 478800,2; 478801,0; 491400,0; 491401,2; 493200,2; 493201,0;
+        507600,0; 507601,2; 509400,2; 509401,0; 550800,0; 550801,2; 552600,2; 552601,
+        0; 563400,0; 563401,2; 565200,2; 565201,0; 579600,0; 579601,2; 581400,2;
+        581401,0; 590400,0; 590401,2; 592200,2; 592201,0; 604800,0])
+                                    annotation (Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        rotation=0,
+        origin={-88,-12})));
+  Modelica.Blocks.Sources.TimeTable OccupancyLivingRoom(table=[0,0; 59400,0; 59401,
+        2; 72000,2; 72001,1; 75600,1; 75601,0; 147600,0; 147601,1; 160200,1; 160201,
+        0; 235800,0; 235801,2; 239400,2; 239401,0; 322200,0; 322201,2; 325800,2;
+        325801,0; 406800,0; 406801,2; 410400,2; 410401,0; 493200,0; 493201,2; 496800,
+        2; 496801,0; 581400,0; 581401,2; 586800,2; 586801,0; 604800,0])
+                                       annotation (Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        rotation=0,
+        origin={-88,-44})));
+  Modelica.Blocks.Sources.TimeTable OccupancyGarage(table=[0,0; 554400,0; 554401,
+        1; 563400,1; 563401,0; 604800,0])
+                                    annotation (Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        rotation=0,
+        origin={-88,-76})));
+  Modelica.Blocks.Sources.TimeTable OccupancySauna(table=[0,0; 248400,0; 248401,
+        2; 252000,2; 252001,0; 586800,0; 586801,2; 590400,2; 590401,0; 604800,0])
+                              annotation (Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        rotation=0,
+        origin={-88,84})));
+  Modelica.Blocks.Sources.TimeTable PelBathroom(table=[0,0; 23400,0; 23401,1600;
+        25200,1600; 25201,0; 109800,0; 109801,1600; 111600,1600; 111601,0; 196200,
+        0; 196201,1600; 198000,1600; 198001,0; 199800,0; 199801,1600; 201600,1600;
+        201601,0; 282600,0; 282601,1600; 284400,1600; 284401,0; 286200,0; 286201,
+        1600; 288000,1600; 288001,0; 372600,0; 372601,1600; 374400,1600; 374401,
+        0; 466200,0; 466201,1600; 468000,1600; 468001,0; 496800,0; 496801,2000;
+        498600,2000; 498601,2500; 500400,2500; 500401,0; 552600,0; 552601,1600;
+        554400,1600; 554401,0; 604800,0])
+    annotation (Placement(transformation(extent={{-60,42},{-40,62}})));
+  Modelica.Blocks.Sources.TimeTable PelBedroom(table=[0,0; 25200,0; 25201,150; 59400,
+        150; 59401,0; 111600,0; 111601,150; 145800,150; 145801,0; 198000,0; 198001,
+        150; 232200,150; 232201,0; 284400,0; 284401,150; 318600,150; 318601,0; 370800,
+        0; 370801,150; 405000,150; 405001,0; 478800,0; 478801,150; 486000,150; 486001,
+        0; 604800,0])
+    annotation (Placement(transformation(extent={{-60,10},{-40,30}})));
+  Modelica.Blocks.Sources.TimeTable PelKitchen(table=[0,200; 21600,200; 21601,3700;
+        23400,3700; 23401,200; 43200,200; 43201,5200; 45000,5200; 45001,200; 57600,
+        200; 57601,2700; 59400,2700; 59401,200; 72000,200; 72001,1200; 73800,1200;
+        73801,200; 75600,200; 75601,1200; 77400,1200; 77401,200; 108000,200; 108001,
+        3700; 109800,3700; 109801,200; 129600,200; 129601,5200; 131400,5200; 131401,
+        200; 145800,200; 145801,4200; 147600,4200; 147601,200; 160200,200; 160201,
+        1200; 162000,1200; 162001,200; 194400,200; 194401,1200; 196200,1200; 196201,
+        200; 198000,200; 198001,2700; 199800,2700; 199801,200; 217800,200; 217801,
+        5200; 219600,5200; 219601,200; 234000,200; 234001,4200; 235800,4200; 235801,
+        200; 246600,200; 246601,1200; 248400,1200; 248401,200; 280800,200; 280801,
+        1200; 282600,1200; 282601,200; 284400,200; 284401,2700; 286200,2700; 286201,
+        200; 302400,200; 302401,5200; 304200,5200; 304201,200; 320400,200; 320401,
+        4200; 322200,4200; 322201,200; 331200,200; 331201,1200; 333000,1200; 333001,
+        200; 334800,200; 334801,1200; 336600,1200; 336601,200; 370800,200; 370801,
+        3700; 372600,3700; 372601,200; 392400,200; 392401,5200; 394200,5200; 394201,
+        200; 405000,200; 405001,2700; 406800,2700; 406801,200; 417600,200; 417601,
+        1200; 419400,1200; 419401,200; 464400,200; 464401,3700; 466200,3700; 466201,
+        200; 477000,200; 477001,5200; 478800,5200; 478801,200; 491400,200; 491401,
+        2700; 493200,2700; 493201,200; 507600,200; 507601,1200; 509400,1200; 509401,
+        200; 550800,200; 550801,3700; 552600,3700; 552601,200; 563400,200; 563401,
+        5200; 565200,5200; 565201,200; 579600,200; 579601,2700; 581400,2700; 581401,
+        200; 590400,200; 590401,1200; 592200,1200; 592201,200; 604800,200])
+    annotation (Placement(transformation(extent={{-60,-22},{-40,-2}})));
+  Modelica.Blocks.Sources.TimeTable PelLivingroom(table=[0,30; 59400,30; 59401,150;
+        75600,150; 75601,30; 147600,30; 147601,300; 160200,300; 160201,30; 235800,
+        30; 235801,150; 239400,150; 239401,30; 322200,30; 322201,150; 325800,150;
+        325801,30; 406800,30; 406801,150; 410400,150; 410401,30; 493200,30; 493201,
+        150; 496800,150; 496801,30; 581400,30; 581401,300; 586800,300; 586801,30;
+        604800,30])
+    annotation (Placement(transformation(extent={{-60,-54},{-40,-34}})));
+  Modelica.Blocks.Sources.TimeTable PelGarage(table=[0,0; 554400,0; 554401,1000;
+        563400,1000; 563401,0; 604800,0])
+    annotation (Placement(transformation(extent={{-60,-86},{-40,-66}})));
+  Modelica.Blocks.Sources.RealExpression TOutdoor(y=271.15)
     annotation (Placement(transformation(extent={{-8,74},{12,94}})));
-  Modelica.Blocks.Sources.CombiTimeTable SaunaSwitch(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameSwitchSauna, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-    annotation (Placement(transformation(extent={{-60,80},{-40,100}})));
-
-  Modelica.Blocks.Sources.CombiTimeTable radNorth(
-    tableOnFile=true,
-    tableName="data",
-    fileName=scenarioDirectory + filenameRadNorth,
-    columns={2},
-    smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments,
-    extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-    annotation (Placement(transformation(
-        extent={{-10,-10},{10,10}},
-        rotation=0,
-        origin={-90,-90})));
-  Modelica.Blocks.Sources.CombiTimeTable radEast(
-    tableOnFile=true,
-    tableName="data",
-    fileName=scenarioDirectory + filenameRadEast,
-    columns={2},
-    smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments,
-    extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-    annotation (Placement(transformation(
-        extent={{-10,-10},{10,10}},
-        rotation=0,
-        origin={-60,-90})));
-  Modelica.Blocks.Sources.CombiTimeTable radSouth(
-    tableOnFile=true,
-    tableName="data",
-    fileName=scenarioDirectory + filenameRadSouth,
-    columns={2},
-    smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments,
-    extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-    annotation (Placement(transformation(
-        extent={{-10,-10},{10,10}},
-        rotation=0,
-        origin={-30,-90})));
-  Modelica.Blocks.Sources.CombiTimeTable radWest(
-    tableOnFile=true,
-    tableName="data",
-    fileName=scenarioDirectory + filenameRadWest,
-    columns={2},
-    smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments,
-    extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-    annotation (Placement(transformation(
-        extent={{-10,-10},{10,10}},
-        rotation=0,
-        origin={0,-90})));
-  Modelica.Blocks.Sources.CombiTimeTable solarData(
-    tableOnFile=true,
-    tableName="data",
-    fileName=scenarioDirectory + filenameSolar,
-    columns={2},
-    smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,
-    extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-    annotation (Placement(transformation(extent={{-10,-10},{10,10}},
-        rotation=90,
-        origin={50,-90})));
-  Modelica.Blocks.Sources.CombiTimeTable WindSpeed(
-    tableOnFile=true,
-    tableName="data",
-    fileName=scenarioDirectory + filenameWind,
-    columns={2},
-    smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,
-    extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-    annotation (Placement(transformation(extent={{-10,-10},{10,10}},
-        rotation=90,
-      origin={90,-90})));
-
-
-
-  // Other
   Modelica.Blocks.Sources.RealExpression TGround(y=278.15)
-    annotation (Placement(transformation(extent={{-30,46},{-10,66}})));
+    annotation (Placement(transformation(extent={{-10,-84},{10,-64}})));
   inner TIL.SystemInformationManager sim(redeclare
       TILMedia.Gas.Types.VDI4670_MoistAir gasType1, redeclare
       TILMedia.Liquid.Types.TILMedia_Water liquidType1)
-    annotation (Placement(transformation(extent={{100,100},{120,120}})));
+    annotation (Placement(transformation(extent={{66,80},{86,100}})));
   ventilation.VentilationUnit ventilationUnit(
     useAirNetwork=false,
     dp_nominal_door(displayUnit="Pa") = 10,
@@ -187,35 +135,14 @@ model HouseEnviroment
     annotation (Placement(transformation(extent={{34,14},{54,34}})));
   Modelica.Blocks.Sources.BooleanExpression booleanExpression(y=true)
     annotation (Placement(transformation(extent={{-4,22},{16,42}})));
+  Modelica.Blocks.Sources.TimeTable SaunaSwitch(table=[0,0; 248400,0; 248401,1;
+        252000,1; 252001,0; 586800,0; 586801,1; 590400,1; 590401,0; 604800,0])
+    annotation (Placement(transformation(extent={{-60,74},{-40,94}})));
   Modelica.Blocks.Logical.GreaterEqualThreshold saunaSwitchBool(threshold=1)
-    annotation (Placement(transformation(extent={{-32,84},{-20,96}})));
-  HeatingSource.HeatPump_ThermalStorage heatPump_ThermalStorage(useHP=useHP,
-      useBoiler=useBoiler)
+    annotation (Placement(transformation(extent={{-32,78},{-20,90}})));
+  HeatingSource.HeatPump_ThermalStorage heatPump_ThermalStorage(useHP=false,
+      useBoiler=true)
     annotation (Placement(transformation(extent={{34,48},{54,68}})));
-  PowerSupply.ElectricSystem electricSystem(
-    enablePV=enablePV,
-    enableWind=enableWind,
-    enableBattery=enableBattery)
-    annotation (Placement(transformation(extent={{22,-70},{42,-50}})));
-
-  Modelica.Blocks.Interaction.Show.RealValue currentHeatload
-    annotation (Placement(transformation(extent={{-7,-6},{7,6}},
-        rotation=90,
-        origin={22,113})));
-  Modelica.Blocks.Math.Add powerSum annotation (Placement(transformation(
-        extent={{-5,-5},{5,5}},
-        rotation=270,
-        origin={37,-35})));
-  Modelica.Blocks.Interaction.Show.RealValue aggGeneratedHeat
-    "aggregates the heat generated by the thermal system"
-    annotation (Placement(transformation(extent={{-7,-6},{7,6}},
-        rotation=90,
-        origin={42,113})));
-  Modelica.Blocks.Continuous.Integrator integratorHeatLoad annotation (
-      Placement(transformation(
-        extent={{-5,-5},{5,5}},
-        rotation=90,
-        origin={41,91})));
   Modelica.Blocks.Sources.TimeTable ShowerOnOff(table=[0,1e-7; 23400,1e-7;
         23401,0.5; 25200,0.5; 25201,1e-7; 109800,1e-7; 109801,0.5; 111600,0.5;
         111601,1e-7; 196200,1e-7; 196201,0.5; 198000,0.5; 198001,1e-7; 199800,
@@ -229,25 +156,25 @@ model HouseEnviroment
         origin={-20,52})));
 equation
   // Occupancy: sauna, bathroom, bedroom, kitchen, living room, garage.
-  connect(OccupancySauna.y[1], houseVentilation.houseInputs.occupancy[1]);
-  connect(OccupancyBathroom.y[1], houseVentilation.houseInputs.occupancy[2]);
-  connect(OccupancyBedroom.y[1], houseVentilation.houseInputs.occupancy[3]);
-  connect(OccupancyKitchen.y[1], houseVentilation.houseInputs.occupancy[4]);
-  connect(OccupancyLivingRoom.y[1], houseVentilation.houseInputs.occupancy[5]);
-  connect(OccupancyGarage.y[1], houseVentilation.houseInputs.occupancy[6]);
+  connect(OccupancySauna.y, houseVentilation.houseInputs.occupancy[1]);
+  connect(OccupancyBathroom.y, houseVentilation.houseInputs.occupancy[2]);
+  connect(OccupancyBedroom.y, houseVentilation.houseInputs.occupancy[3]);
+  connect(OccupancyKitchen.y, houseVentilation.houseInputs.occupancy[4]);
+  connect(OccupancyLivingRoom.y, houseVentilation.houseInputs.occupancy[5]);
+  connect(OccupancyGarage.y, houseVentilation.houseInputs.occupancy[6]);
 
   // Electrical loads: bathroom, bedroom, kitchen, living room, garage.
-  connect(PelBathroom.y[1], houseVentilation.houseInputs.P_el[1]);
-  connect(PelBedroom.y[1], houseVentilation.houseInputs.P_el[2]);
-  connect(PelKitchen.y[1], houseVentilation.houseInputs.P_el[3]);
-  connect(PelLivingroom.y[1], houseVentilation.houseInputs.P_el[4]);
-  connect(PelGarage.y[1], houseVentilation.houseInputs.P_el[5]);
+  connect(PelBathroom.y, houseVentilation.houseInputs.P_el[1]);
+  connect(PelBedroom.y, houseVentilation.houseInputs.P_el[2]);
+  connect(PelKitchen.y, houseVentilation.houseInputs.P_el[3]);
+  connect(PelLivingroom.y, houseVentilation.houseInputs.P_el[4]);
+  connect(PelGarage.y, houseVentilation.houseInputs.P_el[5]);
 
   // Sauna control and environmental temperatures.
-  connect(TOutdoor.y[1], houseVentilation.houseInputs.TOutdoor);
+  connect(TOutdoor.y, houseVentilation.houseInputs.TOutdoor);
   connect(TGround.y, houseVentilation.houseInputs.TGround);
-  connect(saunaSwitchBool.u, SaunaSwitch.y[1])
-    annotation (Line(points={{-33.2,90},{-39,90}}, color={0,0,127}));
+  connect(saunaSwitchBool.u, SaunaSwitch.y)
+    annotation (Line(points={{-33.2,84},{-39,84}}, color={0,0,127}));
   connect(saunaSwitchBool.y, houseVentilation.houseInputs.saunaOn);
 
   // All four heating circuits share the same two liquid boundaries.
@@ -255,20 +182,20 @@ equation
   // Ventilation unit
   connect(houseVentilation.ventilationPorts, ventilationUnit.ventilationPorts)
     annotation (Line(points={{0,-10},{54,-10}}, color={255,153,0}));
-  connect(TOutdoor.y[1], ventilationUnit.TOutdoor)
+  connect(TOutdoor.y, ventilationUnit.TOutdoor)
     annotation (Line(points={{13,84},{46,84},{46,78},{78,78},{78,-22},{68,-22}},
                                                         color={0,0,127}));
-  connect(OccupancyBathroom.y[1], ventilationUnit.occupancy[1]) annotation (Line(
-        points={{-79,60},{-66,60},{-66,-46},{60,-46},{60,-22.75}}, color={0,0,
+  connect(OccupancyBathroom.y, ventilationUnit.occupancy[1]) annotation (Line(
+        points={{-77,52},{-66,52},{-66,-60},{60,-60},{60,-22.75}}, color={0,0,
           127}));
-  connect(OccupancyBedroom.y[1], ventilationUnit.occupancy[2]) annotation (Line(
-        points={{-79,30},{-66,30},{-66,-46},{60,-46},{60,-22.25}}, color={0,0,
+  connect(OccupancyBedroom.y, ventilationUnit.occupancy[2]) annotation (Line(
+        points={{-77,20},{-66,20},{-66,-60},{60,-60},{60,-22.25}}, color={0,0,
           127}));
-  connect(OccupancyKitchen.y[1], ventilationUnit.occupancy[3]) annotation (Line(
-        points={{-79,0},{-66,0},{-66,-46},{60,-46},{60,-21.75}},     color={0,
+  connect(OccupancyKitchen.y, ventilationUnit.occupancy[3]) annotation (Line(
+        points={{-77,-12},{-66,-12},{-66,-60},{60,-60},{60,-21.75}}, color={0,
           0,127}));
-  connect(OccupancyLivingRoom.y[1], ventilationUnit.occupancy[4]) annotation (
-      Line(points={{-79,-30},{-66,-30},{-66,-46},{60,-46},{60,-21.25}}, color
+  connect(OccupancyLivingRoom.y, ventilationUnit.occupancy[4]) annotation (
+      Line(points={{-77,-44},{-66,-44},{-66,-60},{60,-60},{60,-21.25}}, color
       ={0,0,127}));
 
   // Connect
@@ -287,7 +214,7 @@ equation
       points={{47.8,34},{47.8,44},{24,44},{24,61},{34,61}},
       color={0,170,238},
       thickness=0.5));
-  connect(TOutdoor.y[1], heatPump_ThermalStorage.T_ambient) annotation (Line(
+  connect(TOutdoor.y, heatPump_ThermalStorage.T_ambient) annotation (Line(
         points={{13,84},{46,84},{46,78},{78,78},{78,46},{47,46},{47,49}}, color
         ={0,0,127}));
   connect(heatPump_ThermalStorage.WaterInput1, houseVentilation.BWWOut)
@@ -302,38 +229,7 @@ equation
       points={{54,61},{58,61},{58,42},{28,42},{28,24},{22.2,24},{22.2,12.4}},
       color={0,170,238},
       thickness=0.5));
-  connect(radNorth.y[1], houseVentilation.radInput[1]) annotation (Line(points={
-          {-79,-90},{-74,-90},{-74,-74},{0,-74},{0,-21.75}}, color={0,0,127}));
-  connect(radSouth.y[1], houseVentilation.radInput[3]) annotation (Line(points={
-          {-19,-90},{-12,-90},{-12,-74},{0,-74},{0,-20.75}}, color={0,0,127}));
-  connect(radWest.y[1], houseVentilation.radInput[4]) annotation (Line(points={{
-          11,-90},{14,-90},{14,-74},{0,-74},{0,-20.25}}, color={0,0,127}));
-  connect(radEast.y[1], houseVentilation.radInput[2]) annotation (Line(points={{
-          -49,-90},{-44,-90},{-44,-74},{0,-74},{0,-21.25}}, color={0,0,127}));
-  connect(solarData.y[1], electricSystem.solarRadInput) annotation (Line(points={{50,-79},
-          {50,-76},{27,-76},{27,-70}},          color={0,0,127}));
-  connect(WindSpeed.y[1], electricSystem.windSpeedInput) annotation (Line(
-        points={{90,-79},{90,-70},{37,-70}},          color={0,0,127}));
-  connect(currentHeatload.numberPort, heatPump_ThermalStorage.HeatFlow)
-    annotation (Line(points={{22,104.95},{22,76},{47,76},{47,69}},       color={
-          0,0,127}));
-  connect(houseVentilation.aggPel_Demand, powerSum.u2) annotation (Line(points={
-          {18.4,21.4},{22,21.4},{22,22},{24,22},{24,-26},{34,-26},{34,-29}},
-        color={0,0,127}));
-  connect(heatPump_ThermalStorage.P_el, powerSum.u1) annotation (Line(points={{41,
-          69},{41,74},{58,74},{58,4},{40,4},{40,-29}}, color={0,0,127}));
-  connect(powerSum.y, electricSystem.powerLoad)
-    annotation (Line(points={{37,-40.5},{37,-48}}, color={0,0,127}));
-  connect(integratorHeatLoad.u, heatPump_ThermalStorage.HeatFlow) annotation (
-      Line(points={{41,85},{41,76},{47,76},{47,69}}, color={0,0,127}));
-  connect(integratorHeatLoad.y, aggGeneratedHeat.numberPort)
-    annotation (Line(points={{41,96.5},{42,98},{42,104.95}}, color={0,0,127}));
-  annotation (Icon(coordinateSystem(preserveAspectRatio=false, extent={{-120,
-            -120},{120,120}})),                                  Diagram(
-        coordinateSystem(preserveAspectRatio=false, extent={{-120,-120},{120,
-            120}})),
-    experiment(
-      StopTime=1209600,
-      Interval=300,
-      __Dymola_Algorithm="Dassl"));
+  annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+        coordinateSystem(preserveAspectRatio=false)),
+    experiment(StopTime=604800, __Dymola_Algorithm="Dassl"));
 end HouseEnviroment;

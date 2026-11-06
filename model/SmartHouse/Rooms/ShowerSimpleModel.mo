@@ -99,7 +99,7 @@ model ShowerSimpleModel
                                        annotation (Placement(transformation(
         extent={{8,-6},{-8,6}},
         rotation=180,
-        origin={46,78})));
+        origin={44,78})));
   TIL.LiquidComponents.Valves.OrificeValve valve(use_effectiveFlowAreaInput=true)
     annotation (Placement(transformation(
         extent={{-8,-4},{8,4}},
@@ -150,11 +150,6 @@ model ShowerSimpleModel
   Modelica.Blocks.Sources.RealExpression realExpression1(
   y=if showerEnabled then Vdot_shower else 0)
   annotation (Placement(transformation(extent={{114,18},{94,38}})));
-  TIL.LiquidComponents.HydraulicInductors.HydraulicInductor hydraulicInductor(
-      momentumFactor=0.01) annotation (Placement(transformation(
-        extent={{-6,-6},{6,6}},
-        rotation=270,
-        origin={46,60})));
   TIL.LiquidComponents.Tubes.Tube tube(
     tubeGeometry(
       innerDiameter=0.1,
@@ -183,7 +178,8 @@ model ShowerSimpleModel
         origin={76,80})));
 equation
   // Stop both controllers regulating while the shower is off.
-   connect(showerEnabled, controllerT.activeInput);
+   controllerT.activeInput = false;
+   //connect(showerEnabled, controllerT.activeInput);
    connect(showerEnabled, controllerVdot.activeInput);
 
 // Hold a neutral mixing position and a small flow-valve area.
@@ -218,7 +214,8 @@ equation
       color={0,170,238},
       thickness=0.5));
   connect(controllerT.y, directionalControlValve.switchingPosition_in)
-    annotation (Line(points={{46,93.6},{46,84.6}}, color={0,0,127}));
+    annotation (Line(points={{46,93.6},{46,84.6},{44,84.6}},
+                                                   color={0,0,127}));
   connect(sensor_T.sensorValue, controllerT.u_m) annotation (Line(points={{60,68},
           {66,68},{66,100},{51.8,100}},
                                       color={0,0,127}));
@@ -230,19 +227,6 @@ equation
         points={{20,23},{20,28},{32,28},{32,14},{70,14},{70,22.2}}, color={0,0,127}));
   connect(realExpression1.y, controllerVdot.u_s)
     annotation (Line(points={{93,28},{75.6,28}}, color={0,0,127}));
-  connect(directionalControlValve.portA, hydraulicInductor.portA) annotation (
-      Line(
-      points={{46,72},{46,66}},
-      color={0,170,238},
-      thickness=0.5));
-  connect(sensor_T.port, hydraulicInductor.portA) annotation (Line(
-      points={{54,68},{46,68},{46,66}},
-      color={0,170,238},
-      thickness=0.5));
-  connect(hydraulicInductor.portB, tube.portA) annotation (Line(
-      points={{46,54},{46,50},{56,50},{56,58},{64,58},{64,54}},
-      color={0,170,238},
-      thickness=0.5));
   connect(valve.portA, tube.portB) annotation (Line(
       points={{46,36},{46,40},{58,40},{58,38},{64,38}},
       color={0,170,238},
@@ -252,7 +236,7 @@ equation
       color={0,170,238},
       thickness=0.5));
   connect(simplePump.portB, directionalControlValve.portC) annotation (Line(
-      points={{24,82},{34,82},{34,80},{38,80}},
+      points={{24,82},{34,82},{34,80},{36,80}},
       color={0,170,238},
       thickness=0.5));
   connect(BWWVorlauf, simplePump1.portA) annotation (Line(
@@ -260,7 +244,15 @@ equation
       color={0,170,238},
       thickness=0.5));
   connect(simplePump1.portB, directionalControlValve.portB) annotation (Line(
-      points={{68,80},{54,80}},
+      points={{68,80},{52,80}},
+      color={0,170,238},
+      thickness=0.5));
+  connect(directionalControlValve.portA, tube.portA) annotation (Line(
+      points={{44,72},{34,72},{34,50},{56,50},{56,58},{64,58},{64,54}},
+      color={0,170,238},
+      thickness=0.5));
+  connect(sensor_T.port, directionalControlValve.portA) annotation (Line(
+      points={{54,68},{50,68},{50,72},{44,72}},
       color={0,170,238},
       thickness=0.5));
   annotation (Icon(graphics={Bitmap(
