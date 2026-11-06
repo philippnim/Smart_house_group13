@@ -26,6 +26,7 @@ model ShowerSimpleModel
     displayUnit="degC")
     "Mixed-water temperature setpoint upstream of the heat exchanger"
     annotation(Dialog(tab="Operation", group="Shower setpoints"));
+  Modelica.Blocks.Interfaces.BooleanInput showerEnabled;
 
   parameter Modelica.Units.SI.VolumeFlowRate Vdot_shower(
     displayUnit="l/min")
@@ -123,7 +124,10 @@ model ShowerSimpleModel
     Ti=Ti_Temp,
     yMax=1,
     yMin=0,
-    yInitial=0.5) annotation (Placement(transformation(
+    yInitial=0.5,
+    use_activeInput=true,
+    use_y_notActive=true)
+                  annotation (Placement(transformation(
         extent={{-6,6},{6,-6}},
         rotation=270,
         origin={46,100})));
@@ -136,13 +140,16 @@ model ShowerSimpleModel
     Ti=Ti_Vdot,
     yMax=1e-3,
     yMin=1e-9,
-    yInitial=1e-9)
+    yInitial=1e-9,
+    use_activeInput=true,
+    use_y_notActive=true)
             annotation (Placement(transformation(
         extent={{6,-6},{-6,6}},
         rotation=0,
         origin={70,28})));
-  Modelica.Blocks.Sources.RealExpression realExpression1(y=Vdot_shower)
-    annotation (Placement(transformation(extent={{114,18},{94,38}})));
+  Modelica.Blocks.Sources.RealExpression realExpression1(
+  y=if showerEnabled then Vdot_shower else 0)
+  annotation (Placement(transformation(extent={{114,18},{94,38}})));
   TIL.LiquidComponents.HydraulicInductors.HydraulicInductor hydraulicInductor(
       momentumFactor=0.01) annotation (Placement(transformation(
         extent={{-6,-6},{6,6}},
@@ -169,7 +176,19 @@ model ShowerSimpleModel
     annotation (Placement(transformation(extent={{-8,-8},{8,8}},
         rotation=270,
         origin={16,82})));
+  TIL.LiquidComponents.Pumps.SimplePump simplePump1(presetVariableType="dp",
+      dpFixed=20000)
+    annotation (Placement(transformation(extent={{-8,-8},{8,8}},
+        rotation=90,
+        origin={76,80})));
 equation
+  // Stop both controllers regulating while the shower is off.
+   connect(showerEnabled, controllerT.activeInput);
+   connect(showerEnabled, controllerVdot.activeInput);
+
+// Hold a neutral mixing position and a small flow-valve area.
+  controllerT.y_notActive = 0.5;
+  controllerVdot.y_notActive = 1e-9;
   connect(BWWRuecklauf, BWWRuecklauf) annotation (Line(
       points={{100,-80},{100,-80}},
       color={0,170,238},
@@ -185,10 +204,6 @@ equation
   connect(ShowerAirOut, parallelFlowHX.portB_gas) annotation (Line(
       points={{-100,-80},{-8,-80},{-8,-16}},
       color={255,153,0},
-      thickness=0.5));
-  connect(BWWVorlauf, directionalControlValve.portB) annotation (Line(
-      points={{102,80},{54,80}},
-      color={0,170,238},
       thickness=0.5));
   connect(parallelFlowHX.portB_liq, BWWRuecklauf) annotation (Line(
       points={{8,-16},{8,-80},{100,-80}},
@@ -238,6 +253,14 @@ equation
       thickness=0.5));
   connect(simplePump.portB, directionalControlValve.portC) annotation (Line(
       points={{24,82},{34,82},{34,80},{38,80}},
+      color={0,170,238},
+      thickness=0.5));
+  connect(BWWVorlauf, simplePump1.portA) annotation (Line(
+      points={{102,80},{84,80}},
+      color={0,170,238},
+      thickness=0.5));
+  connect(simplePump1.portB, directionalControlValve.portB) annotation (Line(
+      points={{68,80},{54,80}},
       color={0,170,238},
       thickness=0.5));
   annotation (Icon(graphics={Bitmap(

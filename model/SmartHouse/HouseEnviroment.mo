@@ -115,16 +115,12 @@ model HouseEnviroment
   Modelica.Blocks.Sources.TimeTable PelGarage(table=[0,0; 554400,0; 554401,1000;
         563400,1000; 563401,0; 604800,0])
     annotation (Placement(transformation(extent={{-60,-86},{-40,-66}})));
-  Modelica.Blocks.Sources.RealExpression TOutdoor(y=253.15)
+  Modelica.Blocks.Sources.RealExpression TOutdoor(y=271.15)
     annotation (Placement(transformation(extent={{-8,74},{12,94}})));
   Modelica.Blocks.Sources.RealExpression TGround(y=278.15)
     annotation (Placement(transformation(extent={{-10,-84},{10,-64}})));
-  inner TIL.SystemInformationManager sim(
-    redeclare TILMedia.VLEFluid.Types.TILMedia_Propane vleFluidType1,
-                                         redeclare
-      TILMedia.Gas.Types.VDI4670_MoistAir gasType1,
-    redeclare TILMedia.Gas.Types.TILMedia_DryAir gasType2,
-                                                    redeclare
+  inner TIL.SystemInformationManager sim(redeclare
+      TILMedia.Gas.Types.VDI4670_MoistAir gasType1, redeclare
       TILMedia.Liquid.Types.TILMedia_Water liquidType1)
     annotation (Placement(transformation(extent={{66,80},{86,100}})));
   ventilation.VentilationUnit ventilationUnit(
@@ -144,16 +140,17 @@ model HouseEnviroment
     annotation (Placement(transformation(extent={{-60,74},{-40,94}})));
   Modelica.Blocks.Logical.GreaterEqualThreshold saunaSwitchBool(threshold=1)
     annotation (Placement(transformation(extent={{-32,78},{-20,90}})));
-  HeatingSource.HeatPump_ThermalStorage heatPump_ThermalStorage(useHP=true,
+  HeatingSource.HeatPump_ThermalStorage heatPump_ThermalStorage(useHP=false,
       useBoiler=true)
     annotation (Placement(transformation(extent={{34,48},{54,68}})));
-  Modelica.Blocks.Sources.TimeTable ShowerOnOff(table=[0,0; 23400,0; 23401,0.5;
-        25200,0.5; 25201,0; 109800,0; 109801,0.5; 111600,0.5; 111601,0; 196200,
-        0; 196201,0.5; 198000,0.5; 198001,0; 199800,0; 199801,0.5; 201600,0.5;
-        201601,0; 282600,0; 282601,0.5; 284400,0.5; 284401,0; 286200,0; 286201,
-        0.5; 288000,0.5; 288001,0; 372600,0; 372601,0.5; 374400,0.5; 374401,0;
-        466200,0; 466201,0.5; 468000,0.5; 468001,0; 552600,0; 552601,0.5;
-        554400,0.5; 554401,0; 604800,0]) annotation (Placement(transformation(
+  Modelica.Blocks.Sources.TimeTable ShowerOnOff(table=[0,1e-7; 23400,1e-7;
+        23401,0.5; 25200,0.5; 25201,1e-7; 109800,1e-7; 109801,0.5; 111600,0.5;
+        111601,1e-7; 196200,1e-7; 196201,0.5; 198000,0.5; 198001,1e-7; 199800,
+        1e-7; 199801,0.5; 201600,0.5; 201601,1e-7; 282600,1e-7; 282601,0.5;
+        284400,0.5; 284401,1e-7; 286200,1e-7; 286201,0.5; 288000,0.5; 288001,
+        1e-7; 372600,1e-7; 372601,0.5; 374400,0.5; 374401,1e-7; 466200,1e-7;
+        466201,0.5; 468000,0.5; 468001,1e-7; 552600,1e-7; 552601,0.5; 554400,
+        0.5; 554401,1e-7; 604800,1e-7]) annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=0,
         origin={-20,52})));
@@ -220,11 +217,6 @@ equation
   connect(TOutdoor.y, heatPump_ThermalStorage.T_ambient) annotation (Line(
         points={{13,84},{46,84},{46,78},{78,78},{78,46},{47,46},{47,49}}, color
         ={0,0,127}));
-  connect(heatPump_ThermalStorage.WaterOutput1, houseVentilation.BWWIn)
-    annotation (Line(
-      points={{54,61},{58,61},{58,42},{28,42},{28,24},{22.2,24},{22.2,12.4}},
-      color={0,170,238},
-      thickness=0.5));
   connect(heatPump_ThermalStorage.WaterInput1, houseVentilation.BWWOut)
     annotation (Line(
       points={{54,55},{60,55},{60,6},{26,6},{26,9},{22.2,9}},
@@ -232,6 +224,11 @@ equation
       thickness=0.5));
   connect(ShowerOnOff.y, houseVentilation.showerOn) annotation (Line(points={{
           -9,52},{8,52},{8,16},{23.4,16},{23.4,15.6}}, color={0,0,127}));
+  connect(heatPump_ThermalStorage.WaterOutput1, houseVentilation.BWWIn)
+    annotation (Line(
+      points={{54,61},{58,61},{58,42},{28,42},{28,24},{22.2,24},{22.2,12.4}},
+      color={0,170,238},
+      thickness=0.5));
   annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
         coordinateSystem(preserveAspectRatio=false)),
     experiment(StopTime=604800, __Dymola_Algorithm="Dassl"));

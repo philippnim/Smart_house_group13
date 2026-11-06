@@ -20,14 +20,22 @@ model Bathroom "simpler Batrhroom"
     k_Vdot=1,
     Ti_Vdot=0.5)
     annotation (Placement(transformation(extent={{58,-4},{78,16}})));
-  TIL.LiquidComponents.Valves.OrificeValve valve(use_effectiveFlowAreaInput=
-        true) annotation (Placement(transformation(extent={{72,32},{88,40}})));
   Modelica.Blocks.Interfaces.RealInput showercontroll annotation (Placement(
         transformation(
         extent={{-20,-20},{20,20}},
         rotation=270,
         origin={66,108})));
+  TIL.LiquidComponents.Valves.OrificeValve valve(use_effectiveFlowAreaInput=true)
+    annotation (Placement(transformation(extent={{66,26},{82,34}})));
+  Modelica.Blocks.Continuous.FirstOrder showerValveActuator(
+  k=1,
+  T=5,
+  initType=Modelica.Blocks.Types.Init.InitialOutput,
+  y_start=1e-7)
+  "Smooth the external shower-valve area command";
 equation
+  showerSimpleModel.showerEnabled = showercontroll > 0.25;
+  //showerSimpleModel.showerEnabled = false;
   connect(BWWRuecklauf, showerSimpleModel.BWWRuecklauf) annotation (Line(
       points={{100,-30},{84,-30},{84,-2},{78,-2}},
       color={0,170,238},
@@ -43,15 +51,15 @@ equation
       color={255,153,0},
       thickness=0.5));
   connect(BWWVorlauf, valve.portB) annotation (Line(
-      points={{100,30},{94,30},{94,34},{90,34},{90,36},{88,36}},
+      points={{100,30},{82,30}},
       color={0,170,238},
       thickness=0.5));
   connect(valve.portA, showerSimpleModel.BWWVorlauf) annotation (Line(
-      points={{72,36},{66,36},{66,20},{84,20},{84,14},{78.2,14}},
+      points={{66,30},{62,30},{62,20},{82,20},{82,14},{78.2,14}},
       color={0,170,238},
       thickness=0.5));
-  connect(showercontroll, valve.effectiveFlowArea_in) annotation (Line(points={
-          {66,108},{74,108},{74,41},{80,41}}, color={0,0,127}));
+  connect(showercontroll, showerValveActuator.u);
+connect(showerValveActuator.y, valve.effectiveFlowArea_in);
   annotation (Icon(graphics={Bitmap(
           extent={{-100,-100},{100,100}},
     fileName="modelica://SmartHouse/Images/bathroom.png"),

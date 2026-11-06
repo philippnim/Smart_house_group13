@@ -876,7 +876,7 @@ equation
       color={0,170,238},
       thickness=0.5));
   connect(showerOn, bathroom.showercontroll) annotation (Line(points={{234,156},
-          {106,156},{106,80.8},{-23.4,80.8}}, color={0,0,127}));
+          {105,156},{105,80.8},{-23.4,80.8}}, color={0,0,127}));
   annotation (Icon(coordinateSystem(extent={{-220,-200},{220,200}}),
                    graphics={Bitmap(
           extent={{-200,-200},{200,200}},
