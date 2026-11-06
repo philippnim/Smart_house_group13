@@ -8,15 +8,13 @@ model Bathroom "simpler Batrhroom"
       choice=sim.liquidType3 "Liquid 3 as defined in SIM"));
   TIL.Connectors.LiquidPort BWWVorlauf(liquidType=liquidType)
     annotation (Placement(transformation(extent={{90,20},{110,40}})));
-  TIL.Connectors.LiquidPort BWWRuecklauf(liquidType=liquidType)
-    annotation (Placement(transformation(extent={{90,-40},{110,-20}})));
   ShowerSimpleModel showerSimpleModel(
     p_ColdWater=200000,
     T_coldWater=283.15,
     T_shower=313.15,
     Vdot_shower=0.0001,
-    k_Temp=0.1,
-    Ti_Temp=5,
+    k_Temp=0.01,
+    Ti_Temp=10,
     k_Vdot=1,
     Ti_Vdot=0.5)
     annotation (Placement(transformation(extent={{58,-4},{78,16}})));
@@ -36,10 +34,6 @@ model Bathroom "simpler Batrhroom"
 equation
   showerSimpleModel.showerEnabled = showercontroll > 0.25;
   //showerSimpleModel.showerEnabled = false;
-  connect(BWWRuecklauf, showerSimpleModel.BWWRuecklauf) annotation (Line(
-      points={{100,-30},{84,-30},{84,-2},{78,-2}},
-      color={0,170,238},
-      thickness=0.5));
   connect(showerSimpleModel.ShowerAirIn, room_volume.portArray[4]) annotation (
       Line(
       points={{58,14},{52,14},{52,4},{42.65,4},{42.65,0}},
