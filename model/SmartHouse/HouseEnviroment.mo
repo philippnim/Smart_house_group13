@@ -187,17 +187,9 @@ model HouseEnviroment
     annotation (Placement(transformation(extent={{34,14},{54,34}})));
   Modelica.Blocks.Sources.BooleanExpression booleanExpression(y=true)
     annotation (Placement(transformation(extent={{-4,22},{16,42}})));
-  TIL.LiquidComponents.Boundaries.Boundary boundary2(boundaryType="p")
-    annotation (Placement(transformation(extent={{-4,-10},{4,10}},
-        rotation=90,
-        origin={90,62})));
-  TIL.LiquidComponents.Boundaries.Boundary boundary(
-    boundaryType="m_flow",
-    m_flowFixed=0,
-    TFixed=303.15)
-    annotation (Placement(transformation(extent={{-4,-10},{4,10}},
-        rotation=90,
-        origin={90,36})));
+  Modelica.Blocks.Sources.TimeTable SaunaSwitch(table=[0,0; 248400,0; 248401,1;
+        252000,1; 252001,0; 586800,0; 586801,1; 590400,1; 590401,0; 604800,0])
+    annotation (Placement(transformation(extent={{-60,74},{-40,94}})));
   Modelica.Blocks.Logical.GreaterEqualThreshold saunaSwitchBool(threshold=1)
     annotation (Placement(transformation(extent={{-32,84},{-20,96}})));
   HeatingSource.HeatPump_ThermalStorage heatPump_ThermalStorage(useHP=useHP,
@@ -227,6 +219,17 @@ model HouseEnviroment
         extent={{-5,-5},{5,5}},
         rotation=90,
         origin={41,91})));
+  Modelica.Blocks.Sources.TimeTable ShowerOnOff(table=[0,1e-7; 23400,1e-7;
+        23401,0.5; 25200,0.5; 25201,1e-7; 109800,1e-7; 109801,0.5; 111600,0.5;
+        111601,1e-7; 196200,1e-7; 196201,0.5; 198000,0.5; 198001,1e-7; 199800,
+        1e-7; 199801,0.5; 201600,0.5; 201601,1e-7; 282600,1e-7; 282601,0.5;
+        284400,0.5; 284401,1e-7; 286200,1e-7; 286201,0.5; 288000,0.5; 288001,
+        1e-7; 372600,1e-7; 372601,0.5; 374400,0.5; 374401,1e-7; 466200,1e-7;
+        466201,0.5; 468000,0.5; 468001,1e-7; 552600,1e-7; 552601,0.5; 554400,
+        0.5; 554401,1e-7; 604800,1e-7]) annotation (Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        rotation=0,
+        origin={-20,52})));
 equation
   // Occupancy: sauna, bathroom, bedroom, kitchen, living room, garage.
   connect(OccupancySauna.y[1], houseVentilation.houseInputs.occupancy[1]);
@@ -277,15 +280,6 @@ equation
   connect(booleanExpression.y, heatPump_ThermalStorage.SpaceHeatingDemand)
     annotation (Line(points={{17,32},{30,32},{30,40},{41,40},{41,49}}, color={
           255,0,255}));
-  connect(boundary.port, heatPump_ThermalStorage.WaterInput1) annotation (Line(
-      points={{90,36},{74,36},{74,55},{54,55}},
-      color={0,170,238},
-      thickness=0.5));
-  connect(boundary2.port, heatPump_ThermalStorage.WaterOutput1) annotation (
-      Line(
-      points={{90,62},{90,54},{76,54},{76,61},{54,61}},
-      color={0,170,238},
-      thickness=0.5));
   connect(heatingController.WaterReturn, heatPump_ThermalStorage.WaterInput)
     annotation (Line(
       points={{48,14},{48,10},{26,10},{26,55},{34,55}},
@@ -299,6 +293,18 @@ equation
   connect(TOutdoor.y[1], heatPump_ThermalStorage.T_ambient) annotation (Line(
         points={{13,84},{46,84},{46,78},{78,78},{78,46},{47,46},{47,49}}, color
         ={0,0,127}));
+  connect(heatPump_ThermalStorage.WaterInput1, houseVentilation.BWWOut)
+    annotation (Line(
+      points={{54,55},{60,55},{60,6},{26,6},{26,9},{22.2,9}},
+      color={0,170,238},
+      thickness=0.5));
+  connect(ShowerOnOff.y, houseVentilation.showerOn) annotation (Line(points={{
+          -9,52},{8,52},{8,16},{23.4,16},{23.4,15.6}}, color={0,0,127}));
+  connect(heatPump_ThermalStorage.WaterOutput1, houseVentilation.BWWIn)
+    annotation (Line(
+      points={{54,61},{58,61},{58,42},{28,42},{28,24},{22.2,24},{22.2,12.4}},
+      color={0,170,238},
+      thickness=0.5));
   connect(radNorth.y[1], houseVentilation.radInput[1]) annotation (Line(points={
           {-79,-90},{-74,-90},{-74,-74},{0,-74},{0,-21.75}}, color={0,0,127}));
   connect(radSouth.y[1], houseVentilation.radInput[3]) annotation (Line(points={

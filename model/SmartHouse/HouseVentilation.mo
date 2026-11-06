@@ -5,7 +5,7 @@ model HouseVentilation
       phiInitial=40,
       useVentilation=true,
       room_volume(fixedInitialPressure=false)),
-    BathroomPlaceholder(
+    bathroom(
       phiInitial=40,
       useVentilation=true,
       room_volume(fixedInitialPressure=false)),
@@ -33,7 +33,7 @@ model HouseVentilation
 equation
   // Supply connections (1: Sauna, 2: Bathroom, 3: Bedroom, 4: Kitchen, 5: LivingRoom, 6: Garage)
   connect(Sauna.gasPortA, ventilationPorts.supply[1]);
-  connect(BathroomPlaceholder.gasPortA, ventilationPorts.supply[2]);
+  connect(bathroom.gasPortA, ventilationPorts.supply[2]);
   connect(Bedroom.gasPortA, ventilationPorts.supply[3]);
   connect(Kitchen.gasPortA, ventilationPorts.supply[4]);
   connect(LivingRoom.gasPortA, ventilationPorts.supply[5]);
@@ -41,7 +41,7 @@ equation
 
   // Exhaust connections (1: Sauna, 2: Bathroom, 3: Bedroom, 4: Kitchen, 5: LivingRoom, 6: Garage)
   connect(Sauna.gasPortB, ventilationPorts.exhaust[1]);
-  connect(BathroomPlaceholder.gasPortB, ventilationPorts.exhaust[2]);
+  connect(bathroom.gasPortB, ventilationPorts.exhaust[2]);
   connect(Bedroom.gasPortB, ventilationPorts.exhaust[3]);
   connect(Kitchen.gasPortB, ventilationPorts.exhaust[4]);
   connect(LivingRoom.gasPortB, ventilationPorts.exhaust[5]);

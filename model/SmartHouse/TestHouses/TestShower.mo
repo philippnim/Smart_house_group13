@@ -23,8 +23,8 @@ model TestShower
       TILMedia.Gas.Types.VDI4670_MoistAir gasType1, redeclare
       TILMedia.Liquid.Types.TILMedia_Water liquidType1)
     annotation (Placement(transformation(extent={{-66,40},{-46,60}})));
-  TIL.LiquidComponents.Boundaries.Boundary boundary1(boundaryType="p", pFixed
-      =200000)
+  TIL.LiquidComponents.Boundaries.Boundary boundary1(boundaryType="p", pFixed=
+        200000)
     annotation (Placement(transformation(extent={{58,-16},{66,4}})));
   TIL.LiquidComponents.Pumps.SimplePump simplePump(presetVariableType="dp",
       dpFixed=20000)
@@ -49,7 +49,7 @@ equation
       color={0,170,238},
       thickness=0.5));
   connect(simplePump.portB, showerSimpleModel.BWWVorlauf) annotation (Line(
-      points={{44,48},{44,52},{18,52},{18,10},{12.2,10}},
+      points={{44,48},{44,52},{18,52},{18,12},{12.2,12}},
       color={0,170,238},
       thickness=0.5));
   annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
