@@ -2,8 +2,8 @@ within SmartHouse.Rooms;
 model ShowerSimpleModel
   parameter TILMedia.Liquid.Types.BaseLiquid liquidType=sim.liquidType1 "Liquid type" annotation (Dialog(tab="SIM",
         group="SIM"), choices(
-      choice=sim.liquidType1 "Liquid 1 as defined in SIM",
-      choice=sim.liquidType2 "Liquid 2 as defined in SIM",
+    choice=sim.liquidType1 "Liquid 1 as defined in SIM",
+    choice=sim.liquidType2 "Liquid 2 as defined in SIM",
     choice=sim.liquidType3 "Liquid 3 as defined in SIM"));
 // Gas that is utilized
   parameter TILMedia.Gas.Types.BaseGas gasType=sim.gasType1 "Gas type" annotation (Dialog(tab="SIM", group="SIM"),
@@ -11,7 +11,7 @@ model ShowerSimpleModel
       choice=sim.gasType1 "Gas 1 as defined in SIM",
       choice=sim.gasType2 "Gas 2 as defined in SIM",
       choice=sim.gasType3 "Gas 3 as defined in SIM"));
-
+  outer TIL.SystemInformationManager sim;
   parameter Modelica.Units.SI.AbsolutePressure p_ColdWater(
     displayUnit="bar")
     "Cold-water supply absolute pressure"
