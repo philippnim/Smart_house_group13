@@ -115,12 +115,16 @@ model HouseEnviroment
   Modelica.Blocks.Sources.TimeTable PelGarage(table=[0,0; 554400,0; 554401,1000;
         563400,1000; 563401,0; 604800,0])
     annotation (Placement(transformation(extent={{-60,-86},{-40,-66}})));
-  Modelica.Blocks.Sources.RealExpression TOutdoor(y=271.15)
+  Modelica.Blocks.Sources.RealExpression TOutdoor(y=253.15)
     annotation (Placement(transformation(extent={{-8,74},{12,94}})));
   Modelica.Blocks.Sources.RealExpression TGround(y=278.15)
     annotation (Placement(transformation(extent={{-10,-84},{10,-64}})));
-  inner TIL.SystemInformationManager sim(redeclare
-      TILMedia.Gas.Types.VDI4670_MoistAir gasType1, redeclare
+  inner TIL.SystemInformationManager sim(
+    redeclare TILMedia.VLEFluid.Types.TILMedia_Propane vleFluidType1,
+                                         redeclare
+      TILMedia.Gas.Types.VDI4670_MoistAir gasType1,
+    redeclare TILMedia.Gas.Types.TILMedia_DryAir gasType2,
+                                                    redeclare
       TILMedia.Liquid.Types.TILMedia_Water liquidType1)
     annotation (Placement(transformation(extent={{66,80},{86,100}})));
   ventilation.VentilationUnit ventilationUnit(
@@ -140,7 +144,7 @@ model HouseEnviroment
     annotation (Placement(transformation(extent={{-60,74},{-40,94}})));
   Modelica.Blocks.Logical.GreaterEqualThreshold saunaSwitchBool(threshold=1)
     annotation (Placement(transformation(extent={{-32,78},{-20,90}})));
-  HeatingSource.HeatPump_ThermalStorage heatPump_ThermalStorage(useHP=false,
+  HeatingSource.HeatPump_ThermalStorage heatPump_ThermalStorage(useHP=true,
       useBoiler=true)
     annotation (Placement(transformation(extent={{34,48},{54,68}})));
   Modelica.Blocks.Sources.TimeTable ShowerOnOff(table=[0,0; 23400,0; 23401,0.5;
