@@ -137,6 +137,22 @@ model Sauna "its a sauna!"
         extent={{-10,-10},{10,10}},
         rotation=180,
         origin={90,28})));
+  Modelica.Blocks.Interfaces.RealOutput aggPel_Demand annotation (Placement(
+        transformation(
+        extent={{-14,-14},{14,14}},
+        rotation=90,
+        origin={-40,114}), iconTransformation(
+        extent={{-14,-14},{14,14}},
+        rotation=90,
+        origin={-40,114})));
+  Modelica.Blocks.Interfaces.RealOutput Temperature_sensor annotation (
+      Placement(transformation(
+        extent={{13,-13},{-13,13}},
+        rotation=270,
+        origin={39,113}),iconTransformation(
+        extent={{13,-13},{-13,13}},
+        rotation=270,
+        origin={39,113})));
 equation
   connect(unheatedRoom.Temperature_sensor, controller.u_m) annotation (Line(
         points={{3,11},{3,40},{42,40},{42,33.8}}, color={0,0,127}));
@@ -170,6 +186,10 @@ equation
     annotation (Line(points={{79,28},{47.6,28}}, color={0,0,127}));
   connect(SaunaSwitch, controller.activeInput) annotation (Line(points={{104,90},
           {54,90},{54,31.8},{47.6,31.8}}, color={255,0,255}));
+  connect(unheatedRoom.aggPel_Demand, aggPel_Demand) annotation (Line(points={{
+          -4,11.4},{-4,56},{-40,56},{-40,114}}, color={0,0,127}));
+  connect(unheatedRoom.Temperature_sensor, Temperature_sensor) annotation (Line(
+        points={{3,11},{3,40},{39,40},{39,113}}, color={0,0,127}));
   annotation (Icon(graphics={Bitmap(
           extent={{-100,-100},{100,100}},
     fileName="modelica://SmartHouse/Images/sauna.png"),

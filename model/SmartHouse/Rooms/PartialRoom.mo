@@ -117,6 +117,19 @@ partial model PartialRoom "tbd"
         extent={{-4,-6},{4,6}},
         rotation=90,
         origin={0,-50})));
+  Modelica.Blocks.Interfaces.RealOutput aggPel_Demand annotation (Placement(
+        transformation(
+        extent={{-14,-14},{14,14}},
+        rotation=90,
+        origin={-40,114}), iconTransformation(
+        extent={{-14,-14},{14,14}},
+        rotation=90,
+        origin={-40,114})));
+  Modelica.Blocks.Math.MultiSum Pel_summer(nu=1) annotation (Placement(
+        transformation(
+        extent={{-6,-6},{6,6}},
+        rotation=90,
+        origin={-6,76})));
 equation
 
   // Connection to the three heat ports (always there)
@@ -170,6 +183,10 @@ equation
       color={204,0,0},
       thickness=0.5));
   internal_gains.Q_flow_in = -((occupancy * heatPerPerson) + (P_el * fractionElectricToHeat));
+  connect(aggPel_Demand, Pel_summer.y) annotation (Line(points={{-40,114},{-40,
+          90},{-6,90},{-6,83.02}}, color={0,0,127}));
+  connect(P_el, Pel_summer.u[1]) annotation (Line(points={{20,-120},{20,-28},{6,
+          -28},{6,66},{-6,66},{-6,70}}, color={0,0,127}));
   annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
     coordinateSystem(preserveAspectRatio=false)));
 

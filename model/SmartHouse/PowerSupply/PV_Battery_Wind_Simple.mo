@@ -1,5 +1,5 @@
 within SmartHouse.PowerSupply;
-model PV_Battery_Simple
+model PV_Battery_Wind_Simple
   "Einfaches PV-Modell: Einstrahlung aus CSV -> PV-Leistung -> DC-Bus mit Batterie und Last"
 
   import Modelica.Units.SI;
@@ -259,7 +259,6 @@ equation
   connect(windSpeed, homeWindTurbine.windSpeed) annotation (Line(points={{150,-80},
           {150,-36},{198,-36},{198,18},{145,18},{145,12}}, color={0,0,127}));
   annotation (
-    uses(Modelica(version="4.1.0")),
     experiment(StartTime=0, StopTime=604800, Interval=600),
     Diagram(coordinateSystem(extent={{-120,-60},{260,280}})),
     Icon(coordinateSystem(extent={{-120,-60},{260,280}}),
@@ -271,4 +270,4 @@ equation
       Line(points={{-27,60},{-27,-60}}, color={255,255,255}),
       Line(points={{27,60},{27,-60}}, color={255,255,255}),
       Text(extent={{-100,-70},{100,-100}}, textString="%name")}));
-end PV_Battery_Simple;
+end PV_Battery_Wind_Simple;
