@@ -12,3 +12,4 @@ HeatingController
 LatentHeatStorage
 TILMedia_RT31
 PCMForecastController
+PCMStandaloneTest
