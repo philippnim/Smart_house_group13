@@ -12,4 +12,5 @@ HeatingController
 LatentHeatStorage
 TILMedia_RT31
 PCMForecastController
-PCMStandaloneTest
+HeatPump_PCM_IntegrationTest
+HeatPump_ThermalStorage_test

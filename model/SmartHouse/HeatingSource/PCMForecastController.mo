@@ -98,17 +98,15 @@ model PCMForecastController
     annotation(Placement(transformation(extent={{-160,-110},{-140,-90}})));
 
   // === Physical eligibility ===
-  Modelica.Blocks.Logical.GreaterThreshold supplyHotEnough(
-    threshold=TPhaseChange + dTmin)
-    annotation(Placement(transformation(extent={{-160,110},{-140,130}})));
+ Modelica.Blocks.Logical.Hysteresis supplyHotEnough(
+  uLow=304.65,
+  uHigh=305.65);
   Modelica.Blocks.Logical.LessThreshold supplyNotTooHot(
     threshold=TChargeMax)
     annotation(Placement(transformation(extent={{-115,100},{-95,120}})));
   Modelica.Blocks.Logical.LessThreshold returnColdEnough(
     threshold=TPhaseChange - dTmin)
     annotation(Placement(transformation(extent={{-160,-145},{-140,-125}})));
-
-  // === Visible Boolean logic ===
   Modelica.Blocks.Logical.And windowAndCapacity
     annotation(Placement(transformation(extent={{-55,135},{-35,155}})));
   Modelica.Blocks.Logical.And chargeTemperatureOK
@@ -121,8 +119,6 @@ model PCMForecastController
     annotation(Placement(transformation(extent={{-55,-120},{-35,-100}})));
   Modelica.Blocks.Logical.And dischargeDecision
     annotation(Placement(transformation(extent={{10,-100},{30,-80}})));
-
-  // === Visible final command blocks ===
   Modelica.Blocks.Sources.RealExpression supplyCommand(
     y=if chargeDecision.y then chargeDivertPosition else 0)
     annotation(Placement(transformation(extent={{110,75},{130,95}})));
@@ -132,24 +128,18 @@ model PCMForecastController
   Modelica.Blocks.Sources.IntegerExpression operatingMode(
     y=if chargeDecision.y then 1 else if dischargeDecision.y then 2 else 0)
     annotation(Placement(transformation(extent={{110,15},{130,35}})));
-
 equation
-  // Forecast: each daily set of six warmest hours is already precomputed.
   connect(forecast.y[1], warmestHour.u) annotation(Line(points={{-150,180},{-120,180}}, color={0,0,127}));
   connect(warmestHour.y, chargeWindowActive) annotation(Line(points={{-100,180},{200,180}}, color={255,0,255}));
   connect(warmestHour.y, outsideWindow.u) annotation(Line(points={{-100,180},{-75,-10}}, color={255,0,255}));
-
-  // Hysteresis / temperature thresholds.
   connect(SOC, pcmFull.u) annotation(Line(points={{-200,55},{-160,60}}, color={0,0,127}));
   connect(pcmFull.y, notFull.u) annotation(Line(points={{-140,60},{-115,60}}, color={255,0,255}));
   connect(SOC, pcmAvailable.u) annotation(Line(points={{-200,55},{-160,-100}}, color={0,0,127}));
   connect(TSupply, supplyHotEnough.u) annotation(Line(points={{-200,115},{-160,120}}, color={0,0,127}));
   connect(TSupply, supplyNotTooHot.u) annotation(Line(points={{-200,115},{-115,110}}, color={0,0,127}));
   connect(TReturn, returnColdEnough.u) annotation(Line(points={{-200,-135},{-160,-135}}, color={0,0,127}));
-
-  // Charge = warmest hour + free capacity + water between 32 and 40 degC.
-  connect(warmestHour.y, windowAndCapacity.u1) annotation(Line(points={{-100,
-          180},{-57,145}},                                                                    color={255,0,255}));
+  connect(warmestHour.y, windowAndCapacity.u1) annotation(Line(points={{-100,180},
+          {-57,145}},                                                                         color={255,0,255}));
   connect(notFull.y, windowAndCapacity.u2) annotation(Line(points={{-95,60},{-55,139}}, color={255,0,255}));
   connect(windowAndCapacity.y, chargeRequest) annotation(Line(points={{-35,145},{200,150}}, color={255,0,255}));
   connect(supplyHotEnough.y, chargeTemperatureOK.u1) annotation(Line(points={{-140,
@@ -159,25 +149,20 @@ equation
           {8,130}},                                                                            color={255,0,255}));
   connect(chargeTemperatureOK.y, chargeDecision.u2) annotation(Line(points={{-35,100},{10,124}}, color={255,0,255}));
   connect(chargeDecision.y, charging) annotation(Line(points={{30,130},{200,120}}, color={255,0,255}));
-
-  // Discharge = outside warmest hours + space-heating demand +
-  //             at least 10-15% liquid PCM + cool return water.
   connect(outsideWindow.y, outsideAndDemand.u1) annotation(Line(points={{-55,-10},
           {-55,-32},{-55,-55},{-57,-55}},                                                     color={255,0,255}));
   connect(heatingDemand, outsideAndDemand.u2) annotation(Line(points={{-200,-65},{-55,-61}}, color={255,0,255}));
-  connect(pcmAvailable.y, availableAndCold.u1) annotation(Line(points={{-140,
-          -100},{-57,-110}},                                                                    color={255,0,255}));
+  connect(pcmAvailable.y, availableAndCold.u1) annotation(Line(points={{-140,-100},
+          {-57,-110}},                                                                          color={255,0,255}));
   connect(returnColdEnough.y, availableAndCold.u2) annotation(Line(points={{-140,-135},{-55,-116}}, color={255,0,255}));
   connect(outsideAndDemand.y, dischargeDecision.u1) annotation(Line(points={{-35,-55},
           {8,-90}},                                                                              color={255,0,255}));
   connect(availableAndCold.y, dischargeDecision.u2) annotation(Line(points={{-35,-110},{10,-96}}, color={255,0,255}));
   connect(dischargeDecision.y, discharging) annotation(Line(points={{30,-90},{200,-65}}, color={255,0,255}));
-
   connect(supplyCommand.y, supplyValvePosition) annotation(Line(points={{130,85},{200,85}}, color={0,0,127}));
   connect(returnCommand.y, returnValvePosition) annotation(Line(points={{130,-125},{200,-125}}, color={0,0,127}));
   connect(operatingMode.y, mode) annotation(Line(points={{130,25},{200,25}}, color={255,127,0}));
-
-  annotation(
+    annotation(Placement(transformation(extent={{-160,110},{-140,130}})),
     Diagram(coordinateSystem(preserveAspectRatio=false,
       extent={{-210,-165},{210,200}}),
       graphics={
@@ -196,4 +181,18 @@ equation
         Text(extent={{-90,4},{90,-26}},textString="Controller",textColor={0,75,130}),
         Text(extent={{-90,-37},{90,-72}},textString="CHARGE / DISCHARGE",textColor={0,75,130})}),
     Documentation(info="<html><p>Pure signal-based controller. It uses precomputed forecast flags, state of charge and supply/return temperatures. The real PCM and the two valves belong to LatentHeatStorage. Supply valve position 0 selects B (floor) and an intermediate position diverts part of the flow to C (charge). Return valve position 0 selects B (bypass); 0.9999 selects C (discharge). Verify the switching direction in your TIL implementation.</p><p>chargeRequest is provided for future heat-pump enabling. Do not use it alone to run a heat pump against closed heating valves: guarantee a hydraulic circulation path first. The actual energy flow and PCM temperature must be checked in the simulation. No DHW controller is duplicated here.</p></html>"));
+
+  // === Visible Boolean logic ===
+
+  // === Visible final command blocks ===
+
+  // Forecast: each daily set of six warmest hours is already precomputed.
+
+  // Hysteresis / temperature thresholds.
+
+  // Charge = warmest hour + free capacity + water between 32 and 40 degC.
+
+  // Discharge = outside warmest hours + space-heating demand +
+  //             at least 10-15% liquid PCM + cool return water.
+
 end PCMForecastController;
