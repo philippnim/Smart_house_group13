@@ -17,7 +17,7 @@ model House
     annotation (Placement(transformation(extent={{86,86},{100,100}})));
   Rooms.Sauna Sauna(
     A_floor=10,
-    h=2.2,
+    h=2.5,
     enableInternalMass=false,
     TSauna=353.15,
     yMax=20000,
@@ -25,23 +25,24 @@ model House
     annotation (Placement(transformation(extent={{-140,60},{-120,80}})));
   Rooms.UnheatedRoom Bedroom(
     A_floor=24,
-    h=2.2,
+    h=2.5,
     useVentilation=false)
     annotation (Placement(transformation(extent={{60,60},{80,80}})));
   Rooms.UnheatedRoom Kitchen(
     A_floor=24,
-    h=2.2,
+    h=2.5,
     useVentilation=false)
     annotation (Placement(transformation(extent={{-140,-40},{-120,-20}})));
   Rooms.UnheatedRoom LivingRoom(
     A_floor=48,
-    h=2.2,
+    h=2.5,
     useVentilation=false)
     annotation (Placement(transformation(extent={{12,-40},{32,-20}})));
   Rooms.UnheatedRoom Garage(
     A_floor=15,
-    h=2.2,
-    useVentilation=false)
+    h=2.5,
+    useVentilation=false,
+    fractionElectricToHeat=0.01)
     annotation (Placement(transformation(extent={{140,-40},{160,-20}})));
   Boundaries.Horizontal.Roof SaunaRoof(
     length=4,
@@ -525,7 +526,7 @@ model House
     annotation (Placement(transformation(extent={{-20,-230},{20,-190}})));
   Rooms.Bathroom bathroom(
     A_floor=14,
-    h=2.2,
+    h=2.5,
     gasType=sim.gasType1,
     useVentilation=false,
     fractionElectricToHeat=0.7,
@@ -554,11 +555,11 @@ model House
     lambdaWindow=0.08,
     thickness_A=0.2,
     lambda_A=0.039,
-    rho_A=20000,
+    rho_A(displayUnit="kg/m3") = 20,
     cp_A=1500,
     thickness_B=0.03,
     lambda_B=0.13,
-    rho_B=500000,
+    rho_B(displayUnit="kg/m3") = 500,
     cp_B=1600)
     annotation (Placement(transformation(extent={{92,-40},{112,-20}})));
   Modelica.Blocks.Sources.RealExpression solarRadGarDoor(y=0) annotation (
