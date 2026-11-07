@@ -41,7 +41,8 @@ file_names_power = ( # format: {name}_power.csv Note: Sauna has no power profile
     "Bedroom",
     "Garage",
     "Kitchen",
-    "Living_room"
+    "Living_room",
+    "EV_charging"
 )
 
 weather_file_names = {
@@ -733,6 +734,3 @@ if __name__ == "__main__":
             f"Mean Temp: {mean_temp:.2f} K ({mean_temp_c:.1f} °C), "
             f"Weight: {weight:.0f} weeks, Share: {share:.2%}"
         )
-        
-
-

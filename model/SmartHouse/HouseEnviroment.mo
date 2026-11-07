@@ -74,31 +74,31 @@ model HouseEnviroment
     annotation (Placement(transformation(extent={{-22,-20},{22,20}})));
 
   // Data Sources
-  Modelica.Blocks.Sources.CombiTimeTable OccupancyBathroom(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameOccBathroom, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+  Modelica.Blocks.Sources.CombiTimeTable OccupancyBathroom(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameOccBathroom, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic)
     annotation (Placement(transformation(extent={{-10,-10},{10,10}}, rotation=0, origin={-90,60})));
-  Modelica.Blocks.Sources.CombiTimeTable OccupancyBedroom(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameOccBedroom, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+  Modelica.Blocks.Sources.CombiTimeTable OccupancyBedroom(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameOccBedroom, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic)
     annotation (Placement(transformation(extent={{-10,-10},{10,10}}, rotation=0, origin={-90,30})));
-  Modelica.Blocks.Sources.CombiTimeTable OccupancyKitchen(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameOccKitchen, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+  Modelica.Blocks.Sources.CombiTimeTable OccupancyKitchen(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameOccKitchen, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic)
     annotation (Placement(transformation(extent={{-10,-10},{10,10}}, rotation=0, origin={-90,0})));
-  Modelica.Blocks.Sources.CombiTimeTable OccupancyLivingRoom(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameOccLivingRoom, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+  Modelica.Blocks.Sources.CombiTimeTable OccupancyLivingRoom(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameOccLivingRoom, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic)
     annotation (Placement(transformation(extent={{-10,-10},{10,10}}, rotation=0, origin={-90,-30})));
-  Modelica.Blocks.Sources.CombiTimeTable OccupancyGarage(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameOccGarage, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+  Modelica.Blocks.Sources.CombiTimeTable OccupancyGarage(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameOccGarage, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic)
     annotation (Placement(transformation(extent={{-10,-10},{10,10}}, rotation=0, origin={-90,-60})));
-  Modelica.Blocks.Sources.CombiTimeTable OccupancySauna(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameOccSauna, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+  Modelica.Blocks.Sources.CombiTimeTable OccupancySauna(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameOccSauna, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic)
     annotation (Placement(transformation(extent={{-10,-10},{10,10}}, rotation=0, origin={-90,90})));
-  Modelica.Blocks.Sources.CombiTimeTable PelBathroom(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenamePowerBathroom, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+  Modelica.Blocks.Sources.CombiTimeTable PelBathroom(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenamePowerBathroom, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic)
     annotation (Placement(transformation(extent={{-60,50},{-40,70}})));
-  Modelica.Blocks.Sources.CombiTimeTable PelBedroom(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenamePowerBedroom, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+  Modelica.Blocks.Sources.CombiTimeTable PelBedroom(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenamePowerBedroom, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic)
     annotation (Placement(transformation(extent={{-60,20},{-40,40}})));
-  Modelica.Blocks.Sources.CombiTimeTable PelKitchen(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenamePowerKitchen, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+  Modelica.Blocks.Sources.CombiTimeTable PelKitchen(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenamePowerKitchen, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic)
     annotation (Placement(transformation(extent={{-60,-10},{-40,10}})));
-  Modelica.Blocks.Sources.CombiTimeTable PelLivingroom(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenamePowerLivingRoom, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+  Modelica.Blocks.Sources.CombiTimeTable PelLivingroom(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenamePowerLivingRoom, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic)
     annotation (Placement(transformation(extent={{-60,-40},{-40,-20}})));
-  Modelica.Blocks.Sources.CombiTimeTable PelGarage(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenamePowerGarage, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+  Modelica.Blocks.Sources.CombiTimeTable PelGarage(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenamePowerGarage, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic)
     annotation (Placement(transformation(extent={{-60,-70},{-40,-50}})));
-  Modelica.Blocks.Sources.CombiTimeTable TOutdoor(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameTemp, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+  Modelica.Blocks.Sources.CombiTimeTable TOutdoor(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameTemp, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic)
     annotation (Placement(transformation(extent={{-8,74},{12,94}})));
-  Modelica.Blocks.Sources.CombiTimeTable SaunaSwitch(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameSwitchSauna, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+  Modelica.Blocks.Sources.CombiTimeTable SaunaSwitch(tableOnFile=true, tableName="data", fileName=scenarioDirectory + filenameSwitchSauna, columns={2}, smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments, extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic)
     annotation (Placement(transformation(extent={{-60,80},{-40,100}})));
 
   Modelica.Blocks.Sources.CombiTimeTable radNorth(
@@ -107,7 +107,7 @@ model HouseEnviroment
     fileName=scenarioDirectory + filenameRadNorth,
     columns={2},
     smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments,
-    extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+    extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic)
     annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=0,
@@ -118,7 +118,7 @@ model HouseEnviroment
     fileName=scenarioDirectory + filenameRadEast,
     columns={2},
     smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments,
-    extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+    extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic)
     annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=0,
@@ -129,7 +129,7 @@ model HouseEnviroment
     fileName=scenarioDirectory + filenameRadSouth,
     columns={2},
     smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments,
-    extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+    extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic)
     annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=0,
@@ -140,7 +140,7 @@ model HouseEnviroment
     fileName=scenarioDirectory + filenameRadWest,
     columns={2},
     smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments,
-    extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+    extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic)
     annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=0,
@@ -151,7 +151,7 @@ model HouseEnviroment
     fileName=scenarioDirectory + filenameSolar,
     columns={2},
     smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,
-    extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+    extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic)
     annotation (Placement(transformation(extent={{-10,-10},{10,10}},
         rotation=90,
         origin={50,-90})));
@@ -161,7 +161,7 @@ model HouseEnviroment
     fileName=scenarioDirectory + filenameWind,
     columns={2},
     smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,
-    extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+    extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic)
     annotation (Placement(transformation(extent={{-10,-10},{10,10}},
         rotation=90,
       origin={90,-90})));
