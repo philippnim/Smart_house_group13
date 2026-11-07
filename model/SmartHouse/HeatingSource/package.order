@@ -9,3 +9,6 @@ ElectricalBoiler
 ElectricalBoiler_ThermalStorage
 TestElectricalBoiler
 HeatingController
+LatentHeatStorage
+TILMedia_RT31
+PCMForecastController
