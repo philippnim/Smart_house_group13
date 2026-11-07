@@ -17,7 +17,7 @@ model House
     annotation (Placement(transformation(extent={{86,86},{100,100}})));
   Rooms.Sauna Sauna(
     A_floor=10,
-    h=2.2,
+    h=2.5,
     enableInternalMass=false,
     TSauna=353.15,
     yMax=20000,
@@ -25,29 +25,30 @@ model House
     annotation (Placement(transformation(extent={{-140,60},{-120,80}})));
   Rooms.UnheatedRoom Bedroom(
     A_floor=24,
-    h=2.2,
+    h=2.5,
     useVentilation=false)
     annotation (Placement(transformation(extent={{60,60},{80,80}})));
   Rooms.UnheatedRoom Kitchen(
     A_floor=24,
-    h=2.2,
+    h=2.5,
     useVentilation=false)
     annotation (Placement(transformation(extent={{-140,-40},{-120,-20}})));
   Rooms.UnheatedRoom LivingRoom(
     A_floor=48,
-    h=2.2,
+    h=2.5,
     useVentilation=false)
     annotation (Placement(transformation(extent={{12,-40},{32,-20}})));
   Rooms.UnheatedRoom Garage(
     A_floor=15,
-    h=2.2,
-    useVentilation=false)
+    h=2.5,
+    useVentilation=false,
+    fractionElectricToHeat=0.01)
     annotation (Placement(transformation(extent={{140,-40},{160,-20}})));
   Boundaries.Horizontal.Roof SaunaRoof(
     length=4,
     width=2.5,
-    thickness_upper=0.1,
-    lambda_upper=0.039,
+    thickness_upper=0.3,
+    lambda_upper=0.0405,
     rho_upper(displayUnit="kg/m3") = 50,
     cp_upper=1030,
     enableSurfaceConnection=false,
@@ -61,8 +62,8 @@ model House
   Boundaries.Horizontal.Roof BathroomRoof(
     length=4,
     width=3.5,
-    thickness_upper=0.1,
-    lambda_upper=0.039,
+    thickness_upper=0.3,
+    lambda_upper=0.0405,
     rho_upper(displayUnit="kg/m3") = 50,
     cp_upper=1030,
     enableSurfaceConnection=false,
@@ -76,8 +77,8 @@ model House
   Boundaries.Horizontal.Roof BedroomRoof(
     length=4,
     width=6,
-    thickness_upper=0.1,
-    lambda_upper=0.039,
+    thickness_upper=0.3,
+    lambda_upper=0.0405,
     rho_upper(displayUnit="kg/m3") = 50,
     cp_upper=1030,
     enableSurfaceConnection=false,
@@ -91,8 +92,8 @@ model House
   Boundaries.Horizontal.Roof GarageRoof(
     length=5,
     width=3,
-    thickness_upper=0.1,
-    lambda_upper=0.039,
+    thickness_upper=0.3,
+    lambda_upper=0.0405,
     rho_upper(displayUnit="kg/m3") = 50,
     cp_upper=1030,
     enableSurfaceConnection=false,
@@ -106,8 +107,8 @@ model House
   Boundaries.Horizontal.Roof KitchenRoof(
     length=6,
     width=4,
-    thickness_upper=0.1,
-    lambda_upper=0.039,
+    thickness_upper=0.3,
+    lambda_upper=0.0405,
     rho_upper(displayUnit="kg/m3") = 50,
     cp_upper=1030,
     enableSurfaceConnection=false,
@@ -118,11 +119,11 @@ model House
     alpha_up=25,
     alpha_down=10)
     annotation (Placement(transformation(extent={{-200,128},{-180,148}})));
-  Boundaries.Horizontal.Roof KitchenRoof1(
+  Boundaries.Horizontal.Roof LivingRoomRoof(
     length=6,
     width=8,
-    thickness_upper=0.1,
-    lambda_upper=0.039,
+    thickness_upper=0.3,
+    lambda_upper=0.0405,
     rho_upper(displayUnit="kg/m3") = 50,
     cp_upper=1030,
     enableSurfaceConnection=false,
@@ -135,7 +136,7 @@ model House
     annotation (Placement(transformation(extent={{10,132},{30,152}})));
   Boundaries.Walls.InternalWall internalWall(
     lengthWall=4,
-    heightWall=2.2,
+    heightWall=2.5,
     alpha_A=8,
     alpha_B=8,
     thicknessWall=0.15,
@@ -145,7 +146,7 @@ model House
     annotation (Placement(transformation(extent={{-90,60},{-70,80}})));
   Boundaries.Walls.InternalWall internalWall1(
     lengthWall=4,
-    heightWall=2.2,
+    heightWall=2.5,
     alpha_A=8,
     alpha_B=8,
     thicknessWall=0.15,
@@ -153,19 +154,9 @@ model House
     rhoWall(displayUnit="kg/m3") = 1600,
     cpWall=1000)
     annotation (Placement(transformation(extent={{10,60},{30,80}})));
-  Boundaries.Walls.InternalWall internalWall2(
-    lengthWall=5,
-    heightWall=2.2,
-    alpha_A=8,
-    alpha_B=8,
-    thicknessWall=0.15,
-    lambdaWall=0.7,
-    rhoWall(displayUnit="kg/m3") = 1600,
-    cpWall=1000)
-    annotation (Placement(transformation(extent={{74,-40},{94,-20}})));
   Boundaries.Walls.InternalWall internalWall3(
     lengthWall=6,
-    heightWall=2.2,
+    heightWall=2.5,
     alpha_A=8,
     alpha_B=8,
     thicknessWall=0.15,
@@ -175,7 +166,7 @@ model House
     annotation (Placement(transformation(extent={{-70,-40},{-50,-20}})));
   Boundaries.Walls.InternalWall internalWall4(
     lengthWall=2.5,
-    heightWall=2.2,
+    heightWall=2.5,
     alpha_A=8,
     alpha_B=8,
     thicknessWall=0.15,
@@ -187,7 +178,7 @@ model House
         origin={-130,20})));
   Boundaries.Walls.InternalWall internalWall5(
     lengthWall=1.5,
-    heightWall=2.2,
+    heightWall=2.5,
     alpha_A=8,
     alpha_B=8,
     thicknessWall=0.15,
@@ -199,7 +190,7 @@ model House
         origin={-80,20})));
   Boundaries.Walls.InternalWall internalWall6(
     lengthWall=2,
-    heightWall=2.2,
+    heightWall=2.5,
     alpha_A=8,
     alpha_B=8,
     thicknessWall=0.15,
@@ -211,7 +202,7 @@ model House
         origin={-18,20})));
   Boundaries.Walls.InternalWall internalWall7(
     lengthWall=6,
-    heightWall=2.2,
+    heightWall=2.5,
     alpha_A=8,
     alpha_B=8,
     thicknessWall=0.15,
@@ -223,28 +214,28 @@ model House
         origin={46,20})));
   Boundaries.Walls.CompositeWall compositeWall(
     lengthTotal=6.5,
-    heightTotal=2.2,
-    lengthWindow=4,
-    heightWindow=2.2,
+    heightTotal=2.5,
+    lengthWindow=0.6,
+    heightWindow=0.6,
     alpha_A_window=25,
     alpha_B_window=8,
     alpha_A_wall=25,
     alpha_B_wall=8,
     g_value=0.55,
     thicknessWindow=0.04,
-    lambdaWindow=0.048,
+    lambdaWindow=0.06,
     thickness_A=0.2,
-    lambda_A=0.035,
+    lambda_A=0.039,
     rho_A(displayUnit="kg/m3") = 20,
     cp_A=1500,
-    thickness_B=0.175,
-    lambda_B=0.7,
-    rho_B(displayUnit="kg/m3") = 1600,
-    cp_B=1000)
+    thickness_B=0.03,
+    lambda_B=0.13,
+    rho_B(displayUnit="kg/m3") = 500,
+    cp_B=1600)
     annotation (Placement(transformation(extent={{-180,60},{-160,80}})));
   Boundaries.Walls.CompositeWall compositeWall1(
     lengthTotal=10,
-    heightTotal=2.2,
+    heightTotal=2.5,
     lengthWindow=5,
     heightWindow=1,
     alpha_A_window=25,
@@ -253,19 +244,19 @@ model House
     alpha_B_wall=8,
     g_value=0.55,
     thicknessWindow=0.04,
-    lambdaWindow=0.048,
+    lambdaWindow=0.06,
     thickness_A=0.2,
-    lambda_A=0.035,
+    lambda_A=0.039,
     rho_A(displayUnit="kg/m3") = 20,
     cp_A=1500,
-    thickness_B=0.175,
-    lambda_B=0.7,
-    rho_B(displayUnit="kg/m3") = 1600,
-    cp_B=1000)
+    thickness_B=0.03,
+    lambda_B=0.13,
+    rho_B(displayUnit="kg/m3") = 500,
+    cp_B=1600)
     annotation (Placement(transformation(extent={{-180,-40},{-160,-20}})));
   Boundaries.Walls.CompositeWall compositeWall2(
     lengthTotal=9,
-    heightTotal=2.2,
+    heightTotal=2.5,
     lengthWindow=3,
     heightWindow=1,
     alpha_A_window=25,
@@ -274,44 +265,44 @@ model House
     alpha_B_wall=8,
     g_value=0.55,
     thicknessWindow=0.04,
-    lambdaWindow=0.048,
+    lambdaWindow=0.06,
     thickness_A=0.2,
-    lambda_A=0.035,
+    lambda_A=0.039,
     rho_A(displayUnit="kg/m3") = 20,
     cp_A=1500,
-    thickness_B=0.175,
-    lambda_B=0.7,
-    rho_B(displayUnit="kg/m3") = 1600,
-    cp_B=1000)
+    thickness_B=0.03,
+    lambda_B=0.13,
+    rho_B(displayUnit="kg/m3") = 500,
+    cp_B=1600)
     annotation (Placement(transformation(extent={{-10,-10},{10,10}},
         rotation=90,
         origin={22,-66})));
   Boundaries.Walls.CompositeWall compositeWall3(
     lengthTotal=11,
-    heightTotal=2.2,
-    lengthWindow=0.2,
-    heightWindow=0.2,
+    heightTotal=2.5,
+    lengthWindow=1,
+    heightWindow=0.5,
     alpha_A_window=25,
     alpha_B_window=8,
     alpha_A_wall=25,
     alpha_B_wall=8,
     g_value=0.55,
     thicknessWindow=0.04,
-    lambdaWindow=0.048,
+    lambdaWindow=0.06,
     thickness_A=0.2,
-    lambda_A=0.035,
+    lambda_A=0.039,
     rho_A(displayUnit="kg/m3") = 20,
     cp_A=1500,
-    thickness_B=0.175,
-    lambda_B=0.7,
-    rho_B(displayUnit="kg/m3") = 1600,
-    cp_B=1000)
+    thickness_B=0.03,
+    lambda_B=0.13,
+    rho_B(displayUnit="kg/m3") = 500,
+    cp_B=1600)
     annotation (Placement(transformation(extent={{10,-10},{-10,10}},
         rotation=0,
         origin={188,-32})));
   Boundaries.Walls.CompositeWall compositeWall4(
     lengthTotal=10,
-    heightTotal=2.2,
+    heightTotal=2.5,
     lengthWindow=2,
     heightWindow=1,
     alpha_A_window=25,
@@ -320,21 +311,21 @@ model House
     alpha_B_wall=8,
     g_value=0.55,
     thicknessWindow=0.04,
-    lambdaWindow=0.048,
+    lambdaWindow=0.06,
     thickness_A=0.2,
-    lambda_A=0.035,
+    lambda_A=0.039,
     rho_A(displayUnit="kg/m3") = 20,
     cp_A=1500,
-    thickness_B=0.175,
-    lambda_B=0.7,
-    rho_B(displayUnit="kg/m3") = 1600,
-    cp_B=1000)
+    thickness_B=0.03,
+    lambda_B=0.13,
+    rho_B(displayUnit="kg/m3") = 500,
+    cp_B=1600)
     annotation (Placement(transformation(extent={{10,-10},{-10,10}},
         rotation=0,
         origin={112,70})));
   Boundaries.Walls.CompositeWall compositeWall5(
     lengthTotal=3.5,
-    heightTotal=2.2,
+    heightTotal=2.5,
     lengthWindow=1,
     heightWindow=1,
     alpha_A_window=25,
@@ -343,15 +334,15 @@ model House
     alpha_B_wall=8,
     g_value=0.55,
     thicknessWindow=0.04,
-    lambdaWindow=0.048,
+    lambdaWindow=0.06,
     thickness_A=0.2,
-    lambda_A=0.035,
+    lambda_A=0.039,
     rho_A(displayUnit="kg/m3") = 20,
     cp_A=1500,
-    thickness_B=0.175,
-    lambda_B=0.7,
-    rho_B(displayUnit="kg/m3") = 1600,
-    cp_B=1000)
+    thickness_B=0.03,
+    lambda_B=0.13,
+    rho_B(displayUnit="kg/m3") = 500,
+    cp_B=1600)
     annotation (Placement(transformation(extent={{10,-10},{-10,10}},
         rotation=90,
         origin={-20,112})));
@@ -363,7 +354,7 @@ model House
     rho_upper(displayUnit="kg/m3") = 2000,
     cp_upper=1000,
     enableSurfaceConnection=true,
-    thickness_lower=0.1,
+    thickness_lower=0.225,
     lambda_lower=0.035,
     rho_lower(displayUnit="kg/m3") = 30,
     cp_lower=1450,
@@ -386,7 +377,7 @@ model House
     rho_upper(displayUnit="kg/m3") = 2000,
     cp_upper=1000,
     enableSurfaceConnection=true,
-    thickness_lower=0.1,
+    thickness_lower=0.225,
     lambda_lower=0.035,
     rho_lower(displayUnit="kg/m3") = 30,
     cp_lower=1450,
@@ -409,7 +400,7 @@ model House
     rho_upper(displayUnit="kg/m3") = 2000,
     cp_upper=1000,
     enableSurfaceConnection=true,
-    thickness_lower=0.1,
+    thickness_lower=0.225,
     lambda_lower=0.035,
     rho_lower(displayUnit="kg/m3") = 30,
     cp_lower=1450,
@@ -432,7 +423,7 @@ model House
     rho_upper(displayUnit="kg/m3") = 2000,
     cp_upper=1000,
     enableSurfaceConnection=true,
-    thickness_lower=0.1,
+    thickness_lower=0.225,
     lambda_lower=0.035,
     rho_lower(displayUnit="kg/m3") = 30,
     cp_lower=1450,
@@ -455,7 +446,7 @@ model House
     rho_upper(displayUnit="kg/m3") = 2000,
     cp_upper=1000,
     enableSurfaceConnection=true,
-    thickness_lower=0.1,
+    thickness_lower=0.225,
     lambda_lower=0.035,
     rho_lower(displayUnit="kg/m3") = 30,
     cp_lower=1450,
@@ -478,7 +469,7 @@ model House
     rho_upper(displayUnit="kg/m3") = 2000,
     cp_upper=1000,
     enableSurfaceConnection=true,
-    thickness_lower=0.1,
+    thickness_lower=0.225,
     lambda_lower=0.035,
     rho_lower(displayUnit="kg/m3") = 30,
     cp_lower=1450,
@@ -503,16 +494,15 @@ model House
     annotation (Placement(transformation(extent={{210,-10},{230,10}})));
   Modelica.Blocks.Sources.RealExpression realExpression
     annotation (Placement(transformation(extent={{-568,-236},{-548,-216}})));
-  Modelica.Blocks.Sources.RealExpression realExpression1(y=0)
-    annotation (Placement(transformation(extent={{-216,-68},{-196,-48}})));
   Boundaries.Walls.Window externalDoor(
     lengthWall=1,
-    heightWall=2,
-    alpha_A=1,
-    alpha_B=1,
+    heightWall=2.1,
+    alpha_A=25,
+    alpha_B=8,
     g_value=0,
-    thicknessWindow=0.10,
-    lambdaWindow=10) annotation (Placement(transformation(
+    thicknessWindow=0.04,
+    lambdaWindow=0.08)
+                     annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=90,
         origin={-28,-88})));
@@ -536,7 +526,7 @@ model House
     annotation (Placement(transformation(extent={{-20,-230},{20,-190}})));
   Rooms.Bathroom bathroom(
     A_floor=14,
-    h=2.2,
+    h=2.5,
     gasType=sim.gasType1,
     useVentilation=false,
     fractionElectricToHeat=0.7,
@@ -551,6 +541,32 @@ model House
         extent={{-20,-20},{20,20}},
         rotation=180,
         origin={234,156})));
+  Boundaries.Walls.CompositeWall compositeWall6(
+    lengthTotal=5,
+    heightTotal=2.5,
+    lengthWindow=1,
+    heightWindow=2.1,
+    alpha_A_window=8,
+    alpha_B_window=8,
+    alpha_A_wall=8,
+    alpha_B_wall=8,
+    g_value=0,
+    thicknessWindow=0.04,
+    lambdaWindow=0.08,
+    thickness_A=0.2,
+    lambda_A=0.039,
+    rho_A(displayUnit="kg/m3") = 20,
+    cp_A=1500,
+    thickness_B=0.03,
+    lambda_B=0.13,
+    rho_B(displayUnit="kg/m3") = 500,
+    cp_B=1600)
+    annotation (Placement(transformation(extent={{92,-40},{112,-20}})));
+  Modelica.Blocks.Sources.RealExpression solarRadGarDoor(y=0) annotation (
+      Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        rotation=90,
+        origin={102,-120})));
 equation
   // Occupancy: all six rooms.
   connect(houseInputs.occupancy[1], Sauna.occupancy);
@@ -656,20 +672,16 @@ equation
       points={{12.6,-30},{6,-30},{6,-50},{22,-50},{22,-56}},
       color={204,0,0},
       thickness=0.5));
-  connect(LivingRoom.heatPort_ceiling, KitchenRoof1.heatPort_down) annotation (
-      Line(
-      points={{12.6,-20.6},{12,-20.6},{12,54},{36,54},{36,126},{20,126},{20,132.4}},
+  connect(LivingRoom.heatPort_ceiling, LivingRoomRoof.heatPort_down)
+    annotation (Line(
+      points={{12.6,-20.6},{12,-20.6},{12,54},{36,54},{36,126},{20,126},{20,
+          132.4}},
       color={204,0,0},
       thickness=0.5));
   connect(LivingRoom.heatPort_floor,LivingRoomFloor. heatPort_up) annotation (
       Line(
       points={{12.6,-39.4},{12,-39.4},{12,-48},{42,-48},{42,-116},{20,-116},{20,
           -122.4}},
-      color={204,0,0},
-      thickness=0.5));
-  connect(LivingRoom.heatPort_walls, internalWall2.heatPort_A_air) annotation (
-      Line(
-      points={{12.6,-30},{74,-30}},
       color={204,0,0},
       thickness=0.5));
   connect(internalWall1.heatPort_B_air, Bedroom.heatPort_walls) annotation (
@@ -689,10 +701,6 @@ equation
   connect(internalWall7.heatPort_B_air,LivingRoom. heatPort_walls) annotation (
       Line(
       points={{46,10},{46,-30},{12.6,-30}},
-      color={204,0,0},
-      thickness=0.5));
-  connect(internalWall2.heatPort_B_air, Garage.heatPort_walls) annotation (Line(
-      points={{94,-30},{140.6,-30}},
       color={204,0,0},
       thickness=0.5));
   connect(Bedroom.heatPort_floor, BedroomFloor.heatPort_up) annotation (Line(
@@ -739,7 +747,7 @@ equation
       points={{150,179.6},{150,192},{-186,192}},
       color={204,0,0},
       thickness=0.5));
-  connect(KitchenRoof1.heatPort_up, OutdoorTemp.heatPort) annotation (Line(
+  connect(LivingRoomRoof.heatPort_up, OutdoorTemp.heatPort) annotation (Line(
       points={{20,151.6},{20,192},{-186,192}},
       color={204,0,0},
       thickness=0.5));
@@ -787,23 +795,6 @@ equation
       points={{150,-161.6},{150,-192},{-186,-192}},
       color={204,0,0},
       thickness=0.5));
-  connect(compositeWall5.RadiationInput, realExpression1.y) annotation (Line(
-        points={{-8,116},{4,116},{4,132},{-104,132},{-104,-58},{-195,-58}},
-                                  color={0,0,127}));
-  connect(compositeWall.RadiationInput, realExpression1.y) annotation (Line(
-        points={{-174,58},{-174,44},{-240,44},{-240,-36},{-188,-36},{-188,-58},
-          {-195,-58}}, color={0,0,127}));
-  connect(compositeWall1.RadiationInput, realExpression1.y) annotation (Line(
-        points={{-174,-42},{-176,-42},{-176,-58},{-195,-58}}, color={0,0,127}));
-  connect(compositeWall4.RadiationInput, realExpression1.y) annotation (Line(
-        points={{116,58},{116,48},{-4,48},{-4,108},{-12,108},{-12,212},{-240,
-          212},{-240,-36},{-188,-36},{-188,-58},{-195,-58}}, color={0,0,127}));
-  connect(compositeWall3.RadiationInput, realExpression1.y) annotation (Line(
-        points={{192,-44},{-4,-44},{-4,-60},{-206,-60},{-206,-58},{-195,-58}},
-        color={0,0,127}));
-  connect(compositeWall2.RadiationInput, realExpression1.y) annotation (Line(
-        points={{34,-70},{48,-70},{48,-44},{-4,-44},{-4,-58},{-195,-58}}, color
-        ={0,0,127}));
   connect(compositeWall1.solarGains, KitchenFloor.heatPort_surfaceConnection)
     annotation (Line(
       points={{-166,-40},{-166,-112},{-208,-112},{-208,-123.6},{-199.6,-123.6}},
@@ -910,6 +901,38 @@ equation
   connect(BathroomRoof.heatPort_down, bathroom.heatPort_ceiling) annotation (
       Line(
       points={{-30,160.4},{-30,152},{-56,152},{-56,79.4},{-39.4,79.4}},
+      color={204,0,0},
+      thickness=0.5));
+  connect(radInput[2], compositeWall4.RadiationInput) annotation (Line(points={
+          {0,-212.5},{0,-206},{116,-206},{116,58}}, color={0,0,127}));
+  connect(radInput[1], compositeWall5.RadiationInput) annotation (Line(points={
+          {0,-217.5},{0,-172},{-56,-172},{-56,-56},{-16,-56},{-16,0},{16,0},{16,
+          52},{40,52},{40,116},{-8,116}}, color={0,0,127}));
+  connect(radInput[4], compositeWall.RadiationInput) annotation (Line(points={{
+          0,-202.5},{0,-206},{-292,-206},{-292,46},{-176,46},{-176,58},{-174,58}},
+        color={0,0,127}));
+  connect(radInput[4], compositeWall1.RadiationInput) annotation (Line(points={
+          {0,-202.5},{0,-206},{-292,-206},{-292,-48},{-174,-48},{-174,-42}},
+        color={0,0,127}));
+  connect(radInput[3], compositeWall2.RadiationInput) annotation (Line(points={
+          {0,-207.5},{0,-206},{52,-206},{52,-70},{34,-70}}, color={0,0,127}));
+  connect(radInput[2], compositeWall3.RadiationInput) annotation (Line(points={
+          {0,-212.5},{0,-206},{192,-206},{192,-44}}, color={0,0,127}));
+  connect(compositeWall6.heatPort_B, Garage.heatPort_walls) annotation (Line(
+      points={{112,-30},{140.6,-30}},
+      color={204,0,0},
+      thickness=0.5));
+  connect(compositeWall6.heatPort_A, LivingRoom.heatPort_walls) annotation (
+      Line(
+      points={{92,-30},{12.6,-30}},
+      color={204,0,0},
+      thickness=0.5));
+  connect(solarRadGarDoor.y, compositeWall6.RadiationInput) annotation (Line(
+        points={{102,-109},{102,-52},{98,-52},{98,-42}}, color={0,0,127}));
+  connect(compositeWall6.solarGains, GarageFloor.heatPort_surfaceConnection)
+    annotation (Line(
+      points={{106,-40},{106,-48},{132,-48},{132,-92},{164,-92},{164,-145.6},{
+          140.4,-145.6}},
       color={204,0,0},
       thickness=0.5));
   annotation (Icon(coordinateSystem(extent={{-220,-200},{220,200}}),
