@@ -534,13 +534,7 @@ model House
     annotation (Placement(transformation(extent={{-40,60},{-20,80}})));
   TIL.Connectors.LiquidPort BWWIn(liquidType=liquidType)
     annotation (Placement(transformation(extent={{212,114},{232,134}})));
-  TIL.Connectors.LiquidPort BWWOut(liquidType=liquidType)
-    annotation (Placement(transformation(extent={{212,80},{232,100}})));
-  Modelica.Blocks.Interfaces.RealInput showerOn annotation (Placement(
-        transformation(
-        extent={{-20,-20},{20,20}},
-        rotation=180,
-        origin={234,156})));
+
   Boundaries.Walls.CompositeWall compositeWall6(
     lengthTotal=5,
     heightTotal=2.5,
@@ -589,6 +583,9 @@ equation
 
   //Sauna connection
   connect(houseInputs.saunaOn, Sauna.SaunaSwitch);
+
+  // DHW connection
+  connect(houseInputs.showerOn, bathroom.showercontroll);
 
   //heatingInput connections
   connect(houseHeatingInput.supplyP[1], BathroomFloor.Input);
@@ -888,12 +885,7 @@ equation
       points={{222,124},{0,124},{0,73},{-20,73}},
       color={0,170,238},
       thickness=0.5));
-  connect(BWWOut, bathroom.BWWRuecklauf) annotation (Line(
-      points={{222,90},{132,90},{132,44},{-8,44},{-8,67},{-20,67}},
-      color={0,170,238},
-      thickness=0.5));
-  connect(showerOn, bathroom.showercontroll) annotation (Line(points={{234,156},
-          {105,156},{105,80.8},{-23.4,80.8}}, color={0,0,127}));
+
   connect(compositeWall5.heatPort_B, bathroom.heatPort_walls) annotation (Line(
       points={{-20,102},{-20,88},{-48,88},{-48,70},{-39.4,70}},
       color={204,0,0},
