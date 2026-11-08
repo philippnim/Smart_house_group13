@@ -37,9 +37,9 @@ model HeatPump_ThermalStorage
   // SCENARIO SWITCHES and Power and effciencies
   // ============================================================
   parameter Boolean useHP = true "Enable heat pump in this scenario"
-    annotation(Dialog(tab="Operation", group="Scenario"));
+    annotation(Dialog(tab="Operation", group="Scenario"),Evaluate=true);
   parameter Boolean useBoiler = true "Enable electric boiler in this scenario"
-    annotation(Dialog(tab="Operation", group="Scenario"));
+    annotation(Dialog(tab="Operation", group="Scenario"),Evaluate=true);
 
   parameter Modelica.Units.SI.Power P_nominal_Boiler = 9000 "Nominal electrical boiler power"
     annotation(Dialog(tab="Operation", group="Electric boiler", enable=useBoiler));

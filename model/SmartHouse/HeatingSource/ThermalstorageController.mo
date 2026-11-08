@@ -18,6 +18,10 @@ model ThermalstorageController
     "Delta T for Hysterese control of boiler limit";
   parameter Modelica.Units.SI.Temperature TdirectMax = 40 + 273.15
     "Upper temperature limit in K for the bypass for floor heating for safety off switch";
+  parameter Modelica.Units.SI.Time tauValve = 2
+    "Time constant for three-way valve movement";
+
+
 
   Modelica.Blocks.Interfaces.BooleanInput EnableHeating
     "Heating demand from the house"
@@ -83,6 +87,18 @@ model ThermalstorageController
     annotation (Placement(transformation(extent={{-10,70},{10,90}})));
 
 
+  Modelica.Blocks.Continuous.FirstOrder valveFilter1(
+  T=tauValve,
+    initType=Modelica.Blocks.Types.Init.SteadyState)
+    annotation (Placement(transformation(extent={{8,-10},{28,10}})));
+
+Modelica.Blocks.Continuous.FirstOrder valveFilter2(
+  T=tauValve,
+    initType=Modelica.Blocks.Types.Init.SteadyState)
+  annotation (Placement(transformation(extent={{52,-10},{72,10}})));
+
+
+
   // Variables
   Boolean DHWmode "True when domestic hot water storage has priority";
   Boolean enableHeater "True when heat generation is required";
@@ -100,8 +116,13 @@ equation
   // Supply temperature setpoint based on DHW or floor heating
   TSupplySet = if DHWmode then TDHW else THeating;
 
-  // Three-way valve
-  threeWayValve = if DHWmode then 0.9999 else 0;
+  // Three-way valve with gradual opening and closing
+  valveFilter1.u = if DHWmode then 0.9999 else 0;
+
+  connect(valveFilter2.u, valveFilter1.y)
+    annotation (Line(points={{50,0},{29,0}}, color={0,0,127}));
+  connect(valveFilter2.y, threeWayValve)
+    annotation (Line(points={{73,0},{100,0}}, color={0,0,127}));
 
   // Heater control depending on active circuit
   enableHeater = if DHWmode
@@ -111,6 +132,8 @@ equation
   // Heater must be activated and system currently heating
   EnableBoiler = enableHeater and useBoiler;
   EnableHeatPump = enableHeater and useHP;
+
+
 
 
 

@@ -19,7 +19,7 @@ And Infiltration to the outside. Additionally also handles air exchange between 
 
   parameter Boolean useAirNetwork = true
     "Enable/disable airExchangeNetwork"
-    annotation(Dialog(tab="General"));
+    annotation(Dialog(tab="General"),Evaluate=true);
 
   // Volumetric exchange rate between the different rooms (open doors etc.)
   parameter Integer doorConnections[:,3] = [

@@ -21,6 +21,9 @@ connector HouseInputs
 
   Modelica.Blocks.Interfaces.BooleanInput saunaOn;
 
+  // Shower control input
+  Modelica.Blocks.Interfaces.RealInput showerOn;
+
   annotation (
     Icon(graphics={
       Rectangle(

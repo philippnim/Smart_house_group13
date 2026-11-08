@@ -41,7 +41,8 @@ file_names_power = ( # format: {name}_power.csv Note: Sauna has no power profile
     "Bedroom",
     "Garage",
     "Kitchen",
-    "Living_room"
+    "Living_room",
+    "EV_charging"
 )
 
 weather_file_names = {
@@ -96,6 +97,13 @@ def load_sauna_switch() -> pd.DataFrame:
     df = pd.read_csv(file_path, header=None, names=["time", "value"])
     return df
 
+def load_shower_switch() -> pd.DataFrame:
+    """Load the shower switch profile from data/raw_profiles/Shower_switch.csv."""
+    file_path = os.path.join(raw_profiles_dir, "Shower_switch.csv")
+    df = pd.read_csv(file_path, header=None, names=["time", "value"])
+    return df
+
+
 def load_weather_data(file_name: str) -> pd.DataFrame:
     """
     Load the weather data from a txt file.
@@ -116,36 +124,27 @@ def load_weather_data(file_name: str) -> pd.DataFrame:
 
 
 def load_all_profiles() -> dict:
-    """
-    Load all occupancy, power and weather profiles into a dictionary.
-
-    Returns:
-        dict: A dictionary separated into 'seconds' (1-week profiles that repeat
-            over the year) and 'hourly' (full-year hourly profiles for 2022).
-
-    """
+    """Load all occupancy, power and weather profiles into a dictionary."""
     profiles = {
         "seconds": {
             "occupancy": {},
             "power": {},
             "sauna_switch": None,
+            "shower_switch": None,
         },
         "hourly": {
             "weather": {}
         }
     }
-    # Load occupancy profiles (1-week profiles in seconds, repeating over the year)
     for name in file_names_occ:
         profiles["seconds"]["occupancy"][name] = load_occupancy_profile(name)
 
-    # Load power profiles (1-week profiles in seconds, repeating over the year)
     for name in file_names_power:
         profiles["seconds"]["power"][name] = load_power_profile(name)
 
-    # Load sauna switch profile (1-week 0/1 profile in seconds)
     profiles["seconds"]["sauna_switch"] = load_sauna_switch()
+    profiles["seconds"]["shower_switch"] = load_shower_switch()
 
-    # Load weather data (hourly profiles for the entire year 2022)
     for key, file_name in weather_file_names.items():
         profiles["hourly"]["weather"][key] = load_weather_data(file_name)
 
@@ -229,7 +228,7 @@ def _prepare_seconds_profile(
         # Cut [win_start, win_end] and linearly interpolate boundary values via np.interp
         t_cut = np.concatenate(([win_start], t_tiled[inner_mask], [win_end]))
         v_cut = np.interp(t_cut, t_tiled, v_tiled)
-        if np.all(np.isclose(v_cut, np.round(v_cut))):
+        if pd.api.types.is_integer_dtype(df["value"].dtype) and np.all(np.isclose(v_cut, np.round(v_cut))):
             v_cut = np.round(v_cut).astype(df["value"].dtype)
 
         single_period = pd.DataFrame(
@@ -462,6 +461,24 @@ def prepare_simulation_profiles(
             plot_path,
             title=f"{scenario_name.capitalize()} - Sauna Switch",
             ylabel="Sauna Switch [0/1]",
+            startdate=startdate,
+            length=length,
+            n_cycles=n_cycles,
+        )
+
+    # 3b. Prepare, save and plot shower switch profile (seconds)
+    if profiles["seconds"].get("shower_switch") is not None:
+        sim_df = _prepare_seconds_profile(
+            profiles["seconds"]["shower_switch"], startdate, length=length, n_cycles=n_cycles
+        )
+        out_path = os.path.join(scenario_folder, "Shower_switch.txt")
+        _save_dymola_table(sim_df, out_path)
+        plot_path = os.path.join(plots_folder, "Shower_switch.png")
+        plot_simulation_profile(
+            sim_df,
+            plot_path,
+            title=f"{scenario_name.capitalize()} - Shower Switch",
+            ylabel="Shower Switch",
             startdate=startdate,
             length=length,
             n_cycles=n_cycles,
@@ -733,6 +750,3 @@ if __name__ == "__main__":
             f"Mean Temp: {mean_temp:.2f} K ({mean_temp_c:.1f} °C), "
             f"Weight: {weight:.0f} weeks, Share: {share:.2%}"
         )
-        
-
-

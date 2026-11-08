@@ -13,9 +13,9 @@ model PV_Battery_Wind_Simple
 
   // ---------- Parameter Last ----------
 
-  parameter Boolean enablePV = true "PV an/aus";
-  parameter Boolean enableWind = true "Wind an/aus";
-  parameter Boolean enableBattery = true "Batterie an/aus";
+  parameter Boolean enablePV = true "PV an/aus" annotation(Evaluate=true);
+  parameter Boolean enableWind = true "Wind an/aus" annotation(Evaluate=true);
+  parameter Boolean enableBattery = true "Batterie an/aus" annotation(Evaluate=true);
 
   // ---------- Einstrahlung aus CSV ----------
   // CSV: 1. Spalte Zeit [s], 2. Spalte Einstrahlung [W/m2]

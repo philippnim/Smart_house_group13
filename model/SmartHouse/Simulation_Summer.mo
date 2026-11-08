@@ -12,7 +12,7 @@ model Simulation_Summer
     Icon(coordinateSystem(preserveAspectRatio=false)),
     Diagram(coordinateSystem(preserveAspectRatio=false)),
     experiment(
-      StopTime=604800,
+      StopTime=1209600,
       Interval=300,
       __Dymola_Algorithm="Dassl"));
 end Simulation_Summer;
