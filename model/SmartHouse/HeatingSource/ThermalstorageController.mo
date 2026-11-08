@@ -18,7 +18,7 @@ model ThermalstorageController
     "Delta T for Hysterese control of boiler limit";
   parameter Modelica.Units.SI.Temperature TdirectMax = 40 + 273.15
     "Upper temperature limit in K for the bypass for floor heating for safety off switch";
-  parameter Modelica.Units.SI.Time tauValve = 2
+  parameter Modelica.Units.SI.Time tauValve = 30
     "Time constant for three-way valve movement";
 
 

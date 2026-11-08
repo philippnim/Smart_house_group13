@@ -59,7 +59,7 @@ model ShowerSimpleModel
       parallelTubeDistance=0.01,
       tubeWallThickness=0.001,
       nTubeSideParallelHydraulicFlows=10),
-    nCells=5,
+    nCells=3,
     redeclare model TubeSideHeatTransferModel =
         TIL.HeatExchangers.FinAndTube.TransportPhenomena.TubeSideHeatTransfer.ConstantAlpha
         (constantAlpha=5000),

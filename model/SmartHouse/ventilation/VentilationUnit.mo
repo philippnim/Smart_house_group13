@@ -97,6 +97,13 @@ outer TIL.SystemInformationManager sim "Comes from the model around it";
 
   Modelica.Blocks.Sources.Constant constPhi(k=phi_outdoor) if useAirNetwork;
   Modelica.Blocks.Sources.Constant constP(k=p_outdoor) if useAirNetwork;
+  Modelica.Blocks.Interfaces.RealOutput Pel_total(unit="W")
+    "Total electrical power consumption of ventilation"
+    annotation (Placement(
+        transformation(
+        extent={{-10,-10},{10,10}},
+        rotation=180,
+        origin={-106,-60})));
 
 equation
 
@@ -132,6 +139,7 @@ equation
     connect(TOutdoor, channel[i].Toutdoor);
   end for;
 
+  Pel_total = sum(channel[i].simpleFan.P_drive for i in 1:4);
 
 
   annotation (Icon(graphics={

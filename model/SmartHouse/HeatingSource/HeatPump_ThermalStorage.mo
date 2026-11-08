@@ -98,6 +98,7 @@ model HeatPump_ThermalStorage
         transformation(extent={{-34,-58},{-14,-38}})));
 
   TIL3_AddOn_HeatStorage.ThermalStorages.HotWaterTank hotWaterTank(
+    nCells=10,
     geometry(
       innerVolume=0.19,
       innerDiameter=0.4,
@@ -129,7 +130,7 @@ model HeatPump_ThermalStorage
         TIL3_AddOn_HeatStorage.ThermalStorages.Components.TransportPhenomena.TankHeatTransfer.Ambient.CylinderVerticalFreeConvection,
     useMantleHX=false,
     useInternalHX_a=true,
-    nInternalHXCellsPerTankCell_a=4,
+    nInternalHXCellsPerTankCell_a=3,
     internalHXGeometry_a(
       meanDiameterHeatExchanger=0.34),
     redeclare model TubeSideHeatTransferModelInternalHX_a =

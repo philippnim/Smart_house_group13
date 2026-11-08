@@ -9,7 +9,7 @@ model VentilationChannel
       length=1,
       nParallelTubes=10),
     pressureDropPosition=TIL.Internals.PressureDropPosition.port_a,
-    nCells=10,
+    nCells=3,
     enableHeatPorts=true,
     redeclare model HeatTransferModel =
         TIL.GasComponents.Tubes.TransportPhenomena.HeatTransfer.ConstantAlpha
@@ -28,7 +28,7 @@ model VentilationChannel
       length=1,
       nParallelTubes=10),
     pressureDropPosition=TIL.Internals.PressureDropPosition.port_a,
-    nCells=10,
+    nCells=3,
     enableHeatPorts=true,
     HeatTransferModel(constantAlpha=100),
     redeclare model PressureDropModel =

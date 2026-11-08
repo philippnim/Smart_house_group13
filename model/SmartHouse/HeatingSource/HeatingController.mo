@@ -29,6 +29,8 @@ model HeatingController
     annotation(Dialog(tab="Controller", group="PID"));
   parameter Modelica.Units.SI.Area A_eff_max = 2e-5
     "Maximum effective flow area of room valve";
+  parameter Modelica.Units.SI.Area A_eff_min = 1e-8
+    "Minimum effective flow area of room valve";
 
   TIL.Connectors.LiquidPort WaterSupply(liquidType=liquidType)
     "Heating water supply from thermal storage"
@@ -52,7 +54,7 @@ model HeatingController
     controllerType=Modelica.Blocks.Types.SimpleController.PI,
     k=k,
     Ti=Ti,
-    yMin=0,
+    yMin=A_eff_min,
     yMax=A_eff_max)
     annotation(Placement(transformation(
       extent={{-10,-10},{10,10}},
@@ -61,7 +63,7 @@ model HeatingController
     controllerType=Modelica.Blocks.Types.SimpleController.PI,
     k=k,
     Ti=Ti,
-    yMin=0,
+    yMin=A_eff_min,
     yMax=A_eff_max)
     annotation(Placement(transformation(
       extent={{-10,-10},{10,10}},
@@ -70,7 +72,7 @@ model HeatingController
     controllerType=Modelica.Blocks.Types.SimpleController.PI,
     k=k,
     Ti=Ti,
-    yMin=0,
+    yMin=A_eff_min,
     yMax=A_eff_max)
     annotation(Placement(transformation(
       extent={{-10,-10},{10,10}},
@@ -79,7 +81,7 @@ model HeatingController
     controllerType=Modelica.Blocks.Types.SimpleController.PI,
     k=k,
     Ti=Ti,
-    yMin=0,
+    yMin=A_eff_min,
     yMax=A_eff_max)
     annotation(Placement(transformation(
       extent={{-10,-10},{10,10}},

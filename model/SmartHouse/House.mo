@@ -387,7 +387,7 @@ model House
     innerDiameter=0.012,
     wallThickness=0.002,
     nbTubes=1,
-    nbCells=10,
+    nbCells=3,
     alpha_pipe=1000,
     T_init=293.15,
     liquidType=sim.liquidType1)
@@ -410,7 +410,7 @@ model House
     innerDiameter=0.012,
     wallThickness=0.002,
     nbTubes=1,
-    nbCells=10,
+    nbCells=3,
     alpha_pipe=1000,
     T_init=293.15,
     liquidType=sim.liquidType1)
@@ -433,7 +433,7 @@ model House
     innerDiameter=0.012,
     wallThickness=0.002,
     nbTubes=1,
-    nbCells=10,
+    nbCells=3,
     alpha_pipe=1000,
     T_init=293.15,
     liquidType=sim.liquidType1)
@@ -456,7 +456,7 @@ model House
     innerDiameter=0.012,
     wallThickness=0.002,
     nbTubes=1,
-    nbCells=10,
+    nbCells=3,
     alpha_pipe=1000,
     T_init=293.15,
     liquidType=sim.liquidType1)
