@@ -18,15 +18,15 @@ model HouseEnviroment
     "Define the scenario use the inputs defined by the python script name of the folder";
 
   parameter Boolean useHP "Enable heat pump in this scenario"
-    annotation(Dialog(group="Operatiopn"));
+    annotation(Dialog(group="Operation"),Evaluate=true);
   parameter Boolean useBoiler "Enable electric boiler in this scenario"
-    annotation(Dialog(group="Operatiopn"));
+    annotation(Dialog(group="Operation"),Evaluate=true);
   parameter Boolean enablePV "PV an/aus"
-    annotation(Dialog(group="Operatiopn"));
+    annotation(Dialog(group="Operation"),Evaluate=true);
   parameter Boolean enableWind "Wind an/aus"
-    annotation(Dialog(group="Operatiopn"));
+    annotation(Dialog(group="Operation"),Evaluate=true);
   parameter Boolean enableBattery "Batterie an/aus"
-    annotation(Dialog(group="Operatiopn"));
+    annotation(Dialog(group="Operation"),Evaluate=true);
 
 
 
@@ -195,7 +195,7 @@ model HouseEnviroment
       TILMedia.Liquid.Types.TILMedia_Water liquidType1)
     annotation (Placement(transformation(extent={{100,100},{120,120}})));
   ventilation.VentilationUnit ventilationUnit(
-    useAirNetwork=false,
+    useAirNetwork=true,
     dp_nominal_door(displayUnit="Pa") = 10,
     mdot_nominal_door=0,
     dp_nominal_inf(displayUnit="Pa") = 100,
