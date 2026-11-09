@@ -27,7 +27,8 @@ model HouseEnviroment
     annotation(Dialog(group="Operation"),Evaluate=true);
   parameter Boolean enableBattery "Batterie an/aus"
     annotation(Dialog(group="Operation"),Evaluate=true);
-
+  parameter Boolean usePCM = false
+  annotation(Dialog(group="Operation"), Evaluate=true);
 
 
   final parameter String scenarioDirectory = Modelica.Utilities.Files.fullPathName(Modelica.Utilities.Files.loadResource("modelica://SmartHouse/") + "/../../data/scenarios/" + scenario + "/") + "/";
@@ -69,7 +70,8 @@ model HouseEnviroment
   parameter String filenameRadSouth = "rad_south_weather.txt" annotation(Dialog(tab="Radiation Filenames", group="Radiation Filenames"));
   parameter String filenameRadWest = "rad_west_weather.txt" annotation(Dialog(tab="Radiation Filenames", group="Radiation Filenames"));
 
-
+  // Contains the 6 hottest hour of a day
+  parameter String filenamePCM = "pcm_charge_window.txt";
 
 
 
@@ -190,7 +192,9 @@ model HouseEnviroment
   // Other
   Modelica.Blocks.Sources.RealExpression TGround(y=278.15)
     annotation (Placement(transformation(extent={{-34,62},{-14,82}})));
-  inner TIL.SystemInformationManager sim(redeclare
+  inner TIL.SystemInformationManager sim(
+    redeclare TILMedia.VLEFluid.Types.TILMedia_Propane vleFluidType1,
+                                         redeclare
       TILMedia.Gas.Types.VDI4670_MoistAir gasType1, redeclare
       TILMedia.Liquid.Types.TILMedia_Water liquidType1)
     annotation (Placement(transformation(extent={{100,100},{120,120}})));
@@ -209,7 +213,8 @@ model HouseEnviroment
   Modelica.Blocks.Logical.GreaterEqualThreshold saunaSwitchBool(threshold=1)
     annotation (Placement(transformation(extent={{-32,84},{-20,96}})));
   HeatingSource.HeatPump_ThermalStorage heatPump_ThermalStorage(useHP=useHP,
-      useBoiler=useBoiler)
+      useBoiler=useBoiler,usePCM=usePCM,
+  pcmForecastFileName=scenarioDirectory + filenamePCM)
     annotation (Placement(transformation(extent={{34,48},{54,68}})));
   PowerSupply.ElectricSystem electricSystem(
     enablePV=enablePV,
@@ -343,8 +348,8 @@ equation
       points={{86,55},{54,55}},
       color={0,170,238},
       thickness=0.5));
-  connect(houseVentilation.aggPel_Demand, powerSum.u3) annotation (Line(points=
-          {{18.4,21.4},{32,21.4},{32,-26},{33,-26},{33,-29}}, color={0,0,127}));
+  connect(houseVentilation.aggPel_Demand, powerSum.u3) annotation (Line(points={
+          {18.4,21.4},{32,21.4},{32,-26},{33,-26},{33,-29}}, color={0,0,127}));
   connect(ventilationUnit.Pel_total, powerSum.u2)
     annotation (Line(points={{53.4,-16},{37,-16},{37,-29}}, color={0,0,127}));
   annotation (Icon(coordinateSystem(preserveAspectRatio=false, extent={{-120,

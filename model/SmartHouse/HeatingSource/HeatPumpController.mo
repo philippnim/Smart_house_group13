@@ -6,11 +6,11 @@ model HeatPumpController
   // PARAMETERS
   // ============================================================
 
-  parameter Real fanSpeedHeating = 12
-    "Fan speed during normal heat-pump operation";
+  parameter Modelica.Units.SI.VolumeFlowRate
+  fanVolumeFlowHeating = 2.0;
 
-  parameter Real fanSpeedOff = 0
-    "Fan speed when heat pump is disabled";
+  parameter Modelica.Units.SI.VolumeFlowRate
+  fanVolumeFlowOff = 0.001;
 
 
   // ============================================================
@@ -63,8 +63,8 @@ model HeatPumpController
         transformation(extent={{136,-58},{152,-42}}),
         iconTransformation(extent={{124,-28},{140,-12}})));
 
-  Modelica.Blocks.Interfaces.RealOutput fanSpeed
-    "Fan-speed command"
+  Modelica.Blocks.Interfaces.RealOutput fanVolumeFlow(
+  unit="m3/s")
     annotation (
       Placement(
         transformation(extent={{136,-88},{152,-72}}),
@@ -93,9 +93,9 @@ equation
   // FAN CONTROL
   // ============================================================
 
-  fanSpeed =
-    if enableHeatPump then fanSpeedHeating
-    else fanSpeedOff;
+  fanVolumeFlow =
+  if enableHeatPump then fanVolumeFlowHeating
+  else fanVolumeFlowOff;
 
 
 annotation (

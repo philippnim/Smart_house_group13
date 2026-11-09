@@ -8,13 +8,13 @@ model HeatPumpCycle "Simplified air-to-water heat pump model"
 
 
   // --- Fan control ---
-  parameter Real fanSpeedHeating = 15
-    "Fan speed during normal heating"
-    annotation(Dialog(tab="Fan", group="Control"));
+  parameter Modelica.Units.SI.VolumeFlowRate fanVolumeFlowHeating = 2.0
+  "Fan volume flow during normal heating"
+  annotation(Dialog(tab="Fan", group="Control"));
 
-  parameter Real fanSpeedOff = 0.1
-    "Fan speed when heat pump is disabled"
-    annotation(Dialog(tab="Fan", group="Control"));
+  parameter Modelica.Units.SI.VolumeFlowRate fanVolumeFlowOff = 0.001
+  "Fan volume flow when heat pump is disabled"
+  annotation(Dialog(tab="Fan", group="Control"));
 
 
 // ============================================================
@@ -262,11 +262,11 @@ parameter Integer condenserNCells(min=1) = 15
     "Initial low-side pressure"
     annotation(Dialog(tab="Advanced", group="Initialization"));
 
-  parameter Modelica.Units.SI.Volume separatorVolume = 2e-3
+  parameter Modelica.Units.SI.Volume separatorVolume = 5e-3
     "Separator volume"
     annotation(Dialog(tab="Advanced", group="Separator"));
 
-  parameter Real separatorInitialFillingLevel(min=0, max=1) = 0.5
+  parameter Real separatorInitialFillingLevel(min=0, max=1) = 0.2
     "Initial separator filling level"
     annotation(Dialog(tab="Advanced", group="Separator"));
 
@@ -342,7 +342,7 @@ parameter Integer condenserNCells(min=1) = 15
     tau=0.5,
     useSteadyStateInitialization=false,
     redeclare TIL.Utilities.Units.Conversions.Units.K unit,
-    initialSensorValue=30)
+    initialSensorValue=303.15)
     annotation (Placement(transformation(extent={{-52,64},{-44,72}})));
   TIL.LiquidComponents.Sensors.Sensor_T      sensor_T_degC_waterIn(redeclare
       TIL.Utilities.Units.Conversions.Units.K unit)
@@ -488,8 +488,8 @@ redeclare model HeatTransferModel_b =
           origin={-160,-26})));
 
   HeatPumpController heatPumpController(
-    fanSpeedHeating=fanSpeedHeating,
-    fanSpeedOff=fanSpeedOff)
+  fanVolumeFlowHeating=fanVolumeFlowHeating,
+  fanVolumeFlowOff=fanVolumeFlowOff)
     annotation (Placement(transformation(extent={{80,-110},{126,-68}})));
   Modelica.Blocks.Interfaces.RealInput T_ambient
     "Temperature of the ambient in K" annotation (Placement(transformation(
@@ -536,21 +536,6 @@ redeclare model HeatTransferModel_b =
     annotation (Placement(transformation(extent={{4,-4},{-4,4}},
         rotation=90,
         origin={-40,-116})));
-  TIL.GasComponents.Fans.Fan2ndOrder fan2ndOrder(
-    use_mechanicalPort=true,
-    steadyStateMomentum=true,
-    nFixed=fanFixedSpeedFallback,
-    n_nominal=fanNominalSpeed,
-    dp_nominal=fanNominalPressureRise,
-    V_flow_nominal=fanNominalVolumeFlow,
-    V_flow0=fanZeroPressureVolumeFlow,
-    deltaV_flow=fanDeltaVolumeFlow,
-    dpInitial(displayUnit="Pa") = fanDpInitial,
-    V_flow_Start=fanVolumeFlowStart)                          annotation (Placement(transformation(extent={{-32,-86},
-            {-48,-102}})));
-  TIL.OtherComponents.Mechanical.RotatoryBoundary rotatoryBoundary(use_nInput=true,
-      nFixed=fanSpeedHeating)
-    annotation (Placement(transformation(extent={{-20,-104},{-28,-84}})));
   TIL.GasComponents.Sensors.StatePoint statePoint5(index=1)
     annotation (Placement(transformation(extent={{-64,-118},{-56,-110}})));
   Modelica.Blocks.Logical.Switch compressorSwitch annotation (Placement(transformation(extent={{6,-6},{
@@ -564,8 +549,13 @@ redeclare model HeatTransferModel_b =
         origin={106,-48})));
   TIL.VLEFluidComponents.Sensors.Sensor_superheating sensor_superheating
     annotation (Placement(transformation(extent={{4,-26},{12,-18}})));
+  TIL.GasComponents.Fans.SimpleFan simpleFan(presetVariableType="V_flow",
+      use_volumeFlowRateInput=true) annotation (Placement(transformation(
+        extent={{-8,-8},{8,8}},
+        rotation=180,
+        origin={-40,-90})));
 equation
-  P_el = compressor.shaftPower + fan2ndOrder.P_shaft;
+  P_el = compressor.shaftPower + simpleFan.P_drive;
   HeatFlow = -condenser.Q_flow;
   connect(statePoint1.sensorPort,pressureState_hp. portA) annotation (Line(
       points={{-6,46},{-6,42},{-20,42}},
@@ -660,15 +650,14 @@ equation
       color={0,170,238},
       thickness=0.5));
   connect(heatPumpController.controllerSwitch, compressorController.activeInput)
-    annotation (Line(points={{124.686,-78.85},{154,-78.85},{154,13.8},{137.6,
-          13.8}},              color={255,0,255}));
+    annotation (Line(points={{124.686,-78.85},{154,-78.85},{154,13.8},{137.6,13.8}},
+                               color={255,0,255}));
   connect(heatPumpController.controllerSwitch, expansionValveController.activeInput)
-    annotation (Line(points={{124.686,-78.85},{154,-78.85},{154,24},{-142,24},{
-          -142,9.8},{-137.6,9.8}},                color={255,0,255}));
+    annotation (Line(points={{124.686,-78.85},{154,-78.85},{154,24},{-142,24},{-142,
+          9.8},{-137.6,9.8}},                     color={255,0,255}));
   connect(heatPumpController.controllerSwitch, expansionValveSwitch.u2) annotation (Line(
-        points={{124.686,-78.85},{154,-78.85},{154,24},{-142,24},{-142,-22},{
-          -129.2,-22}},
-                 color={255,0,255}));
+        points={{124.686,-78.85},{154,-78.85},{154,24},{-142,24},{-142,-22},{-129.2,
+          -22}}, color={255,0,255}));
   connect(heatPumpController.TemperatureSetpoint, compressorController.u_s)
     annotation (Line(points={{124.686,-92.5},{142,-92.5},{142,10},{137.6,10}},
         color={0,0,127}));
@@ -698,27 +687,14 @@ equation
       color={255,153,0},
       thickness=0.5));
 
-  connect(fan2ndOrder.rotatoryFlange,rotatoryBoundary. rotatoryFlange)
-    annotation (Line(
-      points={{-32,-94},{-24,-94}},
-      color={135,135,135},
-      thickness=0.5));
-  connect(fan2ndOrder.portA, evaporator.portB_gas) annotation (Line(
-      points={{-40,-86},{-40,-68},{-40,-56},{-40,-56}},
-      color={255,153,0},
-      thickness=0.5));
   connect(T_ambient, gasSource.T_in) annotation (Line(points={{-120,-200},{-120,
           -32},{-110,-32},{-110,-24},{-60,-24},{-60,-20},{-38,-20},{-38,-8},{-34,
           -8},{-34,-2}},                              color={0,0,127}));
-  connect(heatPumpController.fanSpeed, rotatoryBoundary.n_in) annotation (Line(
-        points={{124.686,-99.5},{152,-99.5},{152,-132},{2,-132},{2,-94},{-20,
-          -94}}, color={0,0,127}));
   connect(compressorController.y, compressorSwitch.u1) annotation (Line(points={{125.6,10},
           {122,10},{122,-32},{116.8,-32},{116.8,-25.2}}, color={0,0,127}));
   connect(heatPumpController.controllerSwitchCompressor, compressorSwitch.u2)
-    annotation (Line(points={{124.686,-71.5},{134,-71.5},{134,-42},{112,-42},{
-          112,-25.2}},
-                   color={255,0,255}));
+    annotation (Line(points={{124.686,-71.5},{134,-71.5},{134,-42},{112,-42},{112,
+          -25.2}}, color={255,0,255}));
   connect(compressorDisable.y, compressorSwitch.u3) annotation (Line(points={{106,-30.4},
           {106,-25.2},{107.2,-25.2}},
                                    color={0,0,127}));
@@ -736,10 +712,6 @@ equation
       points={{-12,-38},{-12,-44},{63,-44}},
       color={153,204,0},
       thickness=0.5));
-  connect(fan2ndOrder.portB, sensor_V_flow_ambientAir.portA) annotation (Line(
-      points={{-40,-102},{-40,-113}},
-      color={255,153,0},
-      thickness=0.5));
   connect(sensor_superheating.port, statePoint4.sensorPort) annotation (Line(
       points={{8,-26},{8,-42},{-12,-42},{-12,-38}},
       color={153,204,0},
@@ -747,11 +719,22 @@ equation
   connect(sensor_subcooling.sensorValue, expansionValveController.u_m)
     annotation (Line(points={{-118,32},{-118,38},{-128,38},{-128,16},{-132,16},
           {-132,11.8}}, color={0,0,127}));
-  connect(heatPumpController.TSupplySet, TSupplySet) annotation (Line(points={{
-          88.2143,-108.25},{88.2143,-174},{132,-174},{132,-200}}, color={0,0,
+  connect(heatPumpController.TSupplySet, TSupplySet) annotation (Line(points={{88.2143,
+          -108.25},{88.2143,-174},{132,-174},{132,-200}},         color={0,0,
           127}));
   connect(EnableHeatSource, heatPumpController.enableHeatPump) annotation (Line(
         points={{0,-200},{0,-89},{80.6571,-89}}, color={255,0,255}));
+  connect(evaporator.portB_gas, simpleFan.portA) annotation (Line(
+      points={{-40,-56},{-40,-82}},
+      color={255,153,0},
+      thickness=0.5));
+  connect(simpleFan.portB, sensor_V_flow_ambientAir.portA) annotation (Line(
+      points={{-40,-98},{-40,-113}},
+      color={255,153,0},
+      thickness=0.5));
+  connect(simpleFan.V_flow_in, heatPumpController.fanVolumeFlow) annotation (
+      Line(points={{-30,-90},{6,-90},{6,-132},{82,-132},{82,-134},{140,-134},{140,
+          -99.5},{124.686,-99.5}}, color={0,0,127}));
   annotation (
   Diagram(
     coordinateSystem(

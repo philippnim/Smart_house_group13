@@ -40,6 +40,13 @@ model HeatPump_ThermalStorage
     annotation(Dialog(tab="Operation", group="Scenario"),Evaluate=true);
   parameter Boolean useBoiler = true "Enable electric boiler in this scenario"
     annotation(Dialog(tab="Operation", group="Scenario"),Evaluate=true);
+  parameter Boolean usePCM = false
+  "Enable latent heat storage"
+  annotation(Dialog(tab="Operation", group="Scenario"),
+             Evaluate=true);
+
+  parameter String pcmForecastFileName = ""
+  "Path to PCM forecast file";
 
   parameter Modelica.Units.SI.Power P_nominal_Boiler = 9000 "Nominal electrical boiler power"
     annotation(Dialog(tab="Operation", group="Electric boiler", enable=useBoiler));
@@ -65,7 +72,7 @@ model HeatPump_ThermalStorage
   parameter Modelica.Units.SI.Temperature T_maxFloorHeating = 40 + 273.15
     "Failsafe temperature at which point the boiler is shut down"
     annotation(Dialog(group="Temperatures"));
-  parameter Modelica.Units.SI.TemperatureDifference deltaT = 1
+  parameter Modelica.Units.SI.TemperatureDifference deltaT = 5
     "delta when the boiler is activated again after failsafe"
     annotation(Dialog(group="Temperatures"));
 
@@ -75,8 +82,6 @@ model HeatPump_ThermalStorage
   // ============================================================
   HeatPumpCycle heatPumpCycle1(
     liquidType = liquidType,
-    fanSpeedHeating=15,
-    fanSpeedOff=0.001,
     evaporatorFinnedTubeLength=8,
     evaporatorNSerialTubes=5,
     evaporatorNParallelTubes=30,
@@ -322,6 +327,11 @@ model HeatPump_ThermalStorage
         origin={-10,84})));
   Modelica.Blocks.Sources.Constant zeroInactiveSource(k=0) "Zero heat and electricity for removed heat sources";
 
+  LatentHeatStorage latentHeatStorage(
+  liquidType=liquidType,
+  forecastFileName=pcmForecastFileName)
+  if usePCM
+  annotation (Placement(transformation(extent={{-100,22},{-80,42}})));
 equation
 
 
@@ -351,14 +361,6 @@ equation
         color={0,170,238},
         thickness=0.5));
 
-  connect(
-    WaterOutput,
-    linearDirectionalControlValve.portB)
-    annotation (
-      Line(
-        points={{-100,60},{16,60}},
-        color={0,170,238},
-        thickness=0.5));
 
   connect(
     linearDirectionalControlValve.portC,
@@ -366,15 +368,6 @@ equation
     annotation (
       Line(
         points={{40,60},{42,60},{42,40},{70,40}},
-        color={0,170,238},
-        thickness=0.5));
-
-  connect(
-    junction.portC,
-    WaterInput)
-    annotation (
-      Line(
-        points={{-90,0},{-96,0},{-96,-30},{-100,-30}},
         color={0,170,238},
         thickness=0.5));
 
@@ -410,7 +403,7 @@ equation
 
   connect(sensor_T_floorHeating.port, linearDirectionalControlValve.portB)
     annotation (Line(
-      points={{-58,40},{-58,60},{16,60}},
+      points={{-58,40},{-58,50},{14,50},{14,60},{16,60}},
       color={0,170,238},
       thickness=0.5));
   connect(sensor_T_floorHeating.sensorValue, thermalstorageController.T_direct)
@@ -470,6 +463,48 @@ equation
   else
     connect(expansionTank.portB, pump.portA);
   end if;
+
+// =====================================================================
+// PCM
+// =====================================================================
+
+  if usePCM then
+
+  // Supply: Source -> PCM -> Floor heating
+  connect(
+    linearDirectionalControlValve.portB,
+    latentHeatStorage.WaterSupplyIn);
+
+  connect(
+    latentHeatStorage.WaterSupplyOut,
+    WaterOutput);
+
+  // Return: Floor heating -> PCM -> Source
+  connect(
+    WaterInput,
+    latentHeatStorage.WaterReturnIn);
+
+  connect(
+    latentHeatStorage.WaterReturnOut,
+    junction.portC);
+
+  // Heating demand for PCM controller
+  connect(
+    SpaceHeatingDemand,
+    latentHeatStorage.heatingDemand);
+
+else
+
+  // Original system without PCM
+  connect(
+    linearDirectionalControlValve.portB,
+    WaterOutput);
+
+  connect(
+    WaterInput,
+    junction.portC);
+
+end if;
 
 annotation (
   Icon(

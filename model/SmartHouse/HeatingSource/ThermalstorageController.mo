@@ -14,7 +14,7 @@ model ThermalstorageController
     "Lower DHW temperature limit in K";
   parameter Modelica.Units.SI.Temperature TDHWMax = 58 + 273.15
     "Upper DHW temperature limit in K";
-  parameter Modelica.Units.SI.TemperatureDifference  deltaT = 1
+  parameter Modelica.Units.SI.TemperatureDifference  deltaT = 5
     "Delta T for Hysterese control of boiler limit";
   parameter Modelica.Units.SI.Temperature TdirectMax = 40 + 273.15
     "Upper temperature limit in K for the bypass for floor heating for safety off switch";
