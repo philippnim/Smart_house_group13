@@ -64,15 +64,3 @@ Here notes can be added about features that could later be implemented if of int
 
 
 ## Citations
-
-Time Series Clustering through tsam
-@article{Teichgraeber2019joss,
-   author = {Teichgraeber, Holger and Kuepper, Lucas Elias and Brandt, Adam R},
-   doi = {https://doi.org/10.21105/joss.01573},
-   journal = {Journal of Open Source Software},
-   number = {41},
-   pages = {1573},
-   title = {TimeSeriesClustering : An extensible framework in Julia},
-   volume = {4},
-   year = {2019}
-}
