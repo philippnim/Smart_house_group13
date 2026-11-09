@@ -29,4 +29,5 @@ dsin.txt
 timers.txt
 simulation_summary.txt
 status
-/data/scenarios/*
+/data/scenarios/**/*.png
+/data/scenarios/**/*.jpeg
