@@ -4,8 +4,9 @@ model Simulation_Winter
     scenario="winter",
     useHP=false,
     useBoiler=true,
+    usePCM=true,
     enablePV=false,
-    enableWind=true,
+    enableWind=false,
     enableBattery=false)
     annotation (Placement(transformation(extent={{-20,-20},{20,20}})));
   annotation (

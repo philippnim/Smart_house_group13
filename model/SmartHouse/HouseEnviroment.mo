@@ -21,6 +21,8 @@ model HouseEnviroment
     annotation(Dialog(group="Operation"),Evaluate=true);
   parameter Boolean useBoiler "Enable electric boiler in this scenario"
     annotation(Dialog(group="Operation"),Evaluate=true);
+  parameter Boolean usePCM "Enable PCM in this scenario"
+    annotation(Dialog(group="Operation"),Evaluate=true);
   parameter Boolean enablePV "PV an/aus"
     annotation(Dialog(group="Operation"),Evaluate=true);
   parameter Boolean enableWind "Wind an/aus"
@@ -195,7 +197,7 @@ model HouseEnviroment
       TILMedia.Liquid.Types.TILMedia_Water liquidType1)
     annotation (Placement(transformation(extent={{100,100},{120,120}})));
   ventilation.VentilationUnit ventilationUnit(
-    useAirNetwork=true,
+    useAirNetwork=false,
     dp_nominal_door(displayUnit="Pa") = 10,
     mdot_nominal_door=0,
     dp_nominal_inf(displayUnit="Pa") = 100,
@@ -209,7 +211,8 @@ model HouseEnviroment
   Modelica.Blocks.Logical.GreaterEqualThreshold saunaSwitchBool(threshold=1)
     annotation (Placement(transformation(extent={{-32,84},{-20,96}})));
   HeatingSource.HeatPump_ThermalStorage heatPump_ThermalStorage(useHP=useHP,
-      useBoiler=useBoiler)
+      useBoiler=useBoiler,
+    usePCM=usePCM)
     annotation (Placement(transformation(extent={{34,48},{54,68}})));
   PowerSupply.ElectricSystem electricSystem(
     enablePV=enablePV,

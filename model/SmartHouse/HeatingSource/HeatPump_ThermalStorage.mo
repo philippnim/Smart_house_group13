@@ -40,6 +40,9 @@ model HeatPump_ThermalStorage
     annotation(Dialog(tab="Operation", group="Scenario"),Evaluate=true);
   parameter Boolean useBoiler = true "Enable electric boiler in this scenario"
     annotation(Dialog(tab="Operation", group="Scenario"),Evaluate=true);
+  parameter Boolean usePCM = true
+    "Include the forecast-controlled latent heat storage in floor heating"
+    annotation(Dialog(tab="Operation", group="Scenario"),Evaluate=true);
 
   parameter Modelica.Units.SI.Power P_nominal_Boiler = 9000 "Nominal electrical boiler power"
     annotation(Dialog(tab="Operation", group="Electric boiler", enable=useBoiler));
@@ -83,7 +86,7 @@ model HeatPump_ThermalStorage
     separatorInitialFillingLevel=0.2) if useHP
     annotation (
       Placement(
-        transformation(extent={{-52,-20},{-6,22}})));
+        transformation(extent={{-52,-24},{-6,18}})));
 
   ThermalstorageController thermalstorageController(useHP=useHP,
     useBoiler=useBoiler,
@@ -176,7 +179,7 @@ model HeatPump_ThermalStorage
         transformation(
           extent={{-12.0001,-9},{11.9999,9}},
           rotation=180,
-          origin={27.9999,57})));
+          origin={25.9999,55})));
 
   TIL.LiquidComponents.JunctionElements.VolumeJunction junction
     annotation (
@@ -269,7 +272,7 @@ model HeatPump_ThermalStorage
         transformation(
         extent={{-4,-4},{4,4}},
         rotation=180,
-        origin={-58,36})));
+        origin={-58,14})));
   ElectricalBoiler electricalBoiler(
     liquidType = liquidType, P_nominal=P_nominal_Boiler, eta=etaBoiler) if useBoiler
     annotation (Placement(transformation(extent={{-2,-12},{26,14}})));
@@ -321,6 +324,18 @@ model HeatPump_ThermalStorage
         origin={-10,84})));
   Modelica.Blocks.Sources.Constant zeroInactiveSource(k=0) "Zero heat and electricity for removed heat sources";
 
+  LatentHeatStorage latentHeatStorage(forecastFileName="C:/Users/nilsobu/Documents/Project/Smart_house_group13/data/scenarios/winter/pcm_charge_window.txt")
+    annotation (Placement(transformation(extent={{-34,24},{-78,66}})));
+  Modelica.Blocks.Logical.Or demandOrPCM if usePCM
+    "Enable generation for room heating OR a forecast PCM charge request"
+    annotation (Placement(transformation(extent={{-116,23},{-98,41}})));
+  TIL.LiquidComponents.Tubes.Tube tube(
+    tubeGeometry(innerDiameter=0.01, length=2),
+    nCells=2,
+    TubeSideHeatTransferModel(constantAlpha=0),
+    redeclare model PressureDropModel =
+        TIL.LiquidComponents.Tubes.TransportPhenomena.PressureDrop.ZeroPressureDrop)
+    annotation (Placement(transformation(extent={{0,54},{-16,58}})));
 equation
 
 
@@ -338,7 +353,7 @@ equation
     linearDirectionalControlValve.switchingPosition_in)
     annotation (
       Line(
-        points={{-14.8,-46},{60,-46},{60,68},{28,68},{28,66.9}},
+        points={{-14.8,-46},{60,-46},{60,68},{26,68},{26,64.9}},
         color={0,0,127}));
 
   connect(
@@ -346,16 +361,7 @@ equation
     linearDirectionalControlValve.portA)
     annotation (
       Line(
-        points={{28,38},{28,48}},
-        color={0,170,238},
-        thickness=0.5));
-
-  connect(
-    WaterOutput,
-    linearDirectionalControlValve.portB)
-    annotation (
-      Line(
-        points={{-100,60},{16,60}},
+        points={{28,38},{28,46},{26,46}},
         color={0,170,238},
         thickness=0.5));
 
@@ -364,16 +370,7 @@ equation
     hotWaterTank.liquidFluidPortA)
     annotation (
       Line(
-        points={{40,60},{42,60},{42,40},{70,40}},
-        color={0,170,238},
-        thickness=0.5));
-
-  connect(
-    junction.portC,
-    WaterInput)
-    annotation (
-      Line(
-        points={{-90,0},{-96,0},{-96,-30},{-100,-30}},
+        points={{38,58},{42,58},{42,40},{70,40}},
         color={0,170,238},
         thickness=0.5));
 
@@ -407,15 +404,9 @@ equation
         thickness=0.5));
 
 
-  connect(sensor_T_floorHeating.port, linearDirectionalControlValve.portB)
-    annotation (Line(
-      points={{-58,40},{-58,60},{16,60}},
-      color={0,170,238},
-      thickness=0.5));
   connect(sensor_T_floorHeating.sensorValue, thermalstorageController.T_direct)
-    annotation (Line(points={{-58,34},{-58,-39},{-33,-39}}, color={0,0,127}));
-  connect(SpaceHeatingDemand, thermalstorageController.EnableHeating)
-    annotation (Line(points={{-100,-52},{-38,-53},{-33,-53}}, color={255,0,255}));
+    annotation (Line(points={{-58,12},{-58,-40},{-60,-40},{-60,-42},{-56,-42},{-56,
+          -39},{-33,-39}},                                  color={0,0,127}));
   connect(junction.portA, linearHydraulicResistor_dhw.portA) annotation (Line(
       points={{-86,-4},{-86,-74},{-7,-74}},
       color={0,170,238},
@@ -469,7 +460,42 @@ equation
   else
     connect(expansionTank.portB, pump.portA);
   end if;
+  //insert PCM between puffer tank and heating water output, and heating water input and three way connection
+  if usePCM then
+    connect(latentHeatStorage.WaterSupplyOut, WaterOutput) annotation (Line(
+      points={{-78,57.6},{-86,57.6},{-86,60},{-100,60}},
+      color={0,170,238},
+      thickness=0.5));
+  connect(tube.portB, latentHeatStorage.WaterSupplyIn) annotation (Line(
+      points={{-16,56},{-26,56},{-26,57.6},{-34,57.6}},
+      color={0,170,238},
+      thickness=0.5));
+    connect(WaterInput, latentHeatStorage.WaterReturnIn);
+    connect(latentHeatStorage.WaterReturnOut, junction.portC);
+    connect(SpaceHeatingDemand, latentHeatStorage.heatingDemand);
+    connect(SpaceHeatingDemand, demandOrPCM.u1);
+    connect(latentHeatStorage.chargeRequest, demandOrPCM.u2);
+    connect(demandOrPCM.y, thermalstorageController.EnableHeating);
+  else
+    // Identical plumbing and enabling to the original model.
+    connect(tube.portB, WaterOutput);
+    connect(WaterInput, junction.portC);
+    connect(SpaceHeatingDemand, thermalstorageController.EnableHeating);
+  end if;
 
+
+  connect(sensor_T_floorHeating.port, junction.portC) annotation (Line(
+      points={{-58,18},{-70,18},{-70,16},{-96,16},{-96,0},{-90,0}},
+      color={0,170,238},
+      thickness=0.5));
+  connect(linearDirectionalControlValve.portB, tube.portA) annotation (Line(
+      points={{14,58},{8,56},{0,56}},
+      color={0,170,238},
+      thickness=0.5));
+  connect(sensor_T_afterHeatpump.port, tube.portB) annotation (Line(
+      points={{-6,20},{2,20},{2,50},{-20,50},{-20,56},{-16,56}},
+      color={0,170,238},
+      thickness=0.5));
 annotation (
   Icon(
     coordinateSystem(
