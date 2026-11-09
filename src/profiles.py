@@ -15,6 +15,10 @@ import sys
 import os
 import time
 import tsam #Time series clustering
+try:
+    from generate_pcm_charge_window import make_charge_schedule
+except ImportError:
+    from src.generate_pcm_charge_window import make_charge_schedule
 
 repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
 data_dir = os.path.join(repo_root, "data")
@@ -349,21 +353,102 @@ def plot_simulation_profile(
     ax.plot(t_eval, v_eval, color="#1f77b4", linewidth=1.6)
     ax.fill_between(t_eval, v_eval, v_eval.min(), color="#1f77b4", alpha=0.12)
 
-    # Format x-axis ticks at 24h intervals showing both date/weekday and simulation time [s]
+    # Format x-axis ticks at 24h intervals showing date/weekday
     n_days = max(int(length // 24), 1)
     tick_positions = [eval_start_sec + d * 86400 for d in range(n_days + 1)]
     tick_labels = [
-        f"{(startdate + pd.Timedelta(days=d)).strftime('%a %d.%m.')}\n({int(t)} s)"
-        for d, t in enumerate(tick_positions)
+        (startdate + pd.Timedelta(days=d)).strftime("%a %d.%m.")
+        for d in range(n_days + 1)
     ]
     ax.set_xticks(tick_positions)
     ax.set_xticklabels(tick_labels, fontsize=8.5)
     ax.set_xlim(eval_start_sec, eval_end_sec)
 
     ax.set_title(f"{title}", fontsize=11, fontweight="bold")
-    ax.set_xlabel("Date / Simulation Time [s]")
+    ax.set_xlabel("Date")
     ax.set_ylabel(ylabel)
     ax.grid(True, linestyle="--", alpha=0.5)
+
+    fig.tight_layout()
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=150)
+    plt.close(fig)
+    png_bytes = buf.getvalue()
+
+    for attempt in range(5):
+        try:
+            with open(plot_path, "wb") as f:
+                f.write(png_bytes)
+            break
+        except OSError:
+            if attempt < 4:
+                try:
+                    if os.path.exists(plot_path):
+                        os.remove(plot_path)
+                except OSError:
+                    pass
+                time.sleep(0.15)
+            else:
+                raise
+
+
+def plot_stacked_house_profiles(
+    sim_dfs: dict[str, pd.DataFrame],
+    plot_path: str,
+    title: str,
+    ylabel: str,
+    startdate: pd.Timestamp,
+    length: int = 168,
+    n_cycles: int = 2,
+) -> None:
+    """
+    Create a stacked area plot across all rooms/consumers for the evaluation period
+    (second/final week) directly from the in-memory DataFrames `sim_dfs`.
+    """
+    if not sim_dfs:
+        return
+    os.makedirs(os.path.dirname(plot_path), exist_ok=True)
+
+    period_sec = int(length * 3600)
+    eval_start_sec = (max(n_cycles, 1) - 1) * period_sec
+    eval_end_sec = max(n_cycles, 1) * period_sec
+
+    # Build the exact union of all support timestamps across all rooms in [eval_start_sec, eval_end_sec]
+    time_Arrays = [np.array([eval_start_sec, eval_end_sec], dtype=float)]
+    for df in sim_dfs.values():
+        t = df["time"].to_numpy(dtype=float)
+        inner = t[(t > eval_start_sec) & (t < eval_end_sec)]
+        time_Arrays.append(inner)
+    t_eval = np.unique(np.concatenate(time_Arrays))
+
+    labels = []
+    series_list = []
+    for name, df in sim_dfs.items():
+        t = df["time"].to_numpy(dtype=float)
+        v = df["value"].to_numpy(dtype=float)
+        series_list.append(np.interp(t_eval, t, v))
+        labels.append(name.replace("_", " "))
+
+    fig, ax = plt.subplots(figsize=(11, 4.5))
+    ax.stackplot(t_eval, *series_list, labels=labels, alpha=0.82)
+    total_curve = np.sum(series_list, axis=0)
+    ax.plot(t_eval, total_curve, color="black", linewidth=1.0, alpha=0.7, label="Total House")
+
+    n_days = max(int(length // 24), 1)
+    tick_positions = [eval_start_sec + d * 86400 for d in range(n_days + 1)]
+    tick_labels = [
+        (startdate + pd.Timedelta(days=d)).strftime("%a %d.%m.")
+        for d in range(n_days + 1)
+    ]
+    ax.set_xticks(tick_positions)
+    ax.set_xticklabels(tick_labels, fontsize=8.5)
+    ax.set_xlim(eval_start_sec, eval_end_sec)
+
+    ax.set_title(title, fontsize=11, fontweight="bold")
+    ax.set_xlabel("Date")
+    ax.set_ylabel(ylabel)
+    ax.grid(True, linestyle="--", alpha=0.5)
+    ax.legend(loc="upper right", frameon=True, fontsize=8.5, ncol=2)
 
     fig.tight_layout()
     buf = io.BytesIO()
@@ -417,8 +502,10 @@ def prepare_simulation_profiles(
     os.makedirs(plots_folder, exist_ok=True)
 
     # 1. Prepare, save and plot occupancy profiles (seconds)
+    occ_sim_dfs = {}
     for name, df in profiles["seconds"]["occupancy"].items():
         sim_df = _prepare_seconds_profile(df, startdate, length=length, n_cycles=n_cycles)
+        occ_sim_dfs[name] = sim_df
         out_path = os.path.join(scenario_folder, f"{name}_occupancy.txt")
         _save_dymola_table(sim_df, out_path)
         plot_path = os.path.join(plots_folder, f"{name}_occupancy.png")
@@ -432,9 +519,21 @@ def prepare_simulation_profiles(
             n_cycles=n_cycles,
         )
 
+    plot_stacked_house_profiles(
+        occ_sim_dfs,
+        os.path.join(plots_folder, "House_occupancy_stacked.png"),
+        title=f"{scenario_name.capitalize()} - Total House Occupancy (Stacked)",
+        ylabel="Occupancy [persons]",
+        startdate=startdate,
+        length=length,
+        n_cycles=n_cycles,
+    )
+
     # 2. Prepare, save and plot power profiles (seconds)
+    power_sim_dfs = {}
     for name, df in profiles["seconds"]["power"].items():
         sim_df = _prepare_seconds_profile(df, startdate, length=length, n_cycles=n_cycles)
+        power_sim_dfs[name] = sim_df
         out_path = os.path.join(scenario_folder, f"{name}_power.txt")
         _save_dymola_table(sim_df, out_path)
         plot_path = os.path.join(plots_folder, f"{name}_power.png")
@@ -447,6 +546,16 @@ def prepare_simulation_profiles(
             length=length,
             n_cycles=n_cycles,
         )
+
+    plot_stacked_house_profiles(
+        power_sim_dfs,
+        os.path.join(plots_folder, "House_power_stacked.png"),
+        title=f"{scenario_name.capitalize()} - Total House Electrical Power (Stacked)",
+        ylabel="Electrical Power [W]",
+        startdate=startdate,
+        length=length,
+        n_cycles=n_cycles,
+    )
 
     # 3. Prepare, save and plot sauna switch profile (seconds, 0/1)
     if profiles["seconds"].get("sauna_switch") is not None:
@@ -500,6 +609,41 @@ def prepare_simulation_profiles(
             n_cycles=n_cycles,
         )
 
+    # 5. Prepare, save and plot PCM charge window profile (6 warmest hours/day)
+    if "temperature" in profiles["hourly"]["weather"]:
+        temp_sim_df = _prepare_hourly_profile(
+            profiles["hourly"]["weather"]["temperature"],
+            startdate,
+            length=length,
+            n_cycles=n_cycles,
+        )
+        n_days = max(int((length * n_cycles) // 24), 1)
+        _, schedule = make_charge_schedule(
+            temp_sim_df["time"].to_numpy(dtype=float),
+            temp_sim_df["value"].to_numpy(dtype=float),
+            n_days=n_days,
+            n_warm_hours=6,
+        )
+        n_hours = len(schedule)
+        pcm_df = pd.DataFrame(
+            {
+                "time": np.arange(n_hours + 1, dtype=int) * 3600,
+                "value": np.append(schedule, 0).astype(int),
+            }
+        )
+        pcm_out_path = os.path.join(scenario_folder, "pcm_charge_window.txt")
+        _save_dymola_table(pcm_df, pcm_out_path)
+        pcm_plot_path = os.path.join(plots_folder, "pcm_charge_window.png")
+        plot_simulation_profile(
+            pcm_df,
+            pcm_plot_path,
+            title=f"{scenario_name.capitalize()} - PCM Charge Window",
+            ylabel="Charge Permission [0/1]",
+            startdate=startdate,
+            length=length,
+            n_cycles=n_cycles,
+        )
+
 
 def plot_scenarios_weather_comparison(profiles: dict, scenarios: dict) -> None:
     """
@@ -540,9 +684,7 @@ def plot_scenarios_weather_comparison(profiles: dict, scenarios: dict) -> None:
         eval_end_sec = max(ref_cycles, 1) * period_sec
         n_days = max(int(ref_length // 24), 1)
         tick_positions = [eval_start_sec + d * 86400 for d in range(n_days + 1)]
-        tick_labels = [
-            f"{weekday_names[d % 7]}\n({int(t)} s)" for d, t in enumerate(tick_positions)
-        ]
+        tick_labels = [weekday_names[d % 7] for d in range(n_days + 1)]
         ax.set_xticks(tick_positions)
         ax.set_xticklabels(tick_labels, fontsize=8.5)
         ax.set_xlim(eval_start_sec, eval_end_sec)
@@ -552,7 +694,7 @@ def plot_scenarios_weather_comparison(profiles: dict, scenarios: dict) -> None:
             fontsize=11,
             fontweight="bold",
         )
-        ax.set_xlabel("Weekday / Simulation Time [s]")
+        ax.set_xlabel("Weekday")
         ax.set_ylabel(weather_ylabels.get(key, key))
         ax.grid(True, linestyle="--", alpha=0.5)
         ax.legend(loc="best", frameon=True)
