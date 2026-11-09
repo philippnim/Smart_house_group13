@@ -12,7 +12,7 @@ And Infiltration to the outside. Additionally also handles air exchange between 
   // 6 Garage
 
   // All 6 room volumes (1 Sauna, 2 Bathroom, 3 Bedroom, 4 Kitchen, 5 Living room, 6 Garage)
-  parameter Modelica.Units.SI.Volume V_rooms[6] = {22.0, 30.8, 52.8, 52.8, 105.6, 33.0}
+  parameter Modelica.Units.SI.Volume V_rooms[6] = {25.0, 35.0, 60.0, 60.0, 120.0, 37.5}
     "Room volumes for all 6 rooms"
                                   annotation(Dialog(tab="General"));
 
