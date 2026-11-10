@@ -133,6 +133,13 @@ model VentilationChannel
     linearHydraulicResistor_out(dp_nominal(displayUnit="Pa") = 100,
       mdot_nominal=mdot_nominal_out)
     annotation (Placement(transformation(extent={{-54,-12},{-42,-8}})));
+
+
+
+  Modelica.Blocks.Interfaces.RealOutput P_fan(unit="W") "Electrical fan power" annotation (Placement(transformation(
+        extent={{-10,-10},{10,10}},
+        rotation=90,
+        origin={0,170})));
 equation
 
   connect(sensor_phi.sensorValue, ventilationController.phi_room) annotation
@@ -253,7 +260,13 @@ equation
   connect(gasPortExhaust, linearHydraulicResistor_out.portA) annotation (Line(
       points={{-90,-10},{-54,-10}},
       color={255,153,0},
-      thickness=0.5));
+    thickness=0.5));
+
+
+  // Calculate electrical power from actual channel pressure drop if simpleFan is isobaric
+  P_fan = abs(simpleFan.P_drive);
+
+
   annotation (
     Icon(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},{240,160}})),
     Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},{240,

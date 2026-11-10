@@ -95,6 +95,11 @@ outer TIL.SystemInformationManager sim "Comes from the model around it";
     mdot_nominal_inf=mdot_nominal_inf) if useAirNetwork
     annotation (Placement(transformation(extent={{-20,30},{20,70}})));
 
+  Modelica.Blocks.Interfaces.RealOutput P_ventilation_total(unit="W") "Total fan power"
+    annotation (Placement(transformation(extent={{-10,-10},{10,10}},
+        rotation=90,
+        origin={0,110})));
+
   Modelica.Blocks.Sources.Constant constPhi(k=phi_outdoor) if useAirNetwork;
   Modelica.Blocks.Sources.Constant constP(k=p_outdoor) if useAirNetwork;
 
@@ -131,6 +136,9 @@ equation
     connect(occupancy[i], channel[i].Occupancy);
     connect(TOutdoor, channel[i].Toutdoor);
   end for;
+
+
+  P_ventilation_total = sum(channel.P_fan);
 
 
 

@@ -2,8 +2,9 @@ within SmartHouse;
 model Simulation_Summer
   HouseEnviroment houseEnviroment(
     scenario="summer",
-    useHP=false,
+    useHP=true,
     useBoiler=true,
+    usePCM=false,
     enablePV=false,
     enableWind=false,
     enableBattery=false)
