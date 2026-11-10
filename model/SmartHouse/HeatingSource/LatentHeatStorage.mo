@@ -87,9 +87,9 @@ model LatentHeatStorage
       redeclare model SLEMediumType = SmartHouse.HeatingSource.TILMedia_RT31,
       nCells=6,
       nCellsSLE=3,
-      TInitialLiquid=298.15,
-      TInitialWall=298.15,
-      TInitialSLE=298.15,
+    TInitialLiquid=298.15,
+    TInitialWall=298.15,
+    TInitialSLE=298.15,
       redeclare model HeatTransferModel =
         TIL3_AddOn_PCMStorages.TubeInBlock.TransportPhenomena.HeatTransfer.ConstantAlpha(
           constantAlpha=500),
@@ -150,7 +150,11 @@ model LatentHeatStorage
     annotation(Placement(transformation(extent={{70,-7},{86,7}})));
 
   TIL.LiquidComponents.Sensors.Sensor_T sensorSupply(
-    redeclare TIL.Utilities.Units.Conversions.Units.K unit)
+  redeclare TIL.Utilities.Units.Conversions.Units.K unit,
+  useTimeConstant=true,
+  tau=5,
+  useSteadyStateInitialization=false,
+  initialSensorValue=303.15)
     annotation(Placement(transformation(extent={{-180,127},{-170,137}})));
   TIL.LiquidComponents.Sensors.Sensor_T sensorReturn(
     redeclare TIL.Utilities.Units.Conversions.Units.K unit)
@@ -199,7 +203,7 @@ equation
     annotation(Line(points={{86,0},{93,0},{93,13},{100,13}},
       color={0,170,238}, thickness=0.5));
   connect(pcmStorage_heated.portB, returnMergeJunction.portA)
-    annotation(Line(points={{100,-12.5},{150,-12.5},{150,-106},{165,-106}},
+    annotation(Line(points={{100,-12.5},{82,-12.5},{82,-106},{165,-106}},
       color={0,170,238}, thickness=0.5));
   connect(returnMergeJunction.portB, WaterReturnOut)
     annotation(Line(points={{171,-100},{200,-100}},

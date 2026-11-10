@@ -2,10 +2,11 @@ within SmartHouse;
 model Simulation_Winter
   HouseEnviroment houseEnviroment(
     scenario="winter",
-    useHP=false,
+    useHP=true,
     useBoiler=true,
+    usePCM=true,
     enablePV=false,
-    enableWind=true,
+    enableWind=false,
     enableBattery=false)
     annotation (Placement(transformation(extent={{-20,-20},{20,20}})));
   annotation (

@@ -11,7 +11,7 @@ model HeatPump_PCM_IntegrationTest
 
   // == Test parameters ==
   parameter String scheduleFile =
-    "C:/Users/louisjw/Documents/Github/Smart_house_group13/data/scenarios/winter/pcm_charge_window.txt"
+    "C:/Users/nilsobu/Documents/Project/Smart_house_group13/data/scenarios/winter/pcm_charge_window.txt"
     "The EXISTING winter forecast file";
 
   parameter Boolean testUseHP = true
