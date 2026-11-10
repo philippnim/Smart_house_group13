@@ -1,0 +1,8 @@
+dymat==0.7
+matplotlib==3.11.2
+numpy
+pandas
+pydantic==2.14.3
+RWTHColors==0.4.1
+scienceplots==2.2.2
+tsam==4.1.1

@@ -7,7 +7,7 @@ This file serves as a module to determine the KPIs of the individual scenarios. 
 
 Prep: the simulation reults (.mat) need to be in /model/SmartHouse/
 
-Author: Philipp, Janik
+Author: Janik
 """
 import numpy as np
 import pandas as pd

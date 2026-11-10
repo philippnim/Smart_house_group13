@@ -7,6 +7,20 @@ Author: Philipp
 from KPIs import KPIs
 from load_and_prepare_mat_file import Datahandler
 
+try:
+    from config import ReportStyleConfig, generic_save_function, get_repo_root
+except ImportError:
+    from src.config import ReportStyleConfig, generic_save_function, get_repo_root
+
+ReportStyleConfig().apply_style()
+
+repo_root = get_repo_root()
+
+
+##################################################
+# Code 
+##################################################
+
 SCENARIOS = { # mat file names
     "winter_base": "mat file name here",
     "summer_base": "mat file name here",
