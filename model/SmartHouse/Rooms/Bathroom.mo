@@ -26,7 +26,7 @@ model Bathroom "simpler Batrhroom"
   TIL.LiquidComponents.Valves.OrificeValve valve(use_effectiveFlowAreaInput=true)
     annotation (Placement(transformation(extent={{66,26},{82,34}})));
   Modelica.Blocks.Continuous.FirstOrder showerValveActuator(
-  k=1,
+  k=0.01,
   T=5,
   initType=Modelica.Blocks.Types.Init.InitialOutput,
   y_start=1e-7)
