@@ -150,7 +150,11 @@ model LatentHeatStorage
     annotation(Placement(transformation(extent={{70,-7},{86,7}})));
 
   TIL.LiquidComponents.Sensors.Sensor_T sensorSupply(
-    redeclare TIL.Utilities.Units.Conversions.Units.K unit)
+  redeclare TIL.Utilities.Units.Conversions.Units.K unit,
+  useTimeConstant=true,
+  tau=5,
+  useSteadyStateInitialization=false,
+  initialSensorValue=303.15)
     annotation(Placement(transformation(extent={{-180,127},{-170,137}})));
   TIL.LiquidComponents.Sensors.Sensor_T sensorReturn(
     redeclare TIL.Utilities.Units.Conversions.Units.K unit)

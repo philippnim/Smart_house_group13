@@ -192,7 +192,9 @@ model HouseEnviroment
   // Other
   Modelica.Blocks.Sources.RealExpression TGround(y=278.15)
     annotation (Placement(transformation(extent={{-34,62},{-14,82}})));
-  inner TIL.SystemInformationManager sim(redeclare
+  inner TIL.SystemInformationManager sim(
+    redeclare TILMedia.VLEFluid.Types.TILMedia_Propane vleFluidType1,
+                                         redeclare
       TILMedia.Gas.Types.VDI4670_MoistAir gasType1, redeclare
       TILMedia.Liquid.Types.TILMedia_Water liquidType1)
     annotation (Placement(transformation(extent={{100,100},{120,120}})));

@@ -2,7 +2,7 @@ within SmartHouse;
 model Simulation_Winter
   HouseEnviroment houseEnviroment(
     scenario="winter",
-    useHP=false,
+    useHP=true,
     useBoiler=true,
     usePCM=true,
     enablePV=false,

@@ -342,7 +342,7 @@ parameter Integer condenserNCells(min=1) = 15
     tau=0.5,
     useSteadyStateInitialization=false,
     redeclare TIL.Utilities.Units.Conversions.Units.K unit,
-    initialSensorValue=30)
+    initialSensorValue=303.15)
     annotation (Placement(transformation(extent={{-52,64},{-44,72}})));
   TIL.LiquidComponents.Sensors.Sensor_T      sensor_T_degC_waterIn(redeclare
       TIL.Utilities.Units.Conversions.Units.K unit)

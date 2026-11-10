@@ -83,6 +83,7 @@ model HeatPump_ThermalStorage
     evaporatorFinnedTubeLength=8,
     evaporatorNSerialTubes=5,
     evaporatorNParallelTubes=30,
+    compressorSpeedMin=0,
     separatorInitialFillingLevel=0.2) if useHP
     annotation (
       Placement(
@@ -324,7 +325,7 @@ model HeatPump_ThermalStorage
         origin={-10,84})));
   Modelica.Blocks.Sources.Constant zeroInactiveSource(k=0) "Zero heat and electricity for removed heat sources";
 
-  LatentHeatStorage latentHeatStorage(forecastFileName="C:/Users/nilsobu/Documents/Project/Smart_house_group13/data/scenarios/winter/pcm_charge_window.txt")
+  LatentHeatStorage latentHeatStorage(forecastFileName="C:/Users/nilsobu/Documents/Project/Smart_house_group13/data/scenarios/winter/pcm_charge_window.txt") if usePCM
     annotation (Placement(transformation(extent={{-34,24},{-78,66}})));
   Modelica.Blocks.Logical.Or demandOrPCM if usePCM
     "Enable generation for room heating OR a forecast PCM charge request"
@@ -484,18 +485,12 @@ equation
   end if;
 
 
-  connect(sensor_T_floorHeating.port, junction.portC) annotation (Line(
-      points={{-58,18},{-70,18},{-70,16},{-96,16},{-96,0},{-90,0}},
-      color={0,170,238},
-      thickness=0.5));
+connect(sensor_T_floorHeating.port, tube.portB);
   connect(linearDirectionalControlValve.portB, tube.portA) annotation (Line(
       points={{14,58},{8,56},{0,56}},
       color={0,170,238},
       thickness=0.5));
-  connect(sensor_T_afterHeatpump.port, tube.portB) annotation (Line(
-      points={{-6,20},{2,20},{2,50},{-20,50},{-20,56},{-16,56}},
-      color={0,170,238},
-      thickness=0.5));
+
 annotation (
   Icon(
     coordinateSystem(

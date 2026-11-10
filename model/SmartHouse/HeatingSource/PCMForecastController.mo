@@ -101,9 +101,13 @@ model PCMForecastController
  Modelica.Blocks.Logical.Hysteresis supplyHotEnough(
   uLow=304.65,
   uHigh=305.65);
-  Modelica.Blocks.Logical.LessThreshold supplyNotTooHot(
-    threshold=TChargeMax)
-    annotation(Placement(transformation(extent={{-115,100},{-95,120}})));
+  Modelica.Blocks.Logical.Hysteresis supplyTooHot(
+  uLow=TChargeMax - 2,
+  uHigh=TChargeMax,
+  pre_y_start=false);
+
+  Modelica.Blocks.Logical.Not supplyNotTooHot;
+
   Modelica.Blocks.Logical.LessThreshold returnColdEnough(
     threshold=TPhaseChange - dTmin)
     annotation(Placement(transformation(extent={{-160,-145},{-140,-125}})));
@@ -136,7 +140,8 @@ equation
   connect(pcmFull.y, notFull.u) annotation(Line(points={{-140,60},{-115,60}}, color={255,0,255}));
   connect(SOC, pcmAvailable.u) annotation(Line(points={{-200,55},{-160,-100}}, color={0,0,127}));
   connect(TSupply, supplyHotEnough.u) annotation(Line(points={{-200,115},{-160,120}}, color={0,0,127}));
-  connect(TSupply, supplyNotTooHot.u) annotation(Line(points={{-200,115},{-115,110}}, color={0,0,127}));
+  connect(TSupply, supplyTooHot.u);
+  connect(supplyTooHot.y, supplyNotTooHot.u);
   connect(TReturn, returnColdEnough.u) annotation(Line(points={{-200,-135},{-160,-135}}, color={0,0,127}));
   connect(warmestHour.y, windowAndCapacity.u1) annotation(Line(points={{-100,180},
           {-57,145}},                                                                         color={255,0,255}));
@@ -162,7 +167,8 @@ equation
   connect(supplyCommand.y, supplyValvePosition) annotation(Line(points={{130,85},{200,85}}, color={0,0,127}));
   connect(returnCommand.y, returnValvePosition) annotation(Line(points={{130,-125},{200,-125}}, color={0,0,127}));
   connect(operatingMode.y, mode) annotation(Line(points={{130,25},{200,25}}, color={255,127,0}));
-    annotation(Placement(transformation(extent={{-160,110},{-140,130}})),
+    annotation(Placement(transformation(extent={{-115,100},{-95,120}})),
+               Placement(transformation(extent={{-160,110},{-140,130}})),
     Diagram(coordinateSystem(preserveAspectRatio=false,
       extent={{-210,-165},{210,200}}),
       graphics={
