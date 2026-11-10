@@ -202,11 +202,11 @@ model HouseEnviroment
       TILMedia.Liquid.Types.TILMedia_Water liquidType1)
     annotation (Placement(transformation(extent={{100,100},{120,120}})));
   ventilation.VentilationUnit ventilationUnit(
-    useAirNetwork=false,
+    useAirNetwork=true,
     dp_nominal_door(displayUnit="Pa") = 10,
-    mdot_nominal_door=0,
+    mdot_nominal_door=0.01,
     dp_nominal_inf(displayUnit="Pa") = 100,
-    mdot_nominal_inf=0)
+    mdot_nominal_inf=0.01)
     annotation (Placement(transformation(extent={{54,-20},{74,0}})));
   HeatingSource.HeatingController heatingController(
     liquidType=sim.liquidType1, A_eff_min=1e-9)
