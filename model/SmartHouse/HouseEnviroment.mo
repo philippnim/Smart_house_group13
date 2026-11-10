@@ -209,7 +209,7 @@ model HouseEnviroment
     mdot_nominal_inf=0.01)
     annotation (Placement(transformation(extent={{54,-20},{74,0}})));
   HeatingSource.HeatingController heatingController(
-    liquidType=sim.liquidType1, A_eff_min=1e-9)
+    liquidType=sim.liquidType1, A_eff_min=1e-8)
     annotation (Placement(transformation(extent={{34,14},{54,34}})));
   Modelica.Blocks.Sources.BooleanExpression booleanExpression(y=true)
     annotation (Placement(transformation(extent={{-4,22},{16,42}})));
