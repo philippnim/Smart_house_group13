@@ -53,22 +53,30 @@ model AirExchangeNetwork
   // --------------------------------------------------
   IdealAirExchange door[nDoors](
     each gasType=gasType,
-    each dp_nominal=dp_nominal_door,
-    each mdot_nominal=mdot_nominal_door,
     airExchange={
       doorConnections[k,3]/(2*3600)
       for k in 1:nDoors});
+
+  // Pressure driven exchange between the rooms
+  TIL.GasComponents.HydraulicResistors.LinearHydraulicResistor doorResistor[nDoors](
+    each gasType=gasType,
+    each dp_nominal=dp_nominal_door,
+    each mdot_nominal=mdot_nominal_door);
 
   // --------------------------------------------------
   // Ideal air exchange with outdoors
   // --------------------------------------------------
   IdealAirExchange infiltration[6](
     each gasType=gasType,
-    each dp_nominal=dp_nominal_inf,
-    each mdot_nominal=mdot_nominal_inf,
     airExchange={
       ACH_inf[i]*V_rooms[i]/3600
       for i in 1:6});
+
+  // Additionally Hydraulic resistors to outdoor pressure for unventilated rooms (1=Sauna, 6=Garage)
+  TIL.GasComponents.HydraulicResistors.LinearHydraulicResistor unventilatedResistor[2](
+    each gasType=gasType,
+    each dp_nominal=dp_nominal_inf,
+    each mdot_nominal=mdot_nominal_inf);
 
   // --------------------------------------------------
   // Room gas connectors
@@ -121,6 +129,8 @@ equation
 
     // Supply air to room B
     connect(door[k].gasPort_B2, roomIn[doorConnections[k,2]]);
+    connect(doorResistor[k].portA, roomOut[doorConnections[k,1]]);
+    connect(doorResistor[k].portB, roomOut[doorConnections[k,2]]);
 
   end for;
 
@@ -139,6 +149,12 @@ equation
     connect(infiltration[i].gasPort_B2, outdoorSink.port);
 
   end for;
+
+  // Pressure reference to outdoors for Sauna (1) and Garage (6)
+  connect(unventilatedResistor[1].portA, roomOut[1]);
+  connect(unventilatedResistor[1].portB, outdoorSink.port);
+  connect(unventilatedResistor[2].portA, roomOut[6]);
+  connect(unventilatedResistor[2].portB, outdoorSink.port);
 
   // --------------------------------------------------
   // Outdoor signal connections

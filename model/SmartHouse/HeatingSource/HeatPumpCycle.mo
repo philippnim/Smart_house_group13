@@ -342,7 +342,7 @@ parameter Integer condenserNCells(min=1) = 15
     tau=0.5,
     useSteadyStateInitialization=false,
     redeclare TIL.Utilities.Units.Conversions.Units.K unit,
-    initialSensorValue=30)
+    initialSensorValue=303.15)
     annotation (Placement(transformation(extent={{-52,64},{-44,72}})));
   TIL.LiquidComponents.Sensors.Sensor_T      sensor_T_degC_waterIn(redeclare
       TIL.Utilities.Units.Conversions.Units.K unit)
@@ -564,6 +564,8 @@ redeclare model HeatTransferModel_b =
         origin={106,-48})));
   TIL.VLEFluidComponents.Sensors.Sensor_superheating sensor_superheating
     annotation (Placement(transformation(extent={{4,-26},{12,-18}})));
+
+
 equation
   P_el = compressor.shaftPower + fan2ndOrder.P_shaft;
   HeatFlow = -condenser.Q_flow;
@@ -747,8 +749,8 @@ equation
   connect(sensor_subcooling.sensorValue, expansionValveController.u_m)
     annotation (Line(points={{-118,32},{-118,38},{-128,38},{-128,16},{-132,16},
           {-132,11.8}}, color={0,0,127}));
-  connect(heatPumpController.TSupplySet, TSupplySet) annotation (Line(points={{
-          88.2143,-108.25},{88.2143,-174},{132,-174},{132,-200}}, color={0,0,
+  connect(heatPumpController.TSupplySet, TSupplySet) annotation (Line(points={{88.2143,
+          -108.25},{88.2143,-174},{132,-174},{132,-200}},         color={0,0,
           127}));
   connect(EnableHeatSource, heatPumpController.enableHeatPump) annotation (Line(
         points={{0,-200},{0,-89},{80.6571,-89}}, color={255,0,255}));

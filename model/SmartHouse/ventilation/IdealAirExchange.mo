@@ -14,10 +14,6 @@ comes from each room and also half is fed back to each room."
   // Volumetric Exchange
   parameter SI.VolumeFlowRate airExchange(min=0);
 
-  // Pressure exchange:
-  parameter SI.Pressure dp_nominal(min=1e-6) "Nominal pressure drop";
-  parameter SI.MassFlowRate mdot_nominal(min=0) "Nominal mass flow rate";
-
   // Connectors
   TIL.Connectors.GasPort gasPort_A1(gasType=gasType) "Air extracted from room A"
     annotation (Placement(transformation(extent={{-110,50},{-90,70}})));
@@ -30,26 +26,21 @@ comes from each room and also half is fed back to each room."
     annotation (Placement(transformation(extent={{90,-70},{110,-50}})));
 
 
-
   // Variables
   SI.MassFlowRate m_exchange;
-  SI.MassFlowRate m_dp;
 
 equation
 
   // Symmetric air exchange with constant nominal density
   m_exchange = rhoMean * airExchange;
 
-  // Pressure-driven equalization flow
-  m_dp = (gasPort_A1.p - gasPort_B1.p) * (mdot_nominal / dp_nominal);
-
   // Mass flows extracted from both rooms
-  gasPort_A1.m_flow = m_exchange + noEvent(max(0, m_dp));
-  gasPort_B1.m_flow = m_exchange + noEvent(max(0, -m_dp));
+  gasPort_A1.m_flow = m_exchange;
+  gasPort_B1.m_flow = m_exchange;
 
   // Mass flows supplied to the opposite rooms
-  gasPort_A2.m_flow = -(m_exchange + noEvent(max(0, -m_dp)));
-  gasPort_B2.m_flow = -(m_exchange + noEvent(max(0, m_dp)));
+  gasPort_A2.m_flow = -m_exchange;
+  gasPort_B2.m_flow = -m_exchange;
 
   // Enthalpy transport from A to B and B to A
   gasPort_B2.h_outflow = inStream(gasPort_A1.h_outflow);

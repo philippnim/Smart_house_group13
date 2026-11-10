@@ -31,3 +31,4 @@ simulation_summary.txt
 status
 /data/scenarios/**/*.png
 /data/scenarios/**/*.jpeg
+/data/scenarios/**/*.pgf
