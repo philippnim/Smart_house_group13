@@ -1,5 +1,5 @@
 within SmartHouse;
-model Simulation_Summer
+model summer_hp
   HouseEnviroment houseEnviroment(
     scenario="summer",
     useHP=true,
@@ -16,4 +16,4 @@ model Simulation_Summer
       StopTime=1209600,
       Interval=300,
       __Dymola_Algorithm="Dassl"));
-end Simulation_Summer;
+end summer_hp;

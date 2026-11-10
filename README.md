@@ -63,4 +63,22 @@ Here notes can be added about features that could later be implemented if of int
 
 
 
-## Citations
+## Scenarios
+
+Naming convention:
+winter: winter_{name}
+summer: summer_{name}
+
+1. Boiler (name: base)
+2. Boiler + PV (name: pv)
+3. Boiler + Wind (name: wind)
+4. Boiler + HeatPump (name: hp)
+5. Boiler + HeatPump + Latent heat storage (name: hp_latent)
+6. Boiler + HeatPump + PV (name: hp_pv)
+7. Boiler + HeatPump + Wind (name: hp_wind)
+8. Boiler + HeatPump + PV + Battery (name: hp_pv_bat)
+9. Boiler + HeatPump + Wind + Battery (name: hp_wind_bat)
+10. Boiler + HeatPump + PV + Wind + Battery (name: hp_pv_wind_bat)
+11. Boiler + HeatPump + PV + Wind + Battery + Latent heat storage (name: hp_pv_wind_bat_latent)
+
+
