@@ -99,6 +99,12 @@ model VentilationChannel
     annotation (Placement(transformation(extent={{130,94},{150,114}})));
   Modelica.Blocks.Routing.Replicator replicator(nout=10)
     annotation (Placement(transformation(extent={{202,112},{222,132}})));
+  Modelica.Blocks.Continuous.FirstOrder T_roomsensor(
+    k=1,
+    T=60,
+    initType=Modelica.Blocks.Types.Init.InitialOutput,
+    y_start=293.15)
+    annotation (Placement(transformation(extent={{-40,106},{-20,126}})));
 equation
 
   connect(sensor_phi.sensorValue, ventilationController.phi_room) annotation
@@ -156,10 +162,6 @@ equation
                                                       color={0,0,127}));
   connect(Toutdoor, outdoorwarm.u) annotation (Line(points={{-86,-52},{24,-52},{
           24,142},{52,142}}, color={0,0,127}));
-  connect(sensor_T_afterRoom.sensorValue, roomtowarm.u) annotation (Line(points
-        ={{-48,2},{-48,90},{8,90},{8,116},{52,116}}, color={0,0,127}));
-  connect(sensor_T_afterRoom.sensorValue, dT_roomout.u1)
-    annotation (Line(points={{-48,2},{-48,90},{16,90}}, color={0,0,127}));
   connect(Toutdoor, dT_roomout.u2)
     annotation (Line(points={{-86,-52},{24,-52},{24,82}}, color={0,0,127}));
   connect(dT_roomout.y, outdoorcooler.u)
@@ -192,8 +194,14 @@ equation
           122},{138,122},{138,46.4},{-20,46.4}}, color={255,0,255}));
   connect(and1.y, moistureRecovery.bypass) annotation (Line(points={{138.9,122},
           {138,122},{138,46},{46,46},{46,30.4}}, color={255,0,255}));
-  connect(sensor_T_afterRoom.sensorValue, ventilationController.T_room)
-    annotation (Line(points={{-48,2},{-48,50},{-28,50},{-28,49},{-20,49}},
+  connect(sensor_T_afterRoom.sensorValue, T_roomsensor.u)
+    annotation (Line(points={{-48,2},{-48,116},{-42,116}}, color={0,0,127}));
+  connect(T_roomsensor.y, roomtowarm.u)
+    annotation (Line(points={{-19,116},{52,116}}, color={0,0,127}));
+  connect(T_roomsensor.y, dT_roomout.u1) annotation (Line(points={{-19,116},{6,
+          116},{6,90},{16,90}}, color={0,0,127}));
+  connect(T_roomsensor.y, ventilationController.T_room) annotation (Line(points
+        ={{-19,116},{6,116},{6,72},{-34,72},{-34,48},{-28,48},{-28,49},{-20,49}},
         color={0,0,127}));
   annotation (
     Icon(coordinateSystem(preserveAspectRatio=false)),
