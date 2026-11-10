@@ -1,3 +1,14 @@
+winter_hp_latent
+winter_hp
+winter_wind
+winter_pv
+winter_base
+winter_hp_pv
+winter_hp_wind
+winter_hp_pv_bat
+winter_hp_wind_bat
+winter_hp_pv_wind_bat
+winter_hp_pv_wind_bat_latent
 summer_hp_pv_wind_bat_latent
 summer_hp_pv_wind_bat
 summer_hp_wind_bat
