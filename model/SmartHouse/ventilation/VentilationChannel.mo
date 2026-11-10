@@ -2,12 +2,25 @@ within SmartHouse.ventilation;
 model VentilationChannel
   parameter Modelica.Units.SI.Volume V_room = 60 "Room volume";
   parameter Modelica.Units.SI.Temperature T_outMin = 283.15 "Free cooling only above this outdoor temperature 10°C";
-  parameter Modelica.Units.SI.Temperature T_comfort = 297.15 "Free cooling when room is warmer than 24°C";
+  parameter Modelica.Units.SI.Temperature T_comfort = 295.15 "Free cooling when room is warmer than 22°C";
   parameter Modelica.Units.SI.TemperatureDifference dT_min = 2 "Outdoor must be this much colder than room";
   parameter Modelica.Units.SI.ThermalConductance G_HX = 100 "Per cell, big = same as the old direct connection";
   outer TIL.SystemInformationManager sim "Comes from the model around it";
 
+
+
+
+  parameter Modelica.Units.SI.Time tau = 5
+    "Time constant for bypass activation";
+
+  parameter Real ACH_boost = 4 "Max extra air changes per hour for cooling";
+
+  final parameter Modelica.Units.SI.MassFlowRate mdot_nominal_in = 1.2 * ACH_boost * V_room / 3600;
+  final parameter Modelica.Units.SI.MassFlowRate mdot_nominal_out= 1.2 * ACH_boost * V_room / 3600;
+
+
   TIL.GasComponents.Tubes.Tube supplyTube(
+
     tubeGeometry(
       innerDiameter=0.05,
       length=1,
@@ -19,8 +32,7 @@ model VentilationChannel
         TIL.GasComponents.Tubes.TransportPhenomena.HeatTransfer.ConstantAlpha
         (constantAlpha=100),
     redeclare model PressureDropModel =
-        TIL.GasComponents.Tubes.TransportPhenomena.PressureDrop.QuadraticMassFlowDependent
-        (mdot_nominal=0.02, pressureDrop_nominal=100),
+        TIL.GasComponents.Tubes.TransportPhenomena.PressureDrop.ZeroPressureDrop,
     wallCellStateType="state south")
     annotation (Placement(transformation(
         extent={{-8,-2},{8,2}},
@@ -36,16 +48,16 @@ model VentilationChannel
     enableHeatPorts=true,
     HeatTransferModel(constantAlpha=100),
     redeclare model PressureDropModel =
-        TIL.GasComponents.Tubes.TransportPhenomena.PressureDrop.QuadraticMassFlowDependent
-        (mdot_nominal=0.02, pressureDrop_nominal=100),
+        TIL.GasComponents.Tubes.TransportPhenomena.PressureDrop.ZeroPressureDrop,
     wallCellStateType="state south")
     annotation (Placement(transformation(
         extent={{-8,2},{8,-2}},
         rotation=180,
         origin={-30,-10})));
   TIL.GasComponents.Sensors.Sensor_T sensor_T_afterRoom
-    annotation (Placement(transformation(extent={{-52,-4},{-44,4}})));
-  VentilationController ventilationController(V_room=V_room)
+    annotation (Placement(transformation(extent={{-62,-4},{-54,4}})));
+  VentilationController ventilationController(V_room=V_room,
+    T_comfort=T_comfort)
     annotation (Placement(transformation(extent={{-18,46},{2,66}})));
   TIL.GasComponents.Sensors.Sensor_phi sensor_phi
     annotation (Placement(transformation(extent={{-72,-6},{-64,2}})));
@@ -76,8 +88,8 @@ model VentilationChannel
   Modelica.Blocks.Logical.Hysteresis outdoorwarm(uLow=T_outMin - 1, uHigh=
         T_outMin + 1)
     annotation (Placement(transformation(extent={{54,132},{74,152}})));
-  Modelica.Blocks.Logical.Hysteresis roomtowarm(uLow=T_comfort - 1, uHigh=
-        T_comfort + 1)
+  Modelica.Blocks.Logical.Hysteresis roomtowarm(uLow=T_comfort - 0.5, uHigh=
+        T_comfort + 0.2)
     annotation (Placement(transformation(extent={{54,106},{74,126}})));
   Modelica.Blocks.Math.Feedback dT_roomout
     annotation (Placement(transformation(extent={{14,80},{34,100}})));
@@ -98,13 +110,29 @@ model VentilationChannel
   Modelica.Blocks.Sources.RealExpression realExpression(y=G_HX)
     annotation (Placement(transformation(extent={{130,94},{150,114}})));
   Modelica.Blocks.Routing.Replicator replicator(nout=10)
-    annotation (Placement(transformation(extent={{202,112},{222,132}})));
+    annotation (Placement(transformation(extent={{218,2},{198,22}})));
   Modelica.Blocks.Continuous.FirstOrder T_roomsensor(
     k=1,
     T=60,
     initType=Modelica.Blocks.Types.Init.InitialOutput,
     y_start=293.15)
     annotation (Placement(transformation(extent={{-40,106},{-20,126}})));
+  Modelica.Blocks.Continuous.FirstOrder firstOrder(T=tau,
+    initType=Modelica.Blocks.Types.Init.SteadyState)
+    annotation (Placement(transformation(extent={{202,112},{222,132}})));
+  TIL.GasComponents.Sensors.Sensor_m_flow sensor_m_flow_air_in
+    annotation (Placement(transformation(extent={{-60,26},{-68,34}})));
+  TIL.GasComponents.Sensors.Sensor_T sensor_T_airIn
+    annotation (Placement(transformation(extent={{-80,38},{-72,46}})));
+  TIL.GasComponents.HydraulicResistors.LinearHydraulicResistor
+    linearHydraulicResistor_in(dp_nominal(displayUnit="Pa") = 100,
+                                                    mdot_nominal=
+        mdot_nominal_in)
+    annotation (Placement(transformation(extent={{-56,28},{-44,32}})));
+  TIL.GasComponents.HydraulicResistors.LinearHydraulicResistor
+    linearHydraulicResistor_out(dp_nominal(displayUnit="Pa") = 100,
+      mdot_nominal=mdot_nominal_out)
+    annotation (Placement(transformation(extent={{-54,-12},{-42,-8}})));
 equation
 
   connect(sensor_phi.sensorValue, ventilationController.phi_room) annotation
@@ -116,24 +144,8 @@ equation
       Line(points={{3,55.8},{26,55.8},{26,34},{80,34},{80,4},{46,4},{46,11}},
         color={0,0,127}));
   connect(sensor_T_afterRoom.sensorValue, moistureRecovery.T_room)
-    annotation (Line(points={{-48,2},{-48,8},{20,8},{20,23},{46,23}},
-                                         color={0,0,127}));
-  connect(gasPortExhaust, exhaustTube.portB) annotation (Line(
-      points={{-90,-10},{-38,-10}},
-      color={255,153,0},
-      thickness=0.5));
-  connect(gasPortSupply, supplyTube.portB) annotation (Line(
-      points={{-90,30},{-38,30}},
-      color={255,153,0},
-      thickness=0.5));
-  connect(sensor_phi.port, exhaustTube.portB) annotation (Line(
-      points={{-68,-6},{-68,-10},{-38,-10}},
-      color={255,153,0},
-      thickness=0.5));
-  connect(sensor_T_afterRoom.port, exhaustTube.portB) annotation (Line(
-      points={{-48,-4},{-48,-10},{-38,-10}},
-      color={255,153,0},
-      thickness=0.5));
+    annotation (Line(points={{-58,2},{-58,10},{-46,10},{-46,-4},{28,-4},{28,23},
+          {46,23}},                      color={0,0,127}));
   connect(Occupancy, ventilationController.occupancy) annotation (Line(points={{-86,-82},
           {-24,-82},{-24,60},{-20,60}},          color={0,0,127}));
   connect(Occupancy, moistureRecovery.occupancy) annotation (Line(points={{-86,-82},
@@ -146,10 +158,6 @@ equation
       thickness=0.5));
   connect(simpleFan.portA, boundary1.port) annotation (Line(
       points={{102,30},{112,30},{112,32},{122,32}},
-      color={255,153,0},
-      thickness=0.5));
-  connect(supplyTube.portA, simpleFan.portB) annotation (Line(
-      points={{-22,30},{86,30}},
       color={255,153,0},
       thickness=0.5));
   connect(moistureRecovery.mixingRatio, boundary1.mixingRatio_in) annotation
@@ -186,16 +194,16 @@ equation
           130},{166,130}}, color={0,0,127}));
   connect(realExpression.y, switch1.u3) annotation (Line(points={{151,104},{158,
           104},{158,114},{166,114}}, color={0,0,127}));
-  connect(switch1.y, replicator.u)
-    annotation (Line(points={{189,122},{200,122}}, color={0,0,127}));
-  connect(replicator.y, bypassHX.Gc) annotation (Line(points={{223,122},{234,122},
-          {234,12},{-20,12}}, color={0,0,127}));
+  connect(replicator.y, bypassHX.Gc) annotation (Line(points={{197,12},{74,12},{
+          74,2},{18,2},{18,12},{-20,12}},
+                              color={0,0,127}));
   connect(and1.y, ventilationController.freeCooling) annotation (Line(points={{138.9,
           122},{138,122},{138,46.4},{-20,46.4}}, color={255,0,255}));
   connect(and1.y, moistureRecovery.bypass) annotation (Line(points={{138.9,122},
           {138,122},{138,46},{46,46},{46,30.4}}, color={255,0,255}));
   connect(sensor_T_afterRoom.sensorValue, T_roomsensor.u)
-    annotation (Line(points={{-48,2},{-48,116},{-42,116}}, color={0,0,127}));
+    annotation (Line(points={{-58,2},{-58,14},{-106,14},{-106,116},{-42,116}},
+                                                           color={0,0,127}));
   connect(T_roomsensor.y, roomtowarm.u)
     annotation (Line(points={{-19,116},{52,116}}, color={0,0,127}));
   connect(T_roomsensor.y, dT_roomout.u1) annotation (Line(points={{-19,116},{6,
@@ -203,8 +211,52 @@ equation
   connect(T_roomsensor.y, ventilationController.T_room) annotation (Line(points
         ={{-19,116},{6,116},{6,72},{-34,72},{-34,48},{-28,48},{-28,49},{-20,49}},
         color={0,0,127}));
+  connect(switch1.y, firstOrder.u)
+    annotation (Line(points={{189,122},{200,122}}, color={0,0,127}));
+  connect(firstOrder.y, replicator.u) annotation (Line(points={{223,122},{230,122},
+          {230,12},{220,12}}, color={0,0,127}));
+  connect(gasPortSupply, sensor_m_flow_air_in.portB) annotation (Line(
+      points={{-90,30},{-67,30}},
+      color={255,153,0},
+      thickness=0.5));
+  connect(supplyTube.portA, simpleFan.portB) annotation (Line(
+      points={{-22,30},{28,30},{28,40},{76,40},{76,30},{86,30}},
+      color={255,153,0},
+      thickness=0.5));
+  connect(sensor_T_airIn.port, sensor_m_flow_air_in.portB) annotation (Line(
+      points={{-76,38},{-76,30},{-67,30}},
+      color={255,153,0},
+      thickness=0.5));
+  connect(sensor_m_flow_air_in.portA, linearHydraulicResistor_in.portA)
+    annotation (Line(
+      points={{-61,30},{-56,30}},
+      color={255,153,0},
+      thickness=0.5));
+  connect(linearHydraulicResistor_in.portB, supplyTube.portB) annotation (Line(
+      points={{-44,30},{-38,30}},
+      color={255,153,0},
+      thickness=0.5));
+  connect(exhaustTube.portB, linearHydraulicResistor_out.portB) annotation (
+      Line(
+      points={{-38,-10},{-42,-10}},
+      color={255,153,0},
+      thickness=0.5));
+  connect(sensor_T_afterRoom.port, linearHydraulicResistor_out.portA)
+    annotation (Line(
+      points={{-58,-4},{-58,-8},{-54,-8},{-54,-10}},
+      color={255,153,0},
+      thickness=0.5));
+  connect(sensor_phi.port, linearHydraulicResistor_out.portA) annotation (Line(
+      points={{-68,-6},{-68,-10},{-54,-10}},
+      color={255,153,0},
+      thickness=0.5));
+  connect(gasPortExhaust, linearHydraulicResistor_out.portA) annotation (Line(
+      points={{-90,-10},{-54,-10}},
+      color={255,153,0},
+      thickness=0.5));
   annotation (
-    Icon(coordinateSystem(preserveAspectRatio=false)),
-    Diagram(coordinateSystem(preserveAspectRatio=false)),
+    Icon(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},{240,160}})),
+    Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},{240,
+            160}})),
     experiment(StopTime=86400, __Dymola_Algorithm="Dassl"));
 end VentilationChannel;

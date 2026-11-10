@@ -3,8 +3,8 @@ block VentilationController "Air flow for one room: 0.5 ACH + people + humidity 
   parameter Modelica.Units.SI.Volume V_room = 60 "Room volume";
   parameter Real ACH_min = 0.5 "Minimum air changes per hour (task)";
   parameter Real phi_set = 60 "Humidity setpoint in %";
-  parameter Modelica.Units.SI.Temperature T_comfort = 297.15 "Cool down to this";
-  parameter Real ACH_boost = 2 "Max extra air changes per hour for cooling";
+  parameter Modelica.Units.SI.Temperature T_comfort = 295.15 "Cool down to this";
+  parameter Real ACH_boost = 4 "Max extra air changes per hour for cooling";
 
 
   Modelica.Blocks.Interfaces.RealInput occupancy "Number of persons in the room"

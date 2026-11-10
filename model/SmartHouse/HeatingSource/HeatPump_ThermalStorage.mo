@@ -16,6 +16,8 @@ model HeatPump_ThermalStorage
   // DHW Tank    |    Floor heating
   // ============================================================
 
+  parameter String fileNamePCMForecast annotation(Dialog(tab="PCM Filenames", group="PCM Filenames"));
+
   // ============================================================
   // MEDIA
   // ============================================================
@@ -325,7 +327,7 @@ model HeatPump_ThermalStorage
         origin={-10,84})));
   Modelica.Blocks.Sources.Constant zeroInactiveSource(k=0) "Zero heat and electricity for removed heat sources";
 
-  LatentHeatStorage latentHeatStorage(forecastFileName="C:/Users/nilsobu/Documents/Project/Smart_house_group13/data/scenarios/winter/pcm_charge_window.txt") if usePCM
+  LatentHeatStorage latentHeatStorage(forecastFileName=fileNamePCMForecast) if usePCM
     annotation (Placement(transformation(extent={{-34,24},{-78,66}})));
   Modelica.Blocks.Logical.Or demandOrPCM if usePCM
     "Enable generation for room heating OR a forecast PCM charge request"

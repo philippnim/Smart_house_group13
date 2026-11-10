@@ -72,6 +72,9 @@ model HouseEnviroment
   parameter String filenameRadWest = "rad_west_weather.txt" annotation(Dialog(tab="Radiation Filenames", group="Radiation Filenames"));
 
 
+  // PCM Forecast file
+  parameter String fileNamePCMForecast = "pcm_charge_window.txt"  annotation(Dialog(tab="PCM Filenames", group="PCM Filenames"));
+  final parameter String filePathPCMForecast = scenarioDirectory + filenameSwitchSauna;
 
 
 
@@ -206,13 +209,14 @@ model HouseEnviroment
     mdot_nominal_inf=0)
     annotation (Placement(transformation(extent={{54,-20},{74,0}})));
   HeatingSource.HeatingController heatingController(
-    liquidType=sim.liquidType1)
+    liquidType=sim.liquidType1, A_eff_min=1e-9)
     annotation (Placement(transformation(extent={{34,14},{54,34}})));
   Modelica.Blocks.Sources.BooleanExpression booleanExpression(y=true)
     annotation (Placement(transformation(extent={{-4,22},{16,42}})));
   Modelica.Blocks.Logical.GreaterEqualThreshold saunaSwitchBool(threshold=1)
     annotation (Placement(transformation(extent={{-32,84},{-20,96}})));
-  HeatingSource.HeatPump_ThermalStorage heatPump_ThermalStorage(useHP=useHP,
+  HeatingSource.HeatPump_ThermalStorage heatPump_ThermalStorage(
+    fileNamePCMForecast=filePathPCMForecast,                    useHP=useHP,
       useBoiler=useBoiler,
     usePCM=usePCM)
     annotation (Placement(transformation(extent={{34,48},{54,68}})));

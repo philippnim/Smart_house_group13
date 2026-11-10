@@ -428,10 +428,12 @@ def plot_stacked_house_profiles(
     startdate: pd.Timestamp,
     length: int = 168,
     n_cycles: int = 2,
+    broken_ylim: tuple[tuple[float, float], tuple[float, float]] | None = None,
 ) -> None:
     """
     Create a stacked area plot across all rooms/consumers for the evaluation period
     (second/final week) directly from the in-memory DataFrames `sim_dfs`.
+    Optionally supports a broken y-axis via `broken_ylim=((y_bot_min, y_bot_max), (y_top_min, y_top_max))`.
     """
     if not sim_dfs:
         return
@@ -460,23 +462,66 @@ def plot_stacked_house_profiles(
         series_list.append(np.interp(t_eval, t, v))
         labels.append(name.replace("_", " "))
 
-    fig, ax = plt.subplots()
-    ax.stackplot(t_eval, *series_list, labels=labels, alpha=0.82)
-
     n_days = max(int(length // 24), 1)
-    _format_weekday_axis(ax, eval_start_sec, eval_end_sec, n_days, startdate=startdate)
 
-    ax.set_title(title)
-    ax.set_xlabel("Weekday")
-    ax.set_ylabel(ylabel)
-    ax.legend(
-        loc="upper center",
-        bbox_to_anchor=(0.5, -0.18),
-        frameon=True,
-        ncol=3,
-    )
+    if broken_ylim is not None:
+        (y_bot_min, y_bot_max), (y_top_min, y_top_max) = broken_ylim
+        ratio_bot = 2.4
+        fig, (ax_top, ax_bot) = plt.subplots(
+            2,
+            1,
+            sharex=True,
+            gridspec_kw={"height_ratios": [1.0, ratio_bot], "hspace": 0.08},
+        )
+        ax_top.stackplot(t_eval, *series_list, labels=labels, alpha=0.82)
+        ax_bot.stackplot(t_eval, *series_list, labels=labels, alpha=0.82)
 
-    fig.tight_layout()
+        ax_top.set_ylim(y_top_min, y_top_max)
+        ax_bot.set_ylim(y_bot_min, y_bot_max)
+
+        _format_weekday_axis(ax_top, eval_start_sec, eval_end_sec, n_days, startdate=startdate)
+        _format_weekday_axis(ax_bot, eval_start_sec, eval_end_sec, n_days, startdate=startdate)
+
+        ax_top.spines["bottom"].set_visible(False)
+        ax_bot.spines["top"].set_visible(False)
+        ax_top.tick_params(axis="x", which="both", bottom=False, top=False, labelbottom=False)
+
+        # Diagonal break marks on left and right spines
+        d_x, d_y = 0.012, 0.03
+        kwargs_top = dict(transform=ax_top.transAxes, color="black", clip_on=False, linewidth=0.8)
+        ax_top.plot((-d_x, +d_x), (-d_y * ratio_bot, +d_y * ratio_bot), **kwargs_top)
+        ax_top.plot((1 - d_x, 1 + d_x), (-d_y * ratio_bot, +d_y * ratio_bot), **kwargs_top)
+
+        kwargs_bot = dict(transform=ax_bot.transAxes, color="black", clip_on=False, linewidth=0.8)
+        ax_bot.plot((-d_x, +d_x), (1 - d_y, 1 + d_y), **kwargs_bot)
+        ax_bot.plot((1 - d_x, 1 + d_x), (1 - d_y, 1 + d_y), **kwargs_bot)
+
+        ax_top.set_title(title)
+        ax_bot.set_xlabel("Weekday")
+        fig.supylabel(ylabel, fontsize=plt.rcParams.get("axes.labelsize", 11))
+        ax_bot.legend(
+            loc="upper center",
+            bbox_to_anchor=(0.5, -0.25),
+            frameon=True,
+            ncol=3,
+        )
+    else:
+        fig, ax = plt.subplots()
+        ax.stackplot(t_eval, *series_list, labels=labels, alpha=0.82)
+
+        _format_weekday_axis(ax, eval_start_sec, eval_end_sec, n_days, startdate=startdate)
+
+        ax.set_title(title)
+        ax.set_xlabel("Weekday")
+        ax.set_ylabel(ylabel)
+        ax.legend(
+            loc="upper center",
+            bbox_to_anchor=(0.5, -0.18),
+            frameon=True,
+            ncol=3,
+        )
+        fig.tight_layout()
+
     generic_save_function(
         fig=fig,
         name=os.path.basename(plot_path),
@@ -576,6 +621,7 @@ def prepare_simulation_profiles(
         startdate=startdate,
         length=length,
         n_cycles=n_cycles,
+        broken_ylim=((0, 3000), (7000, 10000)),
     )
     plot_stacked_house_profiles(
         power_sim_dfs,
@@ -585,6 +631,7 @@ def prepare_simulation_profiles(
         startdate=startdate,
         length=length,
         n_cycles=n_cycles,
+        broken_ylim=((0, 3000), (7000, 10000)),
     )
 
     # 3. Prepare, save and plot sauna switch profile (seconds, 0/1)
