@@ -36,6 +36,8 @@ block MoistureRecovery "Water content of the supply air: moisture recovery of a 
   SI.Pressure p_sat "Saturation pressure of water at room temperature";
   Real phi_sensor(start=phi_start) "Room humidity as the slow sensor sees it, in %";
   Real T_sensor_room(start=T_start, unit="K") "Room temperature as the slow sensor sees it";
+  Modelica.Blocks.Interfaces.BooleanInput bypass
+    annotation (Placement(transformation(extent={{-140,84},{-100,124}})));
 protected
   Real T_degC = T_sensor_room - 273.15;
   Real T_out_degC = T_out - 273.15;
@@ -56,7 +58,7 @@ equation
   rho_supply = p/(287*T_out);
   // Rotary wheel brings back eta_x of the difference, plus moisture from people spread over the supply air
   // Kept between 0.1 g/kg and 15 g/kg so the solver never gets a crazy value
-  x_supply = min(max(x_out + eta_x*(x_room - x_out)
+   x_supply = min(max(x_out + (if bypass then 0 else eta_x)*(x_room - x_out)
     + moisturePerPerson*occupancy/(rho_supply*max(abs(V_flow), 1e-4)), 1e-4), 0.015);
   // The wheel moves water as vapour, together with its latent heat. Without this the extra water would enter as fog at -20 C
   // Never warmer than the room
