@@ -52,7 +52,7 @@ model HeatingController
     controllerType=Modelica.Blocks.Types.SimpleController.PI,
     k=k,
     Ti=Ti,
-    yMin=0,
+    yMin=1e-8,
     yMax=A_eff_max)
     annotation(Placement(transformation(
       extent={{-10,-10},{10,10}},
@@ -61,7 +61,7 @@ model HeatingController
     controllerType=Modelica.Blocks.Types.SimpleController.PI,
     k=k,
     Ti=Ti,
-    yMin=0,
+    yMin=1e-8,
     yMax=A_eff_max)
     annotation(Placement(transformation(
       extent={{-10,-10},{10,10}},
@@ -70,7 +70,7 @@ model HeatingController
     controllerType=Modelica.Blocks.Types.SimpleController.PI,
     k=k,
     Ti=Ti,
-    yMin=0,
+    yMin=1e-8,
     yMax=A_eff_max)
     annotation(Placement(transformation(
       extent={{-10,-10},{10,10}},
@@ -79,7 +79,7 @@ model HeatingController
     controllerType=Modelica.Blocks.Types.SimpleController.PI,
     k=k,
     Ti=Ti,
-    yMin=0,
+    yMin=1e-8,
     yMax=A_eff_max)
     annotation(Placement(transformation(
       extent={{-10,-10},{10,10}},
