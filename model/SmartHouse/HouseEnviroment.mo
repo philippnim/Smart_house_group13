@@ -74,7 +74,7 @@ model HouseEnviroment
 
   // PCM Forecast file
   parameter String fileNamePCMForecast = "pcm_charge_window.txt"  annotation(Dialog(tab="PCM Filenames", group="PCM Filenames"));
-  final parameter String filePathPCMForecast = scenarioDirectory + filenameSwitchSauna;
+  final parameter String filePathPCMForecast = scenarioDirectory + fileNamePCMForecast;
 
 
 
@@ -352,13 +352,13 @@ equation
   connect(houseVentilation.aggPel_Demand, multiSum.u[1]) annotation (Line(
         points={{18.4,21.4},{28,21.4},{28,-18},{34.6,-18},{34.6,-22}}, color={0,
           0,127}));
-  connect(heatPump_ThermalStorage.P_el, multiSum.u[2]) annotation (Line(points=
-          {{41,69},{41,74},{62,74},{62,6},{42,6},{42,-18},{36,-18},{36,-22}},
+  connect(heatPump_ThermalStorage.P_el, multiSum.u[2]) annotation (Line(points={
+          {41,69},{41,74},{62,74},{62,6},{42,6},{42,-18},{36,-18},{36,-22}},
         color={0,0,127}));
   connect(ventilationUnit.P_ventilation_total, multiSum.u[3])
     annotation (Line(points={{64,1},{37.4,1},{37.4,-22}}, color={0,0,127}));
-  connect(multiSum.y, electricSystem.powerLoad) annotation (Line(points={{36,
-          -35.02},{36,-42},{37,-42},{37,-48}}, color={0,0,127}));
+  connect(multiSum.y, electricSystem.powerLoad) annotation (Line(points={{36,-35.02},
+          {36,-42},{37,-42},{37,-48}}, color={0,0,127}));
   annotation (Icon(coordinateSystem(preserveAspectRatio=false, extent={{-120,
             -120},{120,120}})),                                  Diagram(
         coordinateSystem(preserveAspectRatio=false, extent={{-120,-120},{120,
