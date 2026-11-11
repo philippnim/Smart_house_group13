@@ -85,6 +85,7 @@ model HeatPump_ThermalStorage
     evaporatorFinnedTubeLength=8,
     evaporatorNSerialTubes=5,
     evaporatorNParallelTubes=30,
+    compressorControllerK=0.1,
     compressorSpeedMin=0,
     separatorInitialFillingLevel=0.2) if useHP
     annotation (
