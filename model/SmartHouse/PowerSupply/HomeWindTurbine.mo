@@ -11,7 +11,7 @@ model HomeWindTurbine
         2,10; 3,35; 4,83; 5,162; 6,281; 7,446; 8,665; 9,947; 10,1299; 11,1729;
         22,1729; 22.01,0; 40,0])
     annotation (Placement(transformation(extent={{-54,-40},{-34,-20}})));
-  Modelica.Blocks.Math.Gain eta(k=etaWind)
+  Modelica.Blocks.Math.Gain eta(k=if enableWind then etaWind else 0)
     annotation (Placement(transformation(extent={{-10,-40},{10,-20}})));
   Modelica.Blocks.Math.Division PowerToCurrent
     annotation (Placement(transformation(extent={{-10,10},{10,-10}},

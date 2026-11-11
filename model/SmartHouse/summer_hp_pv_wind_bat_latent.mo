@@ -2,7 +2,7 @@ within SmartHouse;
 model summer_hp_pv_wind_bat_latent
   HouseEnviroment houseEnviroment(
     scenario="summer",
-    useHP=false,
+    useHP=true,
     useBoiler=true,
     usePCM=true,
     enablePV=true,

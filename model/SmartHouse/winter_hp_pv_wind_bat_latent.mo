@@ -2,7 +2,7 @@ within SmartHouse;
 model winter_hp_pv_wind_bat_latent
   HouseEnviroment houseEnviroment(
     scenario="winter",
-    useHP=false,
+    useHP=true,
     useBoiler=true,
     usePCM=true,
     enablePV=true,
