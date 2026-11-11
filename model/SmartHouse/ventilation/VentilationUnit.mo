@@ -50,6 +50,17 @@ And Infiltration to the outside. Additionally also handles air exchange between 
   parameter SI.MassFlowRate mdot_nominal_inf
     annotation(Dialog(tab="Air Network", enable=useAirNetwork));
 
+  // Cooling parameters
+
+  parameter Modelica.Units.SI.Temperature T_outMin = 283.15 "Free cooling only above this outdoor temperature 10°C";
+  parameter Modelica.Units.SI.Temperature T_comfort_bathroom = 297.15 "cooling bathroom when room is warmer than 24°C";
+  parameter Modelica.Units.SI.Temperature T_comfort_bedroom = 295.15 "Cooling bedroom when room is warmer than 22°C";
+  parameter Modelica.Units.SI.Temperature T_comfort_kitchen = 295.15 "Cooling kitchen when room is warmer than 22°C";
+  parameter Modelica.Units.SI.Temperature T_comfort_livingroom = 295.15 "Cooling living room when room is warmer than 22°C";
+
+
+
+
   // Outdoor humidity and pressure for infiltration
   parameter Real phi_outdoor(min=0, max=100) = 50
     "Outdoor relative humidity"
@@ -80,7 +91,15 @@ outer TIL.SystemInformationManager sim "Comes from the model around it";
 
 
   // Pass only rooms 2..5 to the 4 active ventilation channels
-  VentilationChannel channel[4](V_room=V_rooms[2:5]) "One air channel per ventilated room"
+  VentilationChannel channel[4](
+    V_room = V_rooms[2:5],
+    each T_outMin = T_outMin,
+    T_comfort = {
+      T_comfort_bathroom,
+      T_comfort_bedroom,
+      T_comfort_kitchen,
+      T_comfort_livingroom})
+       "One air channel per ventilated room"
     annotation (Placement(transformation(extent={{-20,-20},{20,20}})));
 
   // Air exchange network for all 6 rooms (doors + infiltration)
