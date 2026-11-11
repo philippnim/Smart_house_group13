@@ -180,6 +180,17 @@ model ShowerSimpleModel
     pFixed=150000,
     TFixed=298.15)
     annotation (Placement(transformation(extent={{94,-64},{102,-44}})));
+  Modelica.Blocks.Continuous.FirstOrder mixingValveActuator(
+  k=0.01,
+  T=2,
+  initType=Modelica.Blocks.Types.Init.InitialOutput,
+  y_start=0.5);
+
+Modelica.Blocks.Continuous.FirstOrder flowValveActuator(
+  k=0.01,
+  T=2,
+  initType=Modelica.Blocks.Types.Init.InitialOutput,
+  y_start=1e-9);
 equation
   // Stop both controllers regulating while the shower is off.
   // controllerT.activeInput = false; only for testing
@@ -209,16 +220,19 @@ equation
       points={{17,20},{8,20},{8,12}},
       color={0,170,238},
       thickness=0.5));
-  connect(controllerT.y, directionalControlValve.switchingPosition_in)
-    annotation (Line(points={{46,93.6},{46,84.6},{44,84.6}},
-                                                   color={0,0,127}));
+  connect(controllerT.y, mixingValveActuator.u);
+connect(controllerVdot.y, flowValveActuator.u);
+
+directionalControlValve.switchingPosition_in =
+  min(1.0, max(0.0, mixingValveActuator.y));
+
+valve.effectiveFlowArea_in =
+  min(1e-3, max(1e-9, flowValveActuator.y));
   connect(sensor_T.sensorValue, controllerT.u_m) annotation (Line(points={{60,68},
           {66,68},{66,100},{51.8,100}},
                                       color={0,0,127}));
   connect(realExpression.y, controllerT.u_s)
     annotation (Line(points={{31,120},{46,120},{46,105.6}},color={0,0,127}));
-  connect(controllerVdot.y, valve.effectiveFlowArea_in)
-    annotation (Line(points={{63.6,28},{51,28}}, color={0,0,127}));
   connect(sensor_V_flow.sensorValue, controllerVdot.u_m) annotation (Line(
         points={{20,23},{20,28},{32,28},{32,14},{70,14},{70,22.2}}, color={0,0,127}));
   connect(realExpression1.y, controllerVdot.u_s)
