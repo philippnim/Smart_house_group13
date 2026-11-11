@@ -846,6 +846,16 @@ def cluster_time_series(
             if "temperature" in medoid_data
             else float(cluster_id)
         )
+        mean_solar = (
+            float(medoid_data["solar"].mean())
+            if "solar" in medoid_data
+            else float("nan")
+        )
+        mean_wind = (
+            float(medoid_data["wind"].mean())
+            if "wind" in medoid_data
+            else float("nan")
+        )
 
         member_weeks = np.where(assignments == cluster_id)[0]
         weight = float(agg_result.cluster_counts.get(cluster_id, len(member_weeks)))
@@ -854,6 +864,8 @@ def cluster_time_series(
             {
                 "cluster_id": int(cluster_id),
                 "mean_temp": mean_temp,
+                "mean_solar": mean_solar,
+                "mean_wind": mean_wind,
                 "profiles": medoid_data,
                 "cluster_info": {
                     "startdate": medoid_start,
@@ -861,6 +873,8 @@ def cluster_time_series(
                     "timeframe": (medoid_start, medoid_end),
                     "medoid_week_index": medoid_week_idx,
                     "mean_temp": mean_temp,
+                    "mean_solar": mean_solar,
+                    "mean_wind": mean_wind,
                     "cluster_weight": weight,
                     "cluster_share": weight / n_full_weeks,
                     "week_indices": member_weeks,
@@ -882,6 +896,8 @@ def cluster_time_series(
         clustered_data[name] = {
             "profiles": entry["profiles"],
             "mean_temp": entry["mean_temp"],
+            "mean_solar": entry["mean_solar"],
+            "mean_wind": entry["mean_wind"],
             "cluster_info": entry["cluster_info"],
         }
 
@@ -939,10 +955,13 @@ if __name__ == "__main__":
         enddate = info["enddate"]
         mean_temp = cluster_data["mean_temp"]
         mean_temp_c = mean_temp - 273.15
+        mean_solar = cluster_data["mean_solar"]
+        mean_wind = cluster_data["mean_wind"]
         weight = info["cluster_weight"]
         share = info["cluster_share"]
         print(
             f"{cluster_name} - Start: {startdate}, End: {enddate}, "
             f"Mean Temp: {mean_temp:.2f} K ({mean_temp_c:.1f} °C), "
+            f"Mean Solar: {mean_solar:.2f} W/m², Mean Wind: {mean_wind:.2f} m/s, "
             f"Weight: {weight:.0f} weeks, Share: {share:.2%}"
         )
