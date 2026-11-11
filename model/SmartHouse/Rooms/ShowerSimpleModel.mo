@@ -181,13 +181,13 @@ model ShowerSimpleModel
     TFixed=298.15)
     annotation (Placement(transformation(extent={{94,-64},{102,-44}})));
   Modelica.Blocks.Continuous.FirstOrder mixingValveActuator(
-  k=0.01,
+  k=1,
   T=2,
   initType=Modelica.Blocks.Types.Init.InitialOutput,
   y_start=0.5);
 
 Modelica.Blocks.Continuous.FirstOrder flowValveActuator(
-  k=0.01,
+  k=1,
   T=2,
   initType=Modelica.Blocks.Types.Init.InitialOutput,
   y_start=1e-9);
