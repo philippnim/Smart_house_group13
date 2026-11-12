@@ -46,9 +46,10 @@ signals = {
         "LivingRoom": [
             "houseEnviroment.houseVentilation.compositeWall2.heatPort_A.Q_flow",
             "houseEnviroment.houseVentilation.compositeWall6.heatPort_B.Q_flow",
+            "houseEnviroment.houseVentilation.externalDoor.heatPort_A_air.Q_flow"
         ],
-        "Bedroom": "houseEnviroment.houseVentilation.compositeWall4.heatPort_A.Q_flow",
-    },
+        "Bedroom": "houseEnviroment.houseVentilation.compositeWall4.heatPort_A.Q_flow"
+    }
 }
 
 boundary_labels = {

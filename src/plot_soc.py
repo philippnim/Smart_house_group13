@@ -22,7 +22,7 @@ SCENARIO = "summer_hp_pv_bat"
 Y_MAX = 10  # kW, sauna peaks above are clipped and annotated
 keys = ["P_PV", "P_load", "P_import", "P_export", "SOC"]
 
-data = Datahandler(f"{A.MAT_SUBDIR}/{SCENARIO}.mat")
+data = Datahandler(f"{SCENARIO}.mat")
 df = data.to_dataframe([SIGNALS[k] for k in keys], dt=A.DT, start=A.EVAL_START, end=A.EVAL_STOP)
 df = df.rename(columns={SIGNALS[k]: k for k in keys})
 t = df.Time.to_numpy()
