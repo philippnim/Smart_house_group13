@@ -5,7 +5,7 @@ This file serves as a module to determine the KPIs of the individual scenarios. 
 3. Determine the Autaky and share of Renewable Energy (Using for both weeks the scenario without PV/Battery/Wind as a baseline) 
     and grid feed-in and demand. 
 
-Prep: the simulation reults (.mat) need to be in /model/SmartHouse/
+Prep: the folder "simulation_results" with alle the (.mat) results need to be in .../model/SmartHouse/
 
 Author: Janik
 """
@@ -28,7 +28,8 @@ class KPIs:
     @classmethod
     def from_mat(cls, scenario: str) -> "KPIs":
         """Create a KPIs object from a .mat file for the given scenario."""
-        data = Datahandler(f"{scenario}.mat")
+        data = Datahandler(f"{A.MAT_SUBDIR}/{scenario}.mat")
+
     
         paths = {k: v for k, v in SIGNALS.items() if k != "T_room"}
         paths |= {f"T_room_{r}": SIGNALS["T_room"].format(room=r) for r in A.SETPOINTS_C}
@@ -45,6 +46,8 @@ class KPIs:
                 df[k] = np.nan if k.startswith("T_") else 0.0
         return cls(scenario, df)
 
+
+    # delta ende-anfang woche
     def _delta(self, col: str) -> float:
         return self.df[col].iloc[-1] - self.df[col].iloc[0]
 
@@ -59,16 +62,37 @@ class KPIs:
 
     def heating_demand(self) -> dict:
         """Calculate the total heating demand for the given scenario."""
-        return {"Q_heat_kWh": np.trapezoid(self.df.heat_flow, self.df.Time) / 3.6e6}
+        return {"Q_heat_kWh": self._delta("Q_heat") / 3.6e6}
 
     def renewable_share(self) -> dict: 
         """Calculate the share of renewable energy for the given scenario."""
         E_gen  = self._delta("E_PV") / 3.6e6 + self._delta("E_wind")
         E_exp  = self._delta("E_export")
-        E_load = np.trapz(self.df.P_load, self.df.Time) / 3.6e6
+        E_load = np.trapezoid(self.df.P_load, self.df.Time) / 3.6e6
         return {"E_gen_kWh": E_gen,
             "self_consumption": (E_gen - E_exp) / E_gen if E_gen > 0 else np.nan,
             "autarky": 1 - self._delta("E_import") / E_load if E_load > 0 else np.nan}
+
+
+    # Following is the COP. 
+    # Example: Winter HP, 222,7 kWh (heating total), 107,9 kWh for heeating, 
+    # SPF: total heat / total electricity used. Basically COP for HP + Boiler
+    # COP: Heat divided by Electricity for only HP
+    # share boiler = ...
+
+    def heat_performance(self) -> dict:
+        """Weekly performance factor of the heating system and COP of the heat pump."""
+        k = 1 / 3.6e6 # w kWh
+        Q = self._delta("Q_heat") * k 
+        E_el = np.trapezoid(self.df.P_el_heat, self.df.Time) * k
+        q_hp = np.trapezoid(self.df.Q_flow_HP, self.df.Time) * k
+        e_hp = np.trapezoid(self.df.P_el_HP, self.df.Time) * k
+        return {"E_el_heat_kWh": E_el,
+                "SPF_system": Q / E_el if E_el > 0 else np.nan,
+                "COP_HP": q_hp / e_hp if e_hp > 0 else np.nan,
+                "share_heat_HP": q_hp / Q if Q > 0 else np.nan}
+
+    
 
     # ------ Costs / CO2 -------
     def cost(self) -> dict:
@@ -93,30 +117,38 @@ class KPIs:
 
     # ---- Comfort -------
     def comfort(self) -> dict:
-        """Calculate the comfort KPIs for the given scenario."""
+        """% of time within [setpoint − 1 K, 26 °C] + Kelvin-hours too cold / too warm."""
         out = {}
+        h = A.DT / 3600
         for room, sp in A.SETPOINTS_C.items():
-            dev = (self.df[f"T_room_{room}"] - 273.15 - sp).abs()
-            out[f"comfort_{room}_pct"] = (dev <= A.COMFORT_BAND).mean() * 100
-            out[f"discomfort_{room}_Kh"] = (dev - A.COMFORT_BAND).clip(lower=0).sum() * A.DT / 3600
+            T = self.df[f"T_room_{room}"] - 273.15
+            too_cold = (sp - A.COMFORT_BELOW_K - T).clip(lower=0)
+            too_warm = (T - A.COMFORT_T_MAX_C).clip(lower=0)
+            out[f"comfort_{room}_pct"] = ((too_cold == 0) & (too_warm == 0)).mean() * 100
+            out[f"too_cold_{room}_Kh"] = too_cold.sum() * h
+            out[f"too_warm_{room}_Kh"] = too_warm.sum() * h
         return out
+
 
     #--------------------------
 
     def calculate_all_kpis(self):
         """Calculate all KPIs for the given scenario."""
         out = {}
-        for f in [self.energy_import_export, self.heating_demand, self.renewable_share, self.cost, self.co2, self.peaks, self.comfort]:
+        for f in [self.energy_import_export, self.heating_demand, self.renewable_share, self.heat_performance, self.cost, self.co2, self.peaks, self.comfort]:
             out.update(f())
         return pd.Series(out, name=self.scenario)
 
 
 def compare_to_baseline(results: pd.DataFrame) -> pd.DataFrame:
-    """Compare the KPIs of the given scenario to the baseline scenario."""
+    """Szenario − Baseline (negativ = Einsparung). Ohne Baseline → übersprungen."""
     rows = []
     for name, row in results.iterrows():
-        base = results.loc[A.BASELINE[A.SCENARIOS[name]["season"]]]
-        rows.append((row - base).rename(name))
+        base_name = A.BASELINE[A.SCENARIOS[name]["season"]]
+        if base_name not in results.index:
+            print(f"no baseline for {name} ({base_name} missing)")
+            continue
+        rows.append((row - results.loc[base_name]).rename(name))
     return pd.DataFrame(rows)
 
 
