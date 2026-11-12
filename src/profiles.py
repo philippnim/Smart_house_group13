@@ -10,8 +10,6 @@ Author: Philipp
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import io
-import sys
 import os
 import time
 import tsam #Time series clustering
@@ -409,7 +407,6 @@ def plot_simulation_profile(
     _format_weekday_axis(ax, eval_start_sec, eval_end_sec, n_days, startdate=startdate)
 
     ax.set_title(f"{title}")
-    ax.set_xlabel("Weekday")
     ax.set_ylabel(ylabel)
 
     fig.tight_layout()
@@ -497,11 +494,10 @@ def plot_stacked_house_profiles(
         ax_bot.plot((1 - d_x, 1 + d_x), (1 - d_y, 1 + d_y), **kwargs_bot)
 
         ax_top.set_title(title)
-        ax_bot.set_xlabel("Weekday")
         fig.supylabel(ylabel, fontsize=plt.rcParams.get("axes.labelsize", 11))
         ax_bot.legend(
             loc="upper center",
-            bbox_to_anchor=(0.5, -0.25),
+            bbox_to_anchor=(0.5, -0.14),
             frameon=True,
             ncol=3,
         )
@@ -512,11 +508,10 @@ def plot_stacked_house_profiles(
         _format_weekday_axis(ax, eval_start_sec, eval_end_sec, n_days, startdate=startdate)
 
         ax.set_title(title)
-        ax.set_xlabel("Weekday")
         ax.set_ylabel(ylabel)
         ax.legend(
             loc="upper center",
-            bbox_to_anchor=(0.5, -0.18),
+            bbox_to_anchor=(0.5, -0.10),
             frameon=True,
             ncol=3,
         )
@@ -760,11 +755,10 @@ def plot_scenarios_weather_comparison(profiles: dict, scenarios: dict) -> None:
         _format_weekday_axis(ax, eval_start_sec, eval_end_sec, n_days)
 
         ax.set_title(f"Scenario Comparison - {weather_titles.get(key, key)}")
-        ax.set_xlabel("Weekday")
         ax.set_ylabel(weather_ylabels.get(key, key))
         ax.legend(
             loc="upper center",
-            bbox_to_anchor=(0.5, -0.18),
+            bbox_to_anchor=(0.5, -0.10),
             frameon=True,
             ncol=min(max(len(scenarios), 1), 3),
         )
@@ -846,6 +840,16 @@ def cluster_time_series(
             if "temperature" in medoid_data
             else float(cluster_id)
         )
+        mean_solar = (
+            float(medoid_data["solar"].mean())
+            if "solar" in medoid_data
+            else float("nan")
+        )
+        mean_wind = (
+            float(medoid_data["wind"].mean())
+            if "wind" in medoid_data
+            else float("nan")
+        )
 
         member_weeks = np.where(assignments == cluster_id)[0]
         weight = float(agg_result.cluster_counts.get(cluster_id, len(member_weeks)))
@@ -854,6 +858,8 @@ def cluster_time_series(
             {
                 "cluster_id": int(cluster_id),
                 "mean_temp": mean_temp,
+                "mean_solar": mean_solar,
+                "mean_wind": mean_wind,
                 "profiles": medoid_data,
                 "cluster_info": {
                     "startdate": medoid_start,
@@ -861,6 +867,8 @@ def cluster_time_series(
                     "timeframe": (medoid_start, medoid_end),
                     "medoid_week_index": medoid_week_idx,
                     "mean_temp": mean_temp,
+                    "mean_solar": mean_solar,
+                    "mean_wind": mean_wind,
                     "cluster_weight": weight,
                     "cluster_share": weight / n_full_weeks,
                     "week_indices": member_weeks,
@@ -882,6 +890,8 @@ def cluster_time_series(
         clustered_data[name] = {
             "profiles": entry["profiles"],
             "mean_temp": entry["mean_temp"],
+            "mean_solar": entry["mean_solar"],
+            "mean_wind": entry["mean_wind"],
             "cluster_info": entry["cluster_info"],
         }
 
@@ -939,10 +949,13 @@ if __name__ == "__main__":
         enddate = info["enddate"]
         mean_temp = cluster_data["mean_temp"]
         mean_temp_c = mean_temp - 273.15
+        mean_solar = cluster_data["mean_solar"]
+        mean_wind = cluster_data["mean_wind"]
         weight = info["cluster_weight"]
         share = info["cluster_share"]
         print(
             f"{cluster_name} - Start: {startdate}, End: {enddate}, "
             f"Mean Temp: {mean_temp:.2f} K ({mean_temp_c:.1f} °C), "
+            f"Mean Solar: {mean_solar:.2f} W/m², Mean Wind: {mean_wind:.2f} m/s, "
             f"Weight: {weight:.0f} weeks, Share: {share:.2%}"
         )
