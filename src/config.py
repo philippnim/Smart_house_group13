@@ -116,17 +116,17 @@ class ReportStyleConfig(BaseModel):
     """Report/Scientific style configuration using Pydantic validation"""
 
     # Default figure size (width, height)
-    FIG_SIZE: ClassVar[tuple[float, float]] = (6, 3.5)
+    FIG_SIZE: ClassVar[tuple[float, float]] = (5.5, 3.5)
 
     figure_figsize: tuple[float, float] = Field(
         default=FIG_SIZE, description="Figure size in inches"
     )
-    font_size: int = Field(default=11, description="Base font size")
-    axes_titlesize: int = Field(default=11, description="Axes title font size")
-    axes_labelsize: int = Field(default=11, description="Axes label font size")
+    font_size: int = Field(default=10, description="Base font size (matches 10pt report)")
+    axes_titlesize: int = Field(default=10, description="Axes title font size")
+    axes_labelsize: int = Field(default=10, description="Axes label font size")
     xtick_labelsize: int = Field(default=9, description="X-axis tick label size")
     ytick_labelsize: int = Field(default=9, description="Y-axis tick label size")
-    legend_fontsize: int = Field(default=10, description="Legend font size")
+    legend_fontsize: int = Field(default=9, description="Legend font size")
     use_pgf_backend: bool = Field(
         default=False,
         description="Only set global backend to 'pgf' if explicitly desired; savefig('.pgf') works without it.",
@@ -154,15 +154,21 @@ class ReportStyleConfig(BaseModel):
         if self.use_pgf_backend and has_latex:
             matplotlib.use("pgf")
 
-        # Base configuration
+        # Base configuration (matches \documentclass[10pt]{report} with \sffamily)
+        tex_preamble = (
+            r"\usepackage[utf8]{inputenc}" + "\n"
+            r"\usepackage[T1]{fontenc}" + "\n"
+            r"\usepackage{siunitx}" + "\n"
+            r"\renewcommand{\familydefault}{\sfdefault}"
+        )
         style_config = {
             "figure.figsize": self.figure_figsize,
-            "font.family": "serif",
+            "font.family": "sans-serif",
             "text.usetex": False,  # Keep PNG rendering fast & robust; PGF export still uses pdflatex
             "pgf.texsystem": "pdflatex",
             "pgf.rcfonts": False,
-            "pgf.preamble": r"\usepackage[utf8]{inputenc}" + "\n" + r"\usepackage[T1]{fontenc}" + "\n" + r"\usepackage{siunitx}",
-            "text.latex.preamble": r"\usepackage[utf8]{inputenc}" + "\n" + r"\usepackage[T1]{fontenc}" + "\n" + r"\usepackage{siunitx}",
+            "pgf.preamble": tex_preamble,
+            "text.latex.preamble": tex_preamble,
             "font.size": self.font_size,
             "axes.titlesize": self.axes_titlesize,
             "axes.labelsize": self.axes_labelsize,

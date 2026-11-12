@@ -10,8 +10,6 @@ Author: Philipp
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import io
-import sys
 import os
 import time
 import tsam #Time series clustering
@@ -409,7 +407,6 @@ def plot_simulation_profile(
     _format_weekday_axis(ax, eval_start_sec, eval_end_sec, n_days, startdate=startdate)
 
     ax.set_title(f"{title}")
-    ax.set_xlabel("Weekday")
     ax.set_ylabel(ylabel)
 
     fig.tight_layout()
@@ -497,11 +494,10 @@ def plot_stacked_house_profiles(
         ax_bot.plot((1 - d_x, 1 + d_x), (1 - d_y, 1 + d_y), **kwargs_bot)
 
         ax_top.set_title(title)
-        ax_bot.set_xlabel("Weekday")
         fig.supylabel(ylabel, fontsize=plt.rcParams.get("axes.labelsize", 11))
         ax_bot.legend(
             loc="upper center",
-            bbox_to_anchor=(0.5, -0.25),
+            bbox_to_anchor=(0.5, -0.14),
             frameon=True,
             ncol=3,
         )
@@ -512,11 +508,10 @@ def plot_stacked_house_profiles(
         _format_weekday_axis(ax, eval_start_sec, eval_end_sec, n_days, startdate=startdate)
 
         ax.set_title(title)
-        ax.set_xlabel("Weekday")
         ax.set_ylabel(ylabel)
         ax.legend(
             loc="upper center",
-            bbox_to_anchor=(0.5, -0.18),
+            bbox_to_anchor=(0.5, -0.10),
             frameon=True,
             ncol=3,
         )
@@ -760,11 +755,10 @@ def plot_scenarios_weather_comparison(profiles: dict, scenarios: dict) -> None:
         _format_weekday_axis(ax, eval_start_sec, eval_end_sec, n_days)
 
         ax.set_title(f"Scenario Comparison - {weather_titles.get(key, key)}")
-        ax.set_xlabel("Weekday")
         ax.set_ylabel(weather_ylabels.get(key, key))
         ax.legend(
             loc="upper center",
-            bbox_to_anchor=(0.5, -0.18),
+            bbox_to_anchor=(0.5, -0.10),
             frameon=True,
             ncol=min(max(len(scenarios), 1), 3),
         )

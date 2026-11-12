@@ -32,3 +32,7 @@ status
 /data/scenarios/**/*.png
 /data/scenarios/**/*.jpeg
 /data/scenarios/**/*.pgf
+
+/data/output/**/*.png
+/data/output/**/*.jpeg
+/data/output/**/*.pgf
