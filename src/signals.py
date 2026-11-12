@@ -13,11 +13,16 @@ SIGNALS = {
     "P_PV":      "houseEnviroment.electricSystem.pV_Battery_Simple.P_PV",          # W
     "P_wind":    "houseEnviroment.electricSystem.pV_Battery_Simple.homeWindTurbine.P_wind",  # W
     "P_load":    "houseEnviroment.electricSystem.powerLoad",                       # W
-    "E_wind": "houseEnviroment.electricSystem.pV_Battery_Simple.homeWindTurbine.E_wind.y",  # kWh
-    "E_PV":   "houseEnviroment.electricSystem.pV_Battery_Simple.E_PV",                      # J!
+    "E_wind":    "houseEnviroment.electricSystem.pV_Battery_Simple.homeWindTurbine.E_wind.y",  # kWh
+    "E_PV":      "houseEnviroment.electricSystem.pV_Battery_Simple.E_PV",          # J!
     "SOC":       "houseEnviroment.electricSystem.pV_Battery_Simple.Battery_SOC.y", # 
-    "heat_flow": "houseEnviroment.heatPump_ThermalStorage.HeatFlow",               # W
+    "heat_flow": "houseEnviroment.heatPump_ThermalStorage.HeatFlow",               # W current heat of HP and Boiler
+    "Q_heat":    "houseEnviroment.integratorHeatLoad.y",                           # J integrated heating from modelica
     "P_el_heat": "houseEnviroment.heatPump_ThermalStorage.P_el",                   # W
-    "T_room":    "houseEnviroment.houseVentilation.{room}.Temperature_sensor",     # K!
+    "T_room":    "houseEnviroment.houseVentilation.{room}.Temperature_sensor",
+    
+    "P_el_HP":   "houseEnviroment.heatPump_ThermalStorage.heatPumpCycle1.P_el",     # W
+    "Q_flow_HP": "houseEnviroment.heatPump_ThermalStorage.heatPumpCycle1.HeatFlow", # W
+     # K!
 }
 

@@ -10,6 +10,9 @@ SIM_STOP_TIME = 1209600
 EVAL_START = 604800
 EVAL_STOP = 1209600
 DT = 300
+# Folder with simulation results, relative to model/SmartHouse/
+MAT_SUBDIR = "simulation_results"
+
 
 # Assumptions for electricity price and grid contract
 PRODUCTION = 0.014 # NOK/kWh
@@ -75,7 +78,11 @@ CO2_EMISSIONS_RENEWABLE = 0.0 # g/kWh
 
 # Comfort KPIs
 
-COMFORT_BAND = 1.0 #±1K around the setpoint
+# Thermal comfort acc. to EN 16798-1:2019, Category II (residential):
+# lower limit = setpoint − 1 K (→ 20 °C living spaces), upper limit 26 °C
+COMFORT_BELOW_K = 1.0
+COMFORT_T_MAX_C = 26.0
+
 SETPOINTS_C = {
     "LivingRoom": 21.0,
     "Bedroom": 21.0,
@@ -86,27 +93,26 @@ SETPOINTS_C = {
 HUM_BAND = (0.30, 0.60) #rel. humidity
 
 
-# Scenarios, Gedanken machen. Bei Renewables macht immer HP Sinn...
 
-# Flags = exakte Dymola-Parameternamen in HouseEnviroment
-# Key   = Name der .mat-Datei
-
-_HEATING_BOILER = dict(useHP=False, useBoiler=True)
-_HEATING_HP     = dict(useHP=True,  useBoiler=False)
-
-# TODO: Parametername anpassen, sobald der Schalter in HouseEnviroment existiert
-_LH_OFF = dict(usePCM=False)
-_LH_ON  = dict(usePCM=True)
+# Flags exakt wie in model/SmartHouse/<season>_<name>.mo (Stand main)
+# useBoiler=True in allen Szenarien (Boiler = Backup)
+def _s(hp, pcm, pv, wind, bat):
+    return dict(useHP=hp, useBoiler=True, usePCM=pcm,
+                enablePV=pv, enableWind=wind, enableBattery=bat)
 
 _SCENARIO_TEMPLATES = {
-    "base":         dict(**_HEATING_BOILER, **_LH_OFF, enablePV=False, enableWind=False, enableBattery=False),
-    "HP":           dict(**_HEATING_HP,     **_LH_OFF, enablePV=False, enableWind=False, enableBattery=False),
-    "HP_LH":        dict(**_HEATING_HP,     **_LH_ON,  enablePV=False, enableWind=False, enableBattery=False),  # TODO Platzhalter
-    "PV":           dict(**_HEATING_BOILER, **_LH_OFF, enablePV=True,  enableWind=False, enableBattery=False),
-    "wind":         dict(**_HEATING_BOILER, **_LH_OFF, enablePV=False, enableWind=True,  enableBattery=False),
-    "PV_battery":   dict(**_HEATING_BOILER, **_LH_OFF, enablePV=True,  enableWind=False, enableBattery=True),
-    "wind_battery": dict(**_HEATING_BOILER, **_LH_OFF, enablePV=False, enableWind=True,  enableBattery=True),
-    "all":          dict(**_HEATING_BOILER, **_LH_OFF, enablePV=True,  enableWind=True,  enableBattery=True),
+    #                         hp     pcm    pv     wind   bat
+    "base":                _s(False, False, False, False, False),
+    "pv":                  _s(False, False, True,  False, False),
+    "wind":                _s(False, False, False, True,  False),
+    "hp":                  _s(True,  False, False, False, False),
+    "hp_latent":           _s(True,  True,  False, False, False),
+    "hp_pv":               _s(True,  False, True,  False, False),
+    "hp_wind":             _s(True,  False, False, True,  False),
+    "hp_pv_bat":           _s(True,  False, True,  False, True),
+    "hp_wind_bat":         _s(True,  False, False, True,  True),
+    "hp_pv_wind_bat":      _s(True,  False, True,  True,  True),
+    "hp_pv_wind_bat_latent": _s(True, True, True,  True,  True),  
 }
 
 SCENARIOS = {
@@ -114,6 +120,6 @@ SCENARIOS = {
     for season in ("winter", "summer")
     for name, flags in _SCENARIO_TEMPLATES.items()
 }
-# → 16 Szenarien: winter_base ... summer_all
 
 BASELINE = {"winter": "winter_base", "summer": "summer_base"}
+
